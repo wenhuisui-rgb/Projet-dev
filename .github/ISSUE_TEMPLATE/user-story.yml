@@ -1,0 +1,38 @@
+name: User Story
+description: Créer une user story
+title: ''
+labels: ''
+assignees: ''
+
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Add a title *
+      placeholder: "[US]: "
+    validations:
+      required: false
+
+  - type: input
+    id: persona
+    attributes:
+      label: En tant que...
+      placeholder: Identification du type d'utilisateur / Nom du persona
+    validations:
+      required: false
+
+  - type: input
+    id: besoin
+    attributes:
+      label: Je souhaiterais...
+      placeholder: Description du besoin
+    validations:
+      required: false
+
+  - type: textarea
+    id: detail
+    attributes:
+      label: Détail du besoin
+      placeholder: Informations complémentaires, critères d'acceptation...
+    validations:
+      required: false
