@@ -1,37 +1,21 @@
 ---
-name: Userstory
-about: contenu de us
+name: User Story
+about: Créer une user story
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-# Modèle de User Story – Classe de Français
+Add a title *
+[US]: 
 
-## 📝 User Story
+**En tant que...**
 
-**En tant que**  
-> Écrivez ici votre rôle (ex. étudiant, professeur)  
-`[Votre rôle]`
 
-**Je veux**  
-> Écrivez ici ce que vous voulez accomplir (ex. apprendre le vocabulaire des stations de ski)  
-`[Votre objectif]`
+**Je souhaiterais...**
 
-**Afin de**  
-> Écrivez ici le bénéfice ou l'objectif final (ex. pouvoir comparer des explorations dans le manuel)  
-`[Le bénéfice attendu]`
 
-## 🔧 Éléments supplémentaires
+**Afin de...**
 
-**Titre suggéré pour l’issue**  
-`[FRANÇAIS] Titre court ici`
 
-**Assignés**  
-- `[Nom(s) des responsables]`  
-
-**Étiquettes / Labels**  
-- user-story  
-- amélioration  
-- priorité: moyenne
