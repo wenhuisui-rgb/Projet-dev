@@ -9,20 +9,29 @@ assignees: ''
 
 # Modèle de User Story – Classe de Français
 
-## À propos
-Ce modèle est destiné à décrire une User Story liée à la classe de français.  
-Le format Markdown est pris en charge (ex. **gras**, *italique*, `code`).
+## 📝 User Story
 
-## Contenu du modèle
-Veuillez remplir les informations de la User Story ci-dessous :  
+**En tant que**  
+> Écrivez ici votre rôle (ex. étudiant, professeur)  
+`[Votre rôle]`
 
-- **En tant que** : _(ex. étudiant, professeur)_  
-- **Je veux** : _(ex. apprendre le vocabulaire des stations de ski)_  
-- **Afin de** : _(ex. pouvoir comparer des explorations dans le manuel)_  
+**Je veux**  
+> Écrivez ici ce que vous voulez accomplir (ex. apprendre le vocabulaire des stations de ski)  
+`[Votre objectif]`
 
-> Vous pouvez utiliser des listes, des tableaux ou des blocs de code pour organiser les informations.
+**Afin de**  
+> Écrivez ici le bénéfice ou l'objectif final (ex. pouvoir comparer des explorations dans le manuel)  
+`[Le bénéfice attendu]`
 
-## Éléments supplémentaires optionnels
+## 🔧 Éléments supplémentaires
 
-### Titre suggéré
-Proposition de titre pour l’issue :
+**Titre suggéré pour l’issue**  
+`[FRANÇAIS] Titre court ici`
+
+**Assignés**  
+- `[Nom(s) des responsables]`  
+
+**Étiquettes / Labels**  
+- user-story  
+- amélioration  
+- priorité: moyenne
