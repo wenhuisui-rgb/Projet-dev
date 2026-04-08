@@ -17,13 +17,6 @@ public class Reaction {
     public Reaction() {
     }
 
-
-    public Reaction(Long id, TypeReaction typeReaction, LocalDateTime dateReaction) {
-        this.id = id;
-        this.typeReaction = typeReaction;
-        this.dateReaction = dateReaction;
-    }
-
     // Getters et Setters
     public Long getId() {
         return id;
