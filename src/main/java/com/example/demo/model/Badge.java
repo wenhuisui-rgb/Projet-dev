@@ -50,10 +50,11 @@ public class Badge {
     }
 
     public boolean verifierCondition(Utilisateur utilisateur){
-
+        return false;
     }
 
     public static List<Badge> listerTousLesBadges() {
             //List<Badge> badges = new ArrayList<>();
+            return null;
     }
 }
