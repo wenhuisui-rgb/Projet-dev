@@ -7,6 +7,17 @@ public class Reaction {
     private TypeReaction typeReaction;
     private LocalDateTime dateReaction;
 
+    // Constructeurs
+    public Reaction(Long id, TypeReaction typeReaction, LocalDateTime dateReaction) {
+        this.id = id;
+        this.typeReaction = typeReaction;
+        this.dateReaction = dateReaction;
+    }
+
+    public Reaction() {
+    }
+
+
     //methodes
     public void changerType(TypeReaction nouveauType) {
         // TODO: Implement logic
@@ -15,6 +26,8 @@ public class Reaction {
     public void retirerReaction() {
         // TODO: Implement logic
     }
+
+
 
     // Getters et Setters
     public Long getId() {
