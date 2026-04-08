@@ -7,6 +7,17 @@ public class Reaction {
     private TypeReaction typeReaction;
     private LocalDateTime dateReaction;
 
+    // Constructeurs
+    public Reaction(Long id, TypeReaction typeReaction, LocalDateTime dateReaction) {
+        this.id = id;
+        this.typeReaction = typeReaction;
+        this.dateReaction = dateReaction;
+    }
+
+    public Reaction() {
+    }
+
+
     public Reaction(Long id, TypeReaction typeReaction, LocalDateTime dateReaction) {
         this.id = id;
         this.typeReaction = typeReaction;

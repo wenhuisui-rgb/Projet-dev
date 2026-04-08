@@ -15,6 +15,22 @@ public class Utilisateur {
     private List<TypeSport> preferencesSports;
     private List<Badge> listBadge;
 
+    // Constructeurs
+    public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, Float taille,
+            Float poids, NiveauPratique niveauPratique, List<TypeSport> preferencesSports, List<Badge> listBadge) {
+        this.id = id;
+        this.pseudo = pseudo;
+        this.email = email;
+        this.motDePasse = motDePasse;
+        this.sexe = sexe;
+        this.age = age;
+        this.taille = taille;
+        this.poids = poids;
+        this.niveauPratique = niveauPratique;
+        this.preferencesSports = preferencesSports;
+        this.listBadge = listBadge;
+    }
+
     public Utilisateur() {
     }
     public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, 
