@@ -7,6 +7,13 @@ public class ParticipationChallenge {
     private LocalDate dateInscription;
     private float scoreActuel;
 
+    public ParticipationChallenge(long id, LocalDate dateInscription, float scoreActuel) {
+        this.id = id;
+        this.dateInscription = dateInscription;
+        this.scoreActuel = scoreActuel;
+    }
+
+
     public float getScoreActuel() {
         return scoreActuel;
     }

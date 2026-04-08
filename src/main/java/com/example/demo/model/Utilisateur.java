@@ -15,54 +15,22 @@ public class Utilisateur {
     private List<TypeSport> preferencesSports;
     private List<Badge> listBadge;
 
-    //methodes
-    public void sInscrire() {
-        // TODO: Implement logic
+    public Utilisateur() {
     }
-
-    public Boolean seConnecter(String email, String mdp) {
-        // TODO: Implement logic
-        return false;
-    }
-
-    public void seDeconnecter() {
-        // TODO: Implement logic
-    }
-
-    public void mettreAJourProfil() {
-        // TODO: Implement logic
-    }
-
-    public Float calculerIMC() {
-        // TODO: Implement logic
-        return 0.0f;
-    }
-
-    public List<Utilisateur> obtenirListeAmis() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public List<Badge> obtenirMesBadges() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public List<Challenge> obtenirMesChallenges() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public void envoyerDemandeAmi(Utilisateur cible) {
-        // TODO: Implement logic
-    }
-
-    public void traiterDemande(Amitie demande, Boolean accepter) {
-        // TODO: Implement logic
-    }
-
-    public void supprimerAmi(Utilisateur ami) {
-        // TODO: Implement logic
+    public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, 
+                       Float taille, Float poids, NiveauPratique niveauPratique, List<TypeSport> preferencesSports, 
+                       List<Badge> listBadge) {
+        this.id = id;
+        this.pseudo = pseudo;
+        this.email = email;
+        this.motDePasse = motDePasse;
+        this.sexe = sexe;
+        this.age = age;
+        this.taille = taille;
+        this.poids = poids;
+        this.niveauPratique = niveauPratique;
+        this.preferencesSports = preferencesSports;
+        this.listBadge = listBadge;
     }
 
     // Getters et Setters
@@ -154,5 +122,53 @@ public class Utilisateur {
         this.listBadge = listBadge;
     }
 
-    
+    //methodes
+    public void sInscrire() {
+        // TODO: Implement logic
+    }
+
+    public Boolean seConnecter(String email, String mdp) {
+        // TODO: Implement logic
+        return false;
+    }
+
+    public void seDeconnecter() {
+        // TODO: Implement logic
+    }
+
+    public void mettreAJourProfil() {
+        // TODO: Implement logic
+    }
+
+    public Float calculerIMC() {
+        // TODO: Implement logic
+        return 0.0f;
+    }
+
+    public List<Utilisateur> obtenirListeAmis() {
+        // TODO: Implement logic
+        return null;
+    }
+
+    public List<Badge> obtenirMesBadges() {
+        // TODO: Implement logic
+        return null;
+    }
+
+    public List<Challenge> obtenirMesChallenges() {
+        // TODO: Implement logic
+        return null;
+    }
+
+    public void envoyerDemandeAmi(Utilisateur cible) {
+        // TODO: Implement logic
+    }
+
+    public void traiterDemande(Amitie demande, Boolean accepter) {
+        // TODO: Implement logic
+    }
+
+    public void supprimerAmi(Utilisateur ami) {
+        // TODO: Implement logic
+    }
 }

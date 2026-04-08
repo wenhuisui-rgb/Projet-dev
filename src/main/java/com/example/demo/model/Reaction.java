@@ -7,13 +7,10 @@ public class Reaction {
     private TypeReaction typeReaction;
     private LocalDateTime dateReaction;
 
-    //methodes
-    public void changerType(TypeReaction nouveauType) {
-        // TODO: Implement logic
-    }
-
-    public void retirerReaction() {
-        // TODO: Implement logic
+    public Reaction(Long id, TypeReaction typeReaction, LocalDateTime dateReaction) {
+        this.id = id;
+        this.typeReaction = typeReaction;
+        this.dateReaction = dateReaction;
     }
 
     // Getters et Setters
@@ -41,5 +38,12 @@ public class Reaction {
         this.dateReaction = dateReaction;
     }
 
-    
+    //methodes
+    public void changerType(TypeReaction nouveauType) {
+        // TODO: Implement logic
+    }
+
+    public void retirerReaction() {
+        // TODO: Implement logic
+    }
 }

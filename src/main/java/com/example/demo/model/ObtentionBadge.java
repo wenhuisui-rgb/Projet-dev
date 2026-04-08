@@ -12,11 +12,6 @@ public class ObtentionBadge {
         
     }
     
-    public ObtentionBadge(Long id,Date dateObtention){
-        this.id=id;
-        this.dateObtention=dateObtention;
-    }
-    
     public Long getId() {
         return id;
     }

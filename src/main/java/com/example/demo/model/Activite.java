@@ -102,7 +102,7 @@ public class Activite {
         this.meteo = meteo;
     }
 
-     public Float calculerCalories() {
+    public Float calculerCalories() {
         return calories;
     }
 
