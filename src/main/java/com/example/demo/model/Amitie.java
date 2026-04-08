@@ -8,12 +8,6 @@ public class Amitie {
     private StatutAmitie statut;
     private Date dateDemande;
 
-    public enum StatutAmitie {
-        EN_ATTENTE,
-        ACCEPTE,
-        REFUSE
-    }
-
     
     public Amitie() {
     }
@@ -63,6 +57,6 @@ public class Amitie {
     }
 
     public void rompreAmitie(){
-        
+
     }
 }

@@ -6,7 +6,9 @@ public class ObtentionBadge {
     private Date dateObtention;
     
     
-    public ObtentionBadge(){
+    public ObtentionBadge(long id, Date dateObtention) {
+        this.id = id;
+        this.dateObtention = dateObtention;
         
     }
     

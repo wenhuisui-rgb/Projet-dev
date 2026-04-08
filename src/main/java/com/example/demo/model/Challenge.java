@@ -1,20 +1,24 @@
 package com.example.demo.model;
 
-
 import java.time.LocalDate; 
 
 public class Challenge {
     private long id;
     private String titre;
     
-    public enum TypeSport {
-        COURSE, VELO, NATATION, YOGA, MUSCULATION
-    }
-    
-    private TypeSport type; 
+    private TypeSport typeSport; 
 
     private LocalDate dateDebut;
     private LocalDate dateFin;
+
+
+    public Challenge( long id, String titre, TypeSport typeSport, LocalDate dateDebut, LocalDate dateFin) {
+        this.id = id;
+        this.titre = titre;
+        this.typeSport = typeSport;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+    }
 
     void setId(long id) {
         this.id = id;
@@ -32,12 +36,12 @@ public class Challenge {
         this.titre = titre;
     }
 
-    public TypeSport getType() {
-        return type;
+    public TypeSport getTypeSport() {
+        return typeSport;
     }
 
-    public void setType(TypeSport type) {
-        this.type = type;
+    public void setTypeSport(TypeSport typeSport) {
+        this.typeSport = typeSport;
     }
 
     public LocalDate getDateDebut() {
@@ -67,7 +71,7 @@ public class Challenge {
         // java.util.List<Challenge> challenges = new java.util.ArrayList<>();
     }
 
-    
+
 
 
 
