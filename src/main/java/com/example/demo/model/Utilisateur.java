@@ -15,6 +15,7 @@ public class Utilisateur {
     private List<TypeSport> preferencesSports;
     private List<Badge> listBadge;
 
+    //methodes
     public void sInscrire() {
         // TODO: Implement logic
     }
@@ -64,6 +65,7 @@ public class Utilisateur {
         // TODO: Implement logic
     }
 
+    // Getters et Setters
     public Long getId() {
         return id;
     }

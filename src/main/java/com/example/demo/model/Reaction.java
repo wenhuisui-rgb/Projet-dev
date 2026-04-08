@@ -7,6 +7,7 @@ public class Reaction {
     private TypeReaction typeReaction;
     private LocalDateTime dateReaction;
 
+    //methodes
     public void changerType(TypeReaction nouveauType) {
         // TODO: Implement logic
     }
@@ -15,6 +16,7 @@ public class Reaction {
         // TODO: Implement logic
     }
 
+    // Getters et Setters
     public Long getId() {
         return id;
     }
