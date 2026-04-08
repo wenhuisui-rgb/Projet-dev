@@ -56,6 +56,5 @@ public class Badge {
     public static List<Badge> listerTousLesBadges() {
         return null;
             //List<Badge> badges = new ArrayList<>();
-            return null;
     }
 }
