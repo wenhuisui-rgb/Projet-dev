@@ -8,15 +8,7 @@ public class Commentaire {
     private String contenu;
     private LocalDateTime dateCreation;
 
-    public Commentaire() {
-        this.dateCreation = LocalDateTime.now();
-    }
 
-    public Commentaire(Long id, String contenu) {
-        this.id = id;
-        this.contenu = contenu;
-        this.dateCreation = LocalDateTime.now();
-    }
 
     public Commentaire(Long id, String contenu, LocalDateTime dateCreation) {
         this.id = id;
