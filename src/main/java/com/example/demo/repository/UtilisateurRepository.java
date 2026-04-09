@@ -19,6 +19,5 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     boolean existsByPseudo(String pseudo);
 
-    @Query("SELECT u FROM Utilisateur u WHERE LOWER(u.pseudo) LIKE LOWER(CONCAT('%', :motCle, '%'))")
-    List<Utilisateur> rechercherParMotCle(@Param("motCle") String motCle);
+    List<Utilisateur> findByPseudoContainingIgnoreCase(String pseudo);
 }

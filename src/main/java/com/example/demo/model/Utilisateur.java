@@ -3,6 +3,8 @@ package com.example.demo.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -18,6 +20,7 @@ public class Utilisateur {
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
+    @JsonIgnore
     private String motDePasse;
 
     @Enumerated(EnumType.STRING)
@@ -174,36 +177,9 @@ public class Utilisateur {
     
 
     public Float calculerIMC() {
-    if (this.taille != null && this.poids != null && this.taille > 0) {
-        return this.poids / (this.taille * this.taille); // 假设 taille 是米
-    }
+        if (this.taille != null && this.poids != null && this.taille > 0) {
+            return this.poids / (this.taille * this.taille); // 假设 taille 是米
+        }
     return null;
-}
-
-    public List<Utilisateur> obtenirListeAmis() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public List<Badge> obtenirMesBadges() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public List<Challenge> obtenirMesChallenges() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public void envoyerDemandeAmi(Utilisateur cible) {
-        // TODO: Implement logic
-    }
-
-    public void traiterDemande(Amitie demande, Boolean accepter) {
-        // TODO: Implement logic
-    }
-
-    public void supprimerAmi(Utilisateur ami) {
-        // TODO: Implement logic
     }
 }
