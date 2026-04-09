@@ -12,16 +12,12 @@ public class MeteoService {
         this.restTemplate = new RestTemplate();
     }
 
-    /**
-     * 根据城市名称获取天气描述
-     */
     public String getMeteoParLocalisation(String localisation) {
         if (localisation == null || localisation.isEmpty()) {
             return "Non disponible";
         }
 
         try {
-            // 1. 先根据城市名获取经纬度
             String geocodingUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" 
                     + java.net.URLEncoder.encode(localisation, "UTF-8") + "&count=1&language=fr";
             
@@ -34,7 +30,6 @@ public class MeteoService {
             double latitude = geoResponse.getResults().get(0).getLatitude();
             double longitude = geoResponse.getResults().get(0).getLongitude();
             
-            // 2. 根据经纬度获取天气
             String weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude 
                     + "&longitude=" + longitude + "&current_weather=true&timezone=auto";
             
@@ -51,18 +46,12 @@ public class MeteoService {
         }
     }
 
-    /**
-     * 格式化天气信息
-     */
     private String formaterMeteo(CurrentWeather weather) {
         int code = weather.getWeathercode();
         String description = getWeatherDescription(code);
         return description + ", " + weather.getTemperature() + "°C";
     }
 
-    /**
-     * WMO 天气代码转文字描述
-     */
     private String getWeatherDescription(int code) {
         switch (code) {
             case 0: return "Ciel dégagé";
@@ -82,8 +71,7 @@ public class MeteoService {
         }
     }
 
-    // ========== 内部类用于 JSON 解析 ==========
-
+    //partie Json
     private static class GeocodingResponse {
         private java.util.List<GeocodingResult> results;
 
