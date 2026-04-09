@@ -87,4 +87,5 @@ public class ReactionService {
     public long getNombreReactionsParType(Long activiteId, TypeReaction type) {
         return reactionRepository.countByActiviteIdAndType(activiteId, type);
     }
+
 }
