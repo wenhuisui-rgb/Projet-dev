@@ -1,27 +1,27 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Objectif;
+import com.example.demo.model.Periode;
+import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ActiviteRepository;
 import com.example.demo.repository.ObjectifRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import com.example.demo.model.Activite;
 
 @Service
 public class ObjectifService {
 
     @Autowired
     private ObjectifRepository objectifRepository;
-    
+
     @Autowired
     private ActiviteRepository activiteRepository;
 
-    /**
-     * 创建新目标
-     */
     @Transactional
     public Objectif creerObjectif(Objectif objectif, Utilisateur utilisateur) {
         objectif.setUtilisateur(utilisateur);
@@ -32,9 +32,6 @@ public class ObjectifService {
         return objectifRepository.findByUtilisateur(utilisateur);
     }
 
-    /**
-     * 根据ID获取目标
-     */
     public Objectif getObjectifParId(Long id) {
         return objectifRepository.findById(id).orElse(null);
     }
@@ -59,12 +56,71 @@ public class ObjectifService {
     }
 
     public Float getProgressionObjectif(Objectif objectif, Utilisateur utilisateur) {
-        List<Activite> activites = activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur);
-        return objectif.getPourcentageProgression(activites);
+        LocalDateTime debut = getDateDebutDateTime(objectif);
+        LocalDateTime fin = getDateFinDateTime(objectif);
+
+        if ("km".equals(objectif.getUnite())) {
+            if (objectif.getTypeSport() != null) {
+                return activiteRepository.getDistanceBySportAndPeriod(
+                    utilisateur, objectif.getTypeSport(), debut, fin);
+            } else {
+                return activiteRepository.getDistanceByPeriod(utilisateur, debut, fin);
+            }
+        } else if ("minutes".equals(objectif.getUnite())) {
+            if (objectif.getTypeSport() != null) {
+                Integer duree = activiteRepository.getDureeBySportAndPeriod(
+                    utilisateur, objectif.getTypeSport(), debut, fin);
+                return duree != null ? duree.floatValue() : 0f;
+            } else {
+                Integer duree = activiteRepository.getDureeByPeriod(utilisateur, debut, fin);
+                return duree != null ? duree.floatValue() : 0f;
+            }
+        } else if ("kcal".equals(objectif.getUnite())) {
+            if (objectif.getTypeSport() != null) {
+                return activiteRepository.getCaloriesBySportAndPeriod(
+                    utilisateur, objectif.getTypeSport(), debut, fin);
+            } else {
+                return activiteRepository.getCaloriesTotales(utilisateur);
+            }
+        }
+
+        return 0f;
+    }
+
+    public Float getPourcentageObjectif(Objectif objectif, Utilisateur utilisateur) {
+        Float progression = getProgressionObjectif(objectif, utilisateur);
+        if (objectif.getCible() == null || objectif.getCible() == 0) {
+            return 0f;
+        }
+        return (progression / objectif.getCible()) * 100;
     }
 
     public Boolean isObjectifAtteint(Objectif objectif, Utilisateur utilisateur) {
-        List<Activite> activites = activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur);
-        return objectif.estAtteint(activites);
+        Float progression = getProgressionObjectif(objectif, utilisateur);
+        return progression >= objectif.getCible();
+    }
+
+    private LocalDateTime getDateDebutDateTime(Objectif objectif) {
+        if (objectif.getDateDebut() == null) {
+            return LocalDateTime.now().minusMonths(1);
+        }
+        return objectif.getDateDebut().atStartOfDay();
+    }
+
+    private LocalDateTime getDateFinDateTime(Objectif objectif) {
+        LocalDate debut = objectif.getDateDebut() != null ? objectif.getDateDebut() : LocalDate.now();
+        LocalDate fin;
+
+        if (objectif.getPeriode() == null) {
+            fin = debut.plusMonths(1);
+        } else if (Periode.SEMAINE.equals(objectif.getPeriode())) {
+            fin = debut.plusWeeks(1);
+        } else if (Periode.ANNEE.equals(objectif.getPeriode())) {
+            fin = debut.plusYears(1);
+        } else {
+            fin = debut.plusMonths(1);
+        }
+
+        return fin.atTime(23, 59, 59);
     }
 }

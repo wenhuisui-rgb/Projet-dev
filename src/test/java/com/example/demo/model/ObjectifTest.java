@@ -27,7 +27,7 @@ class ObjectifTest {
         objectif.setCible(50f);
         objectif.setUnite("km");
         objectif.setDateDebut(LocalDate.of(2026, 4, 1));
-        objectif.setPeriode("MOIS");
+        objectif.setPeriode(Periode.MOIS);
         objectif.setUtilisateur(utilisateur);
     }
 
@@ -42,7 +42,7 @@ class ObjectifTest {
     @DisplayName("Test constructeur avec paramètres")
     void testAllArgsConstructor() {
         LocalDate date = LocalDate.of(2026, 5, 1);
-        Objectif obj = new Objectif(2L, "Nager 10 km", TypeSport.NATATION, 10f, "km", date, "MOIS", utilisateur);
+        Objectif obj = new Objectif(2L, "Nager 10 km", TypeSport.NATATION, 10f, "km", date, Periode.MOIS, utilisateur);
         
         assertEquals(2L, obj.getId());
         assertEquals("Nager 10 km", obj.getDescription());
@@ -50,7 +50,7 @@ class ObjectifTest {
         assertEquals(10f, obj.getCible());
         assertEquals("km", obj.getUnite());
         assertEquals(date, obj.getDateDebut());
-        assertEquals("MOIS", obj.getPeriode());
+        assertEquals(Periode.MOIS, obj.getPeriode());
         assertEquals(utilisateur, obj.getUtilisateur());
     }
 
@@ -65,7 +65,7 @@ class ObjectifTest {
         objectif.setCible(1200f);
         objectif.setUnite("minutes");
         objectif.setDateDebut(date);
-        objectif.setPeriode("SEMAINE");
+        objectif.setPeriode(Periode.SEMAINE);
         
         assertEquals(5L, objectif.getId());
         assertEquals("Faire 20h de sport", objectif.getDescription());
@@ -73,7 +73,7 @@ class ObjectifTest {
         assertEquals(1200f, objectif.getCible());
         assertEquals("minutes", objectif.getUnite());
         assertEquals(date, objectif.getDateDebut());
-        assertEquals("SEMAINE", objectif.getPeriode());
+        assertEquals(Periode.SEMAINE, objectif.getPeriode());
     }
 
     @Test
@@ -245,7 +245,7 @@ class ObjectifTest {
         Activite a1 = new Activite();
         a1.setTypeSport(TypeSport.COURSE);
         a1.setDistance(100f);
-        a1.setDateActivite(LocalDate.of(2025, 12, 31).atStartOfDay()); // Avant date début
+        a1.setDateActivite(LocalDate.of(2025, 12, 31).atStartOfDay());
         
         activites.add(a1);
         
@@ -274,7 +274,7 @@ class ObjectifTest {
     @Test
     @DisplayName("Test getDateFin - période MOIS")
     void testGetDateFinMois() {
-        objectif.setPeriode("MOIS");
+        objectif.setPeriode(Periode.MOIS);
         objectif.setDateDebut(LocalDate.of(2026, 4, 1));
         
         List<Activite> activites = new ArrayList<>();
@@ -282,7 +282,7 @@ class ObjectifTest {
         Activite a1 = new Activite();
         a1.setTypeSport(TypeSport.COURSE);
         a1.setDistance(30f);
-        a1.setDateActivite(LocalDate.of(2026, 5, 15).atStartOfDay()); // Après la fin du mois
+        a1.setDateActivite(LocalDate.of(2026, 5, 15).atStartOfDay());
         
         activites.add(a1);
         

@@ -17,6 +17,7 @@ public class Utilisateur {
 
     @Column(nullable = false, unique = true)
     private String email;
+    
     @Column(nullable = false)
     private String motDePasse;
 
@@ -25,8 +26,9 @@ public class Utilisateur {
     private Sexe sexe;
 
     private Integer age;
-    private Float taille; // en mètres
-    private Float poids; // en kilogrammes
+    private Float taille;
+    private Float poids;
+    private String objectifPersonnel;
 
     @Enumerated(EnumType.STRING)
     private NiveauPratique niveauPratique;
@@ -37,36 +39,39 @@ public class Utilisateur {
     @Column(name = "type_sport")
     private List<TypeSport> preferencesSports = new ArrayList<>();
 
-    
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Activite> activites = new ArrayList<>();
+    
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Objectif> objectifs = new ArrayList<>();
     
     @OneToMany(mappedBy = "demandeur")
-    private List<Amitie> demandesEnvoyees = new ArrayList<>(); // demander
+    private List<Amitie> demandesEnvoyees = new ArrayList<>();
+    
     @OneToMany(mappedBy = "receveur")
-    private List<Amitie> demandesRecues = new ArrayList<>();   // recevoir
+    private List<Amitie> demandesRecues = new ArrayList<>();
     
     @OneToMany(mappedBy = "utilisateur")
     private List<ObtentionBadge> listBadges = new ArrayList<>();
     
     @OneToMany(mappedBy = "createur")
     private List<Challenge> challengesCrees = new ArrayList<>();
+    
     @OneToMany(mappedBy = "utilisateur")
     private List<ParticipationChallenge> participationsChallenge = new ArrayList<>();
     
     @OneToMany(mappedBy = "auteur")
     private List<Commentaire> commentaires = new ArrayList<>();
+    
     @OneToMany(mappedBy = "auteur")
     private List<Reaction> reactions = new ArrayList<>();
 
-    // Constructeurs
     public Utilisateur() {
     }
+    
     public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, 
-                       Float taille, Float poids, NiveauPratique niveauPratique, List<TypeSport> preferencesSports, 
-                       List<ObtentionBadge> listBadges) {
+                       Float taille, Float poids, NiveauPratique niveauPratique, 
+                       List<TypeSport> preferencesSports, List<ObtentionBadge> listBadges) {
         this.id = id;
         this.pseudo = pseudo;
         this.email = email;
@@ -80,7 +85,6 @@ public class Utilisateur {
         this.listBadges = listBadges;
     }
 
-    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -143,6 +147,14 @@ public class Utilisateur {
 
     public void setPoids(Float poids) {
         this.poids = poids;
+    }
+
+    public String getObjectifPersonnel() {
+        return objectifPersonnel;
+    }
+
+    public void setObjectifPersonnel(String objectifPersonnel) {
+        this.objectifPersonnel = objectifPersonnel;
     }
 
     public NiveauPratique getNiveauPratique() {
@@ -233,38 +245,31 @@ public class Utilisateur {
         this.challengesCrees = challengesCrees;
     }
 
-    //methodes
     public Float calculerIMC() {
-    if (this.taille != null && this.poids != null && this.taille > 0) {
-        return this.poids / (this.taille * this.taille); // 假设 taille 是米
+        if (this.taille != null && this.poids != null && this.taille > 0) {
+            return this.poids / (this.taille * this.taille);
+        }
+        return null;
     }
-    return null;
-}
 
     public List<Utilisateur> obtenirListeAmis() {
-        // TODO: Implement logic
         return null;
     }
 
     public List<Badge> obtenirMesBadges() {
-        // TODO: Implement logic
         return null;
     }
 
     public List<Challenge> obtenirMesChallenges() {
-        // TODO: Implement logic
         return null;
     }
 
     public void envoyerDemandeAmi(Utilisateur cible) {
-        // TODO: Implement logic
     }
 
     public void traiterDemande(Amitie demande, Boolean accepter) {
-        // TODO: Implement logic
     }
 
     public void supprimerAmi(Utilisateur ami) {
-        // TODO: Implement logic
     }
 }

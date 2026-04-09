@@ -7,7 +7,6 @@ import com.example.demo.repository.ActiviteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -71,8 +70,7 @@ public class ActiviteService {
 
     public Float getDistanceDuMois(Utilisateur utilisateur) {
         LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
-        List<Activite> activites = getActivitesEntreDates(utilisateur, debutMois, LocalDateTime.now());
-        return activites.stream().map(Activite::getDistance).reduce(0f, Float::sum);
+        return activiteRepository.getDistanceByPeriod(utilisateur, debutMois, LocalDateTime.now());
     }
 
     public Integer getNombreActivitesDuMois(Utilisateur utilisateur) {
@@ -95,24 +93,37 @@ public class ActiviteService {
     }
 
     public Map<String, Float> getStatistiquesParSemaine(Utilisateur utilisateur) {
+        LocalDateTime debutSemaine = LocalDateTime.now().minusDays(7);
+        LocalDateTime fin = LocalDateTime.now();
+        
         Map<String, Float> statsSemaine = new HashMap<>();
-        List<Activite> activitesSemaine = getActivitesDeLaSemaine(utilisateur);
         
-        float distanceSemaine = 0f;
-        int dureeSemaine = 0;
-        float caloriesSemaine = 0f;
+        Float distance = activiteRepository.getDistanceByPeriod(utilisateur, debutSemaine, fin);
+        Integer duree = activiteRepository.getDureeByPeriod(utilisateur, debutSemaine, fin);
+        Float calories = activiteRepository.getCaloriesByPeriod(utilisateur, debutSemaine, fin);
         
-        for (Activite a : activitesSemaine) {
-            if (a.getDistance() != null) distanceSemaine += a.getDistance();
-            if (a.getDuree() != null) dureeSemaine += a.getDuree();
-            if (a.getCalories() != null) caloriesSemaine += a.getCalories();
-        }
-        
-        statsSemaine.put("distance", distanceSemaine);
-        statsSemaine.put("duree", (float) dureeSemaine);
-        statsSemaine.put("calories", caloriesSemaine);
+        statsSemaine.put("distance", distance != null ? distance : 0f);
+        statsSemaine.put("duree", duree != null ? duree.floatValue() : 0f);
+        statsSemaine.put("calories", calories != null ? calories : 0f);
         
         return statsSemaine;
+    }
+
+    public Map<String, Float> getStatistiquesParMois(Utilisateur utilisateur) {
+        LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
+        LocalDateTime fin = LocalDateTime.now();
+        
+        Map<String, Float> statsMois = new HashMap<>();
+        
+        Float distance = activiteRepository.getDistanceByPeriod(utilisateur, debutMois, fin);
+        Integer duree = activiteRepository.getDureeByPeriod(utilisateur, debutMois, fin);
+        Float calories = activiteRepository.getCaloriesByPeriod(utilisateur, debutMois, fin);
+        
+        statsMois.put("distance", distance != null ? distance : 0f);
+        statsMois.put("duree", duree != null ? duree.floatValue() : 0f);
+        statsMois.put("calories", calories != null ? calories : 0f);
+        
+        return statsMois;
     }
 
     @Transactional

@@ -30,12 +30,26 @@ public class ReactionService {
         reaction.setDateReaction(LocalDateTime.now());
         reaction.setActivite(activite);
         reaction.setAuteur(auteur);
-        return reactionRepository.save(reaction);
+        
+        Reaction saved = reactionRepository.save(reaction);
+        
+        if (activite.getReactions() != null) {
+            activite.getReactions().add(saved);
+        }
+        
+        return saved;
     }
 
     @Transactional
     public void supprimerReaction(Utilisateur auteur, Activite activite) {
-        reactionRepository.deleteByAuteurAndActivite(auteur, activite);
+        Optional<Reaction> existing = reactionRepository.findByAuteurAndActivite(auteur, activite);
+        if (existing.isPresent()) {
+            Reaction reaction = existing.get();
+            if (activite.getReactions() != null) {
+                activite.getReactions().remove(reaction);
+            }
+            reactionRepository.deleteByAuteurAndActivite(auteur, activite);
+        }
     }
 
     @Transactional

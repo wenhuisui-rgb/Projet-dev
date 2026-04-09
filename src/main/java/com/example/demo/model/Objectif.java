@@ -7,24 +7,25 @@ import java.util.List;
 @Entity
 @Table(name = "objectifs")
 public class Objectif {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String description;
-    
+
     @Enumerated(EnumType.STRING)
     private TypeSport typeSport;
-    
+
     private Float cible;
-    
+
     private String unite;
-    
+
     private LocalDate dateDebut;
-    
-    private String periode;
-    
+
+    @Enumerated(EnumType.STRING)
+    private Periode periode;
+
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
@@ -32,8 +33,8 @@ public class Objectif {
     public Objectif() {
     }
 
-    public Objectif(Long id, String description, TypeSport typeSport, Float cible, 
-                    String unite, LocalDate dateDebut, String periode, Utilisateur utilisateur) {
+    public Objectif(Long id, String description, TypeSport typeSport, Float cible,
+                String unite, LocalDate dateDebut, Periode periode, Utilisateur utilisateur) {
         this.id = id;
         this.description = description;
         this.typeSport = typeSport;
@@ -92,11 +93,11 @@ public class Objectif {
         this.dateDebut = dateDebut;
     }
 
-    public String getPeriode() {
+    public Periode getPeriode() {
         return periode;
     }
 
-    public void setPeriode(String periode) {
+    public void setPeriode(Periode periode) {
         this.periode = periode;
     }
 
@@ -108,32 +109,50 @@ public class Objectif {
         this.utilisateur = utilisateur;
     }
 
-    public Float calculerProgression(List<Activite> activites) {
-        if (activites == null || activites.isEmpty() || cible == null || cible == 0) {
-            return 0f;
+    public LocalDate getDateFin() {
+        if (dateDebut == null) return LocalDate.now();
+        if (periode == null) return dateDebut.plusMonths(1);
+        switch (periode) {
+            case SEMAINE:
+                return dateDebut.plusWeeks(1);
+            case ANNEE:
+                return dateDebut.plusYears(1);
+            default:
+                return dateDebut.plusMonths(1);
         }
-        
-        float total = 0f;
-        LocalDate dateFin = getDateFin();
-        
-        for (Activite activite : activites) {
-            if (typeSport != null && activite.getTypeSport() != typeSport) {
-                continue;
-            }
-            LocalDate dateActivite = activite.getDateActivite().toLocalDate();
-            if (!dateActivite.isBefore(dateDebut) && !dateActivite.isAfter(dateFin)) {
-                if ("km".equals(unite) && activite.getDistance() != null) {
-                    total += activite.getDistance();
-                } else if ("minutes".equals(unite) && activite.getDuree() != null) {
-                    total += activite.getDuree();
-                } else if ("kcal".equals(unite) && activite.getCalories() != null) {
-                    total += activite.getCalories();
-                }
-            }
-        }
-        
-        return total;
     }
+
+    public void prolongerObjectif(LocalDate nouvelleDate) {
+        if (nouvelleDate != null && nouvelleDate.isAfter(dateDebut)) {
+            this.dateDebut = nouvelleDate;
+        }
+    }
+
+    public Float calculerProgression(List<Activite> activites) {
+    if (activites == null || activites.isEmpty() || cible == null || cible == 0) {
+        return 0f;
+    }
+    
+    float total = 0f;
+    LocalDate dateFin = getDateFin();
+    
+    for (Activite activite : activites) {
+        if (typeSport != null && activite.getTypeSport() != typeSport) {
+            continue;
+        }
+        LocalDate dateActivite = activite.getDateActivite().toLocalDate();
+        if (!dateActivite.isBefore(dateDebut) && !dateActivite.isAfter(dateFin)) {
+            if ("km".equals(unite) && activite.getDistance() != null) {
+                total += activite.getDistance();
+            } else if ("minutes".equals(unite) && activite.getDuree() != null) {
+                total += activite.getDuree();
+            } else if ("kcal".equals(unite) && activite.getCalories() != null) {
+                total += activite.getCalories();
+            }
+        }
+    }
+    return total;
+}
 
     public Float getPourcentageProgression(List<Activite> activites) {
         float progression = calculerProgression(activites);
@@ -146,27 +165,6 @@ public class Objectif {
     public Boolean estAtteint(List<Activite> activites) {
         float progression = calculerProgression(activites);
         return progression >= cible;
-    }
-
-    private LocalDate getDateFin() {
-        if (dateDebut == null) return LocalDate.now();
-        
-        switch (periode) {
-            case "SEMAINE":
-                return dateDebut.plusWeeks(1);
-            case "MOIS":
-                return dateDebut.plusMonths(1);
-            case "ANNEE":
-                return dateDebut.plusYears(1);
-            default:
-                return dateDebut.plusMonths(1);
-        }
-    }
-
-    public void prolongerObjectif(LocalDate nouvelleDate) {
-        if (nouvelleDate != null && nouvelleDate.isAfter(dateDebut)) {
-            this.dateDebut = nouvelleDate;
-        }
     }
 
     @Override

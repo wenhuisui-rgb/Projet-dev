@@ -23,7 +23,14 @@ public class CommentaireService {
         commentaire.setDateCommentaire(LocalDateTime.now());
         commentaire.setActivite(activite);
         commentaire.setAuteur(auteur);
-        return commentaireRepository.save(commentaire);
+        
+        Commentaire saved = commentaireRepository.save(commentaire);
+        
+        if (activite.getCommentaires() != null) {
+            activite.getCommentaires().add(saved);
+        }
+        
+        return saved;
     }
 
     public List<Commentaire> getCommentairesParActivite(Activite activite) {
@@ -44,12 +51,22 @@ public class CommentaireService {
 
     @Transactional
     public void supprimerCommentaire(Long id) {
+        Commentaire commentaire = getCommentaireParId(id);
+        if (commentaire != null && commentaire.getActivite() != null) {
+            commentaire.getActivite().getCommentaires().remove(commentaire);
+        }
         commentaireRepository.deleteById(id);
     }
 
     @Transactional
-    public void supprimerCommentairesParActivite(Long activiteId) {
-        commentaireRepository.deleteByActiviteId(activiteId);
+    public void supprimerCommentairesParActivite(Activite activite) {
+        List<Commentaire> commentaires = getCommentairesParActivite(activite);
+        for (Commentaire c : commentaires) {
+            commentaireRepository.deleteById(c.getId());
+        }
+        if (activite.getCommentaires() != null) {
+            activite.getCommentaires().clear();
+        }
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Objectif;
+import com.example.demo.model.Periode;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.service.ObjectifService;
@@ -9,9 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
+import java.time.LocalDate;
 
 @Controller
 public class ObjectifController {
@@ -19,27 +19,16 @@ public class ObjectifController {
     @Autowired
     private ObjectifService objectifService;
 
-    @GetMapping("/objectifs")
-    public String listObjectifs(HttpSession session, Model model) {
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) {
-            return "redirect:/connexion";
-        }
-        
-        List<Objectif> objectifs = objectifService.getObjectifsParUtilisateur(utilisateur);
-        model.addAttribute("objectifs", objectifs);
-        return "objectifs";
-    }
-
     @GetMapping("/objectifs/nouveau")
     public String nouveauObjectif(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
         if (utilisateur == null) {
             return "redirect:/connexion";
         }
-        
+
         model.addAttribute("objectif", new Objectif());
         model.addAttribute("typesSport", TypeSport.values());
+        model.addAttribute("periodes", Periode.values());
         return "createObjectif";
     }
 
@@ -51,10 +40,14 @@ public class ObjectifController {
         if (utilisateur == null) {
             return "redirect:/connexion";
         }
-        
+
+        if (objectif.getDateDebut() == null) {
+            objectif.setDateDebut(LocalDate.now());
+        }
+
         objectifService.creerObjectif(objectif, utilisateur);
         redirectAttributes.addFlashAttribute("success", "Objectif créé avec succès !");
-        return "redirect:/objectifs";
+        return "redirect:/profil";
     }
 
     @GetMapping("/objectifs/{id}")
@@ -66,22 +59,23 @@ public class ObjectifController {
         if (utilisateur == null) {
             return "redirect:/connexion";
         }
-        
+
         Objectif objectif = objectifService.getObjectifParId(id);
         if (objectif == null) {
             redirectAttributes.addFlashAttribute("error", "Objectif non trouvé");
-            return "redirect:/objectifs";
+            return "redirect:/profil";
         }
-        
+
         if (!objectif.getUtilisateur().getId().equals(utilisateur.getId())) {
             redirectAttributes.addFlashAttribute("error", "Accès non autorisé");
-            return "redirect:/objectifs";
+            return "redirect:/profil";
         }
-        
+
         model.addAttribute("objectif", objectif);
         model.addAttribute("progression", objectifService.getProgressionObjectif(objectif, utilisateur));
+        model.addAttribute("pourcentage", objectifService.getPourcentageObjectif(objectif, utilisateur));
         model.addAttribute("atteint", objectifService.isObjectifAtteint(objectif, utilisateur));
-        
+
         return "detailObjectif";
     }
 
@@ -93,7 +87,7 @@ public class ObjectifController {
         if (utilisateur == null) {
             return "redirect:/connexion";
         }
-        
+
         Objectif objectif = objectifService.getObjectifParId(id);
         if (objectif != null && objectif.getUtilisateur().getId().equals(utilisateur.getId())) {
             objectifService.supprimerObjectif(id);
@@ -101,7 +95,7 @@ public class ObjectifController {
         } else {
             redirectAttributes.addFlashAttribute("error", "Impossible de supprimer");
         }
-        
-        return "redirect:/objectifs";
+
+        return "redirect:/profil";
     }
 }
