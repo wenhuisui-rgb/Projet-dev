@@ -177,28 +177,6 @@ public class Activite {
         reaction.setActivite(null);
     }
 
-    public void modifierActivite(TypeSport typeSport, Integer duree, Float distance, 
-                                  String localisation, Integer evaluation, Float poidsUtilisateur) {
-        if (typeSport != null) {
-            this.typeSport = typeSport;
-        }
-        if (duree != null) {
-            this.duree = duree;
-        }
-        if (distance != null) {
-            this.distance = distance;
-        }
-        if (localisation != null) {
-            this.localisation = localisation;
-        }
-        if (evaluation != null) {
-            this.evaluation = evaluation;
-        }
-        if (poidsUtilisateur != null) {
-            this.calculerCalories(poidsUtilisateur);
-        }
-    }
-
     public Float calculerCalories(Float poidsUtilisateur) {
         if (typeSport == null || duree == null || poidsUtilisateur == null) {
             return 0f;
