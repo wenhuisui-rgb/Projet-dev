@@ -5,6 +5,7 @@ import com.example.demo.model.StatutAmitie;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.AmitieRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +20,34 @@ public class AmitieService {
 
     // Envoyer une demande d'amitié
     public Amitie envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
-        Optional<Amitie> exist = amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(demandeur, receveur);
-        if (exist.isPresent()) {
-            return exist.get(); 
+        // Vérifier si une demande existe déjà dans le sens demandeur -> receveur
+        Optional<Amitie> existDirecte = amitieRepository
+                .findByUtilisateurDemandeurAndUtilisateurReceveur(demandeur, receveur);
+
+        if (existDirecte.isPresent()) {
+            Amitie amitieExistante = existDirecte.get();
+            if (amitieExistante.getStatut() == StatutAmitie.EN_ATTENTE ||
+                amitieExistante.getStatut() == StatutAmitie.ACCEPTEE ||
+                amitieExistante.getStatut() == StatutAmitie.REFUSEE) {
+                return amitieExistante; // Bloquer la création d'une nouvelle demande
+            }
         }
+
+        // Vérifier si une demande existe dans le sens receveur -> demandeur
+        Optional<Amitie> existInverse = amitieRepository
+                .findByUtilisateurDemandeurAndUtilisateurReceveur(receveur, demandeur);
+
+        if (existInverse.isPresent()) {
+            Amitie amitieInverse = existInverse.get();
+            if (amitieInverse.getStatut() == StatutAmitie.EN_ATTENTE ||
+                amitieInverse.getStatut() == StatutAmitie.ACCEPTEE ||
+                amitieInverse.getStatut() == StatutAmitie.REFUSEE) {
+                throw new IllegalStateException(
+                        "Une demande d'amitié existe déjà dans l'autre sens avec un statut actif.");
+            }
+        }
+
+        // Créer la nouvelle demande
         Amitie amitie = new Amitie();
         amitie.setUtilisateurDemandeur(demandeur);
         amitie.setUtilisateurReceveur(receveur);
