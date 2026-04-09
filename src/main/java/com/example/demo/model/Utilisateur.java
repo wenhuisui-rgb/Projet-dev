@@ -255,24 +255,4 @@ public class Utilisateur {
         return null;
     }
 
-    public List<Utilisateur> obtenirListeAmis() {
-        return null;
-    }
-
-    public List<Badge> obtenirMesBadges() {
-        return null;
-    }
-
-    public List<Challenge> obtenirMesChallenges() {
-        return null;
-    }
-
-    public void envoyerDemandeAmi(Utilisateur cible) {
-    }
-
-    public void traiterDemande(Amitie demande, Boolean accepter) {
-    }
-
-    public void supprimerAmi(Utilisateur ami) {
-    }
 }
