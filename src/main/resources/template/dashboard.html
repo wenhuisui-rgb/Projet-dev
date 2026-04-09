@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+
+<div>
+    <div>
+        <div>
+            <div>
+                <h1>Dashboard</h1>
+                <div>
+                    <span>Bienvenue ! <strong th:text="${session.utilisateur.prenom} + ' ' + ${session.utilisateur.nom}"></strong> !</span>
+                    <a href="/profil">Mon profil</a>
+                    <a href="/activites/nouvelle">+ Nouvelle activité</a>
+                    <a href="/challenges">Défis</a>
+                    <a href="/amis">Amis</a>
+                    <a href="/feed">Fil d'actualité</a>
+                    <a href="/deconnexion">Déconnexion</a>
+                </div>
+            </div>
+
+            <hr>
+
+            <div>
+                <div>
+                    <h3>Mes statistiques</h3>
+                </div>
+                <div>
+                    <div>
+                        <div>Distance totale</div>
+                        <div><span th:text="${stats.totalDistance != null ? stats.totalDistance : 0}"></span> km</div>
+                    </div>
+                    <div>
+                        <div>Temps total</div>
+                        <div><span th:text="${stats.totalDuree != null ? stats.totalDuree : 0}"></span> minutes</div>
+                    </div>
+                    <div>
+                        <div>Calories totales</div>
+                        <div><span th:text="${stats.totalCalories != null ? stats.totalCalories : 0}"></span> kcal</div>
+                    </div>
+                    <div>
+                        <div>Activités totales</div>
+                        <div><span th:text="${stats.totalActivites != null ? stats.totalActivites : 0}"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div>
+                    <h3>Ce mois-ci</h3>
+                </div>
+                <div>
+                    <div>
+                        <div>Distance</div>
+                        <div><span th:text="${stats.distanceMois != null ? stats.distanceMois : 0}"></span> km</div>
+                    </div>
+                    <div>
+                        <div>Activités</div>
+                        <div><span th:text="${stats.activitesMois != null ? stats.activitesMois : 0}"></span></div>
+                    </div>
+                    <div>
+                        <div>Objectif mensuel</div>
+                        <div th:text="${session.utilisateur.objectifPersonnel != null ? session.utilisateur.objectifPersonnel : 'Non défini'}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <div>
+                <div>
+                    <h3>Mes activités récentes</h3>
+                    <a href="/activites/nouvelle">+ Ajouter</a>
+                </div>
+                
+                <div th:if="${activites != null and !activites.isEmpty()}">
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Sport</th>
+                                <th>Durée</th>
+                                <th>Distance</th>
+                                <th>Calories</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="activite : ${activites}">
+                                <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan</td>
+                                <td th:text="${activite.typeSport}">quan</td>
+                                <td th:text="${activite.duree} + ' min'">quan</td>
+                                <td th:text="${activite.distance != null ? activite.distance + ' km' : '-'}">quan</td>
+                                <td th:text="${activite.calories != null ? activite.calories + ' kcal' : '-'}">quan</td>
+                                <td>
+                                    <a th:href="@{/activites/{id}(id=${activite.id})}">Voir</a>
+                                    <a th:href="@{/activites/edit/{id}(id=${activite.id})}">Modifier</a>
+                                    <a th:href="@{/activites/delete/{id}(id=${activite.id})}" 
+                                       onclick="return confirm('Supprimer cette activité ?')">Supprimer</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div th:unless="${activites != null and !activites.isEmpty()}">
+                    <p>Aucune activité enregistrée pour le moment.</p>
+                    <a href="/activites/nouvelle">Enregistrer ma première activité</a>
+                </div>
+            </div>
+
+            <hr>
+
+            <div>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/challenges">Challenges</a>
+                <a href="/amis">Amis</a>
+                <a href="/feed">Feed</a>
+                <a href="/profil">Mon profil</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
