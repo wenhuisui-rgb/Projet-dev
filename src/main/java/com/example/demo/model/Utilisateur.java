@@ -31,9 +31,12 @@ public class Utilisateur {
     @Enumerated(EnumType.STRING)
     private NiveauPratique niveauPratique;
 
-
+    @ElementCollection(targetClass = TypeSport.class)
+    @CollectionTable(name = "utilisateur_preferences_sports", joinColumns = @JoinColumn(name = "utilisateur_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_sport")
     private List<TypeSport> preferencesSports = new ArrayList<>();
-    private List<ObtentionBadge> listBadge = new ArrayList<>();
+
     
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Activite> activites = new ArrayList<>();
@@ -46,7 +49,7 @@ public class Utilisateur {
     private List<Amitie> demandesRecues = new ArrayList<>();   // recevoir
     
     @OneToMany(mappedBy = "utilisateur")
-    private List<ObtentionBadge> obtentionsBadges = new ArrayList<>();
+    private List<ObtentionBadge> listBadges = new ArrayList<>();
     
     @OneToMany(mappedBy = "createur")
     private List<Challenge> challengesCrees = new ArrayList<>();
@@ -63,7 +66,7 @@ public class Utilisateur {
     }
     public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, 
                        Float taille, Float poids, NiveauPratique niveauPratique, List<TypeSport> preferencesSports, 
-                       List<ObtentionBadge> listBadge) {
+                       List<ObtentionBadge> listBadges) {
         this.id = id;
         this.pseudo = pseudo;
         this.email = email;
@@ -74,7 +77,7 @@ public class Utilisateur {
         this.poids = poids;
         this.niveauPratique = niveauPratique;
         this.preferencesSports = preferencesSports;
-        this.listBadge = listBadge;
+        this.listBadges = listBadges;
     }
 
     // Getters et Setters
@@ -158,16 +161,17 @@ public class Utilisateur {
         this.preferencesSports = preferencesSports;
     }
 
-    public List<ObtentionBadge> getListBadge() {
-        return listBadge;
+    public List<ObtentionBadge> getListBadges() {
+        return listBadges;
     }
 
-    public void setListBadge(List<ObtentionBadge> listBadge) {
-        this.listBadge = listBadge;
+    public void setListBadges(List<ObtentionBadge> listBadges) {
+        this.listBadges = listBadges;
     }
 
 
     //methodes
+    
     public void sInscrire() {
         // TODO: Implement logic
     }
@@ -186,9 +190,11 @@ public class Utilisateur {
     }
 
     public Float calculerIMC() {
-        // TODO: Implement logic
-        return 0.0f;
+    if (this.taille != null && this.poids != null && this.taille > 0) {
+        return this.poids / (this.taille * this.taille); // 假设 taille 是米
     }
+    return null;
+}
 
     public List<Utilisateur> obtenirListeAmis() {
         // TODO: Implement logic
