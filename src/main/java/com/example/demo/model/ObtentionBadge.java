@@ -1,42 +1,35 @@
 package com.example.demo.model;
-import java.time.LocalDateTime;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class ObtentionBadge {
-    @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalDateTime dateObtention;
-    
+
     @ManyToOne
-    @JoinColumn(name="badge_id")
+    @JoinColumn(name = "badge_id")
     private Badge badge;
 
     @ManyToOne
-    @JoinColumn(name="utilisateur_id")
+    @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
-    
-    public ObtentionBadge(){
 
+    public ObtentionBadge() {
     }
+
     
-    //On veut savoir quel utilisateur obtient quel badge
-    public ObtentionBadge(Utilisateur utilisateur,Badge badge) {
-        this.utilisateur=utilisateur;
-        this.badge=badge;
+    public ObtentionBadge(Utilisateur utilisateur, Badge badge) {
+        this.utilisateur = utilisateur;
+        this.badge = badge;
         this.dateObtention = LocalDateTime.now();
-
-        
     }
+
     
     public Long getId() {
         return id;
@@ -60,5 +53,9 @@ public class ObtentionBadge {
 
     public Utilisateur getUtilisateur() {
         return utilisateur;
+    }
+
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
     }
 }
