@@ -28,10 +28,12 @@ public class ObjectifService {
         return objectifRepository.save(objectif);
     }
 
+    @Transactional(readOnly = true)
     public List<Objectif> getObjectifsParUtilisateur(Utilisateur utilisateur) {
         return objectifRepository.findByUtilisateur(utilisateur);
     }
 
+    @Transactional(readOnly = true)
     public Objectif getObjectifParId(Long id) {
         return objectifRepository.findById(id).orElse(null);
     }
@@ -55,6 +57,7 @@ public class ObjectifService {
         objectifRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public Float getProgressionObjectif(Objectif objectif, Utilisateur utilisateur) {
         LocalDateTime debut = getDateDebutDateTime(objectif);
         LocalDateTime fin = getDateFinDateTime(objectif);
@@ -83,10 +86,10 @@ public class ObjectifService {
                 return activiteRepository.getCaloriesTotales(utilisateur);
             }
         }
-
         return 0f;
     }
 
+    @Transactional(readOnly = true)
     public Float getPourcentageObjectif(Objectif objectif, Utilisateur utilisateur) {
         Float progression = getProgressionObjectif(objectif, utilisateur);
         if (objectif.getCible() == null || objectif.getCible() == 0) {
@@ -95,6 +98,7 @@ public class ObjectifService {
         return (progression / objectif.getCible()) * 100;
     }
 
+    @Transactional(readOnly = true)
     public Boolean isObjectifAtteint(Objectif objectif, Utilisateur utilisateur) {
         Float progression = getProgressionObjectif(objectif, utilisateur);
         return progression >= objectif.getCible();
@@ -113,14 +117,18 @@ public class ObjectifService {
 
         if (objectif.getPeriode() == null) {
             fin = debut.plusMonths(1);
-        } else if (Periode.SEMAINE.equals(objectif.getPeriode())) {
-            fin = debut.plusWeeks(1);
-        } else if (Periode.ANNEE.equals(objectif.getPeriode())) {
-            fin = debut.plusYears(1);
         } else {
-            fin = debut.plusMonths(1);
+            switch (objectif.getPeriode()) {
+                case SEMAINE:
+                    fin = debut.plusWeeks(1);
+                    break;
+                case ANNEE:
+                    fin = debut.plusYears(1);
+                    break;
+                default:
+                    fin = debut.plusMonths(1);
+            }
         }
-
         return fin.atTime(23, 59, 59);
     }
 }

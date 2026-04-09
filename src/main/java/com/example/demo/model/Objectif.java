@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "objectifs")
@@ -35,14 +34,14 @@ public class Objectif {
 
     public Objectif(Long id, String description, TypeSport typeSport, Float cible,
                 String unite, LocalDate dateDebut, Periode periode, Utilisateur utilisateur) {
-        this.id = id;
-        this.description = description;
-        this.typeSport = typeSport;
-        this.cible = cible;
-        this.unite = unite;
-        this.dateDebut = dateDebut;
-        this.periode = periode;
-        this.utilisateur = utilisateur;
+    this.id = id;
+    this.description = description;
+    this.typeSport = typeSport;
+    this.cible = cible;
+    this.unite = unite;
+    this.dateDebut = dateDebut;
+    this.periode = periode;
+    this.utilisateur = utilisateur;
     }
 
     public Long getId() {
@@ -126,45 +125,6 @@ public class Objectif {
         if (nouvelleDate != null && nouvelleDate.isAfter(dateDebut)) {
             this.dateDebut = nouvelleDate;
         }
-    }
-
-    public Float calculerProgression(List<Activite> activites) {
-    if (activites == null || activites.isEmpty() || cible == null || cible == 0) {
-        return 0f;
-    }
-    
-    float total = 0f;
-    LocalDate dateFin = getDateFin();
-    
-    for (Activite activite : activites) {
-        if (typeSport != null && activite.getTypeSport() != typeSport) {
-            continue;
-        }
-        LocalDate dateActivite = activite.getDateActivite().toLocalDate();
-        if (!dateActivite.isBefore(dateDebut) && !dateActivite.isAfter(dateFin)) {
-            if ("km".equals(unite) && activite.getDistance() != null) {
-                total += activite.getDistance();
-            } else if ("minutes".equals(unite) && activite.getDuree() != null) {
-                total += activite.getDuree();
-            } else if ("kcal".equals(unite) && activite.getCalories() != null) {
-                total += activite.getCalories();
-            }
-        }
-    }
-    return total;
-}
-
-    public Float getPourcentageProgression(List<Activite> activites) {
-        float progression = calculerProgression(activites);
-        if (cible == null || cible == 0) {
-            return 0f;
-        }
-        return (progression / cible) * 100;
-    }
-
-    public Boolean estAtteint(List<Activite> activites) {
-        float progression = calculerProgression(activites);
-        return progression >= cible;
     }
 
     @Override
