@@ -14,6 +14,7 @@ public class UtilisateurService {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
+    // management de compte utilisateur
     @Transactional
     public Utilisateur inscrireUtilisateur(Utilisateur utilisateur) {
         return utilisateurRepository.save(utilisateur);
@@ -34,18 +35,6 @@ public class UtilisateurService {
     public Utilisateur findById(Long id) {
         return utilisateurRepository.findById(id).orElse(null);
     }
-    /**
-     * Obtenir la liste d'amis (obtenirListeAmis)
-     */
-    @Transactional(readOnly = true) // Indique que cette méthode est en lecture seule, ce qui peut améliorer les performances
-    public List<Utilisateur> obtenirListeAmis(Long utilisateurId) {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public List<Utilisateur> findAll() {
-        return utilisateurRepository.findAll();
-    }
 
     public boolean emailExiste(String email) {
         return utilisateurRepository.existsByEmail(email);
@@ -63,5 +52,15 @@ public class UtilisateurService {
     @Transactional
     public void supprimerUtilisateur(Long id) {
         utilisateurRepository.deleteById(id);
+    }
+
+    // gestion des amis
+    /**
+     * Obtenir la liste d'amis (obtenirListeAmis)
+     */
+    @Transactional(readOnly = true) // Indique que cette méthode est en lecture seule, ce qui peut améliorer les performances
+    public List<Utilisateur> obtenirListeAmis(Long utilisateurId) {
+        // TODO: Implement logic
+        return null;
     }
 }
