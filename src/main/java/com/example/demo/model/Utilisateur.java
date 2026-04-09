@@ -172,22 +172,6 @@ public class Utilisateur {
 
     //methodes
     
-    public void sInscrire() {
-        // TODO: Implement logic
-    }
-
-    public Boolean seConnecter(String email, String mdp) {
-        // TODO: Implement logic
-        return false;
-    }
-
-    public void seDeconnecter() {
-        // TODO: Implement logic
-    }
-
-    public void mettreAJourProfil() {
-        // TODO: Implement logic
-    }
 
     public Float calculerIMC() {
     if (this.taille != null && this.poids != null && this.taille > 0) {
