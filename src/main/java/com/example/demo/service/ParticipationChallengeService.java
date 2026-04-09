@@ -1,66 +1,50 @@
 package com.example.demo.service;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.Challenge;
+import com.example.demo.model.ParticipationChallenge;
+import com.example.demo.model.Utilisateur;
+import com.example.demo.repository.ParticipationChallengeRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
 public class ParticipationChallengeService {
 
     private final ParticipationChallengeRepository participationRepository;
-    private final ChallengeRepository challengeRepository;
-    private final UtilisateurRepository utilisateurRepository;
 
-    public ParticipationChallengeService(
-            ParticipationChallengeRepository participationRepository,
-            ChallengeRepository challengeRepository,
-            UtilisateurRepository utilisateurRepository
-    ) {
+    public ParticipationChallengeService(ParticipationChallengeRepository participationRepository) {
         this.participationRepository = participationRepository;
-        this.challengeRepository = challengeRepository;
-        this.utilisateurRepository = utilisateurRepository;
     }
 
-    public ParticipationChallenge rejoindreChallenge(Long userId, Long challengeId) {
+    public ParticipationChallenge rejoindreChallenge(Utilisateur utilisateur, Challenge challenge) {
+        // Vérifier si l'utilisateur est déjà inscrit 
+        ParticipationChallenge existing = participationRepository
+                .findByUtilisateurIdAndChallengeId(utilisateur.getId(), challenge.getId());
+        if (existing != null) return existing;
 
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow();
-
-        Utilisateur utilisateur = utilisateurRepository.findById(userId)
-                .orElseThrow();
-
-        participationRepository
-                .findByUtilisateurIdAndChallengeId(userId, challengeId)
-                .ifPresent(p -> {
-                    throw new RuntimeException("Déjà inscrit");
-                });
-
-        ParticipationChallenge participation =
-                new ParticipationChallenge(utilisateur, challenge);
-
+        ParticipationChallenge participation = new ParticipationChallenge(utilisateur, challenge);
         return participationRepository.save(participation);
     }
 
-    public void mettreAJourScore(Long participationId, float nouveauScore) {
+    public void retirerParticipant(Utilisateur utilisateur, Challenge challenge) {
         ParticipationChallenge participation = participationRepository
-                .findById(participationId)
-                .orElseThrow();
+                .findByUtilisateurIdAndChallengeId(utilisateur.getId(), challenge.getId());
+        if (participation != null) {
+            participationRepository.delete(participation);
+        }
+    }
 
-        participation.setScoreActuel(nouveauScore);
-
-        participationRepository.save(participation);
+    public ParticipationChallenge mettreAJourScore(Utilisateur utilisateur, Challenge challenge, float score) {
+        ParticipationChallenge participation = participationRepository
+                .findByUtilisateurIdAndChallengeId(utilisateur.getId(), challenge.getId());
+        if (participation != null) {
+            participation.setScoreActuel(score);
+            return participationRepository.save(participation);
+        }
+        return null;
     }
 
     public List<ParticipationChallenge> obtenirClassement(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow();
-
-        return challenge.obtenirClassement();
-    }
-
-    public void quitterChallenge(Long participationId) {
-        participationRepository.deleteById(participationId);
+        return participationRepository.findByChallengeIdOrderByScoreActuelDesc(challengeId);
     }
 }

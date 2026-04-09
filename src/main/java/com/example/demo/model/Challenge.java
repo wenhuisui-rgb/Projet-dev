@@ -1,46 +1,48 @@
 package com.example.demo.model;
-import java.util.List;
-import java.time.LocalDate; 
-import java.util.ArrayList;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Challenge {
-    @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
 
-    private long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  
 
     private String titre;
-    
+
     @Enumerated(EnumType.STRING)
-    private TypeSport typeSport; 
+    private TypeSport typeSport;
 
     private LocalDate dateDebut;
     private LocalDate dateFin;
-    
-    @OneToMany(mappedBy = "challenge")
-    private List<ParticipationChallenge>participations=new ArrayList<>();
 
-    public Challenge(){
+    @ManyToOne
+    @JoinColumn(name = "createur_id")
+    private Utilisateur createur;
 
-    }
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ParticipationChallenge> participations = new ArrayList<>();
 
+    public Challenge() {}
 
-    public Challenge(String titre, TypeSport typeSport, LocalDate dateDebut, LocalDate dateFin) {
+    public Challenge(String titre, TypeSport typeSport, LocalDate dateDebut, LocalDate dateFin, Utilisateur createur) {
         this.titre = titre;
         this.typeSport = typeSport;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
+        this.createur = createur;
     }
 
-    void setId(long id) {
-        this.id = id;
-    }
-    
-    public long getId() {
+    public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitre() {
@@ -75,19 +77,25 @@ public class Challenge {
         this.dateFin = dateFin;
     }
 
-        public List<ParticipationChallenge> getParticipations() {
+    public Utilisateur getCreateur() {
+        return createur;
+    }
+
+    public void setCreateur(Utilisateur createur) {
+        this.createur = createur;
+    }
+
+    public List<ParticipationChallenge> getParticipations() {
         return participations;
     }
 
     public void ajouterParticipant(Utilisateur utilisateur) {
         ParticipationChallenge participation = new ParticipationChallenge(utilisateur, this);
-
         participations.add(participation);
-    
     }
 
-    public void retirerParticipant(Utilisateur utilisateur){
-        participations.removeIf(participations -> participations.getUtilisateur().equals(utilisateur) );
+    public void retirerParticipant(Utilisateur utilisateur) {
+        participations.removeIf(p -> p.getUtilisateur().equals(utilisateur));
     }
 
     public boolean estActif() {
@@ -95,19 +103,4 @@ public class Challenge {
         return !aujourdHui.isBefore(dateDebut) && !aujourdHui.isAfter(dateFin);
     }
 
-    //retourne la liste des participants sous forme d'un classement
-    public List<ParticipationChallenge> obtenirClassement() {
-        participations.sort(
-                (p1, p2) -> Float.compare(
-                        p2.getScoreActuel(),
-                        p1.getScoreActuel()
-                )
-        );
-
-        return participations;
-    }
-
-    //retourne la liste de tt les challenges 
-    public List<Challenge> listtoutLesChallenges() {
-        return new ArrayList<>();
-}}
+}

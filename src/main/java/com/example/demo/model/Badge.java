@@ -1,21 +1,27 @@
 package com.example.demo.model;
 import java.util.List;
-public class Badge {
 
+import jakarta.persistence.*;
+
+
+@Entity
+public class Badge {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long badgeID;
     
     private String badge_nom;
     
     private String badge_description;
     
-    
+    @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ObtentionBadge> obtentions;
     
     public Badge(){
         
     }
 
-    public Badge(Long badgeID, String badge_nom, String badge_description){
-        this.badgeID=badgeID;
+    public Badge(String badge_nom, String badge_description){
         this.badge_nom=badge_nom;
         this.badge_description=badge_description;
     }
@@ -53,8 +59,7 @@ public class Badge {
         return false;
     }
 
-    public static List<Badge> listerTousLesBadges() {
-        return null;
-            //List<Badge> badges = new ArrayList<>();
+    public List<ObtentionBadge>etObtentions(){
+        return obtentions;
     }
 }
