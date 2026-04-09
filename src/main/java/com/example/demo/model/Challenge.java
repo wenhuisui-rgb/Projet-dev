@@ -1,19 +1,34 @@
 package com.example.demo.model;
-
+import java.util.List;
 import java.time.LocalDate; 
+import java.util.ArrayList;
+import jakarta.persistence.*;
 
+
+@Entity
 public class Challenge {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+
     private long id;
+
     private String titre;
     
+    @Enumerated(EnumType.STRING)
     private TypeSport typeSport; 
 
     private LocalDate dateDebut;
     private LocalDate dateFin;
+    
+    @OneToMany(mappedBy = "challenge")
+    private List<ParticipationChallenge>participations=new ArrayList<>();
+
+    public Challenge(){
+
+    }
 
 
-    public Challenge( long id, String titre, TypeSport typeSport, LocalDate dateDebut, LocalDate dateFin) {
-        this.id = id;
+    public Challenge(String titre, TypeSport typeSport, LocalDate dateDebut, LocalDate dateFin) {
         this.titre = titre;
         this.typeSport = typeSport;
         this.dateDebut = dateDebut;
@@ -60,19 +75,39 @@ public class Challenge {
         this.dateFin = dateFin;
     }
 
-    public void estActif() {
+        public List<ParticipationChallenge> getParticipations() {
+        return participations;
     }
 
-    public void obtenirClassement() {
-        // java.util.List<Participant> participants = new java.util.ArrayList<>();
+    public void ajouterParticipant(Utilisateur utilisateur) {
+        ParticipationChallenge participation = new ParticipationChallenge(utilisateur, this);
+
+        participations.add(participation);
+    
     }
 
-    public void listtoutLesChallenges() {
-        // java.util.List<Challenge> challenges = new java.util.ArrayList<>();
+    public void retirerParticipant(Utilisateur utilisateur){
+        participations.removeIf(participations -> participations.getUtilisateur().equals(utilisateur) );
     }
 
+    public boolean estActif() {
+        LocalDate aujourdHui = LocalDate.now();
+        return !aujourdHui.isBefore(dateDebut) && !aujourdHui.isAfter(dateFin);
+    }
 
+    //retourne la liste des participants sous forme d'un classement
+    public List<ParticipationChallenge> obtenirClassement() {
+        participations.sort(
+                (p1, p2) -> Float.compare(
+                        p2.getScoreActuel(),
+                        p1.getScoreActuel()
+                )
+        );
 
+        return participations;
+    }
 
-
-}
+    //retourne la liste de tt les challenges 
+    public List<Challenge> listtoutLesChallenges() {
+        return new ArrayList<>();
+}}

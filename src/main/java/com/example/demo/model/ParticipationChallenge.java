@@ -1,25 +1,44 @@
 package com.example.demo.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
+@Entity
 public class ParticipationChallenge {
-    private long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private LocalDate dateInscription;
+
     private float scoreActuel;
 
-    public ParticipationChallenge(long id, LocalDate dateInscription, float scoreActuel) {
-        this.id = id;
-        this.dateInscription = dateInscription;
-        this.scoreActuel = scoreActuel;
+    @ManyToOne
+    @JoinColumn(name = "utilisateur_id")
+    private Utilisateur utilisateur;
+
+    @ManyToOne
+    @JoinColumn(name = "challenge_id")
+    private Challenge challenge;
+
+    public ParticipationChallenge() {
+    }
+
+    public ParticipationChallenge(Utilisateur utilisateur, Challenge challenge) {
+        this.utilisateur = utilisateur;
+        this.challenge = challenge;
+        this.dateInscription = LocalDate.now();
+        this.scoreActuel = 0;
+    }
+
+    public void mettreAJourScore(float nouveauScore) {
+        this.scoreActuel = nouveauScore;
     }
 
 
-    public float getScoreActuel() {
-        return scoreActuel;
-    }
-
-    public void setScoreActuel(float scoreActuel) {
-        this.scoreActuel = scoreActuel;
+    public Long getId() {
+        return id;
     }
 
     public LocalDate getDateInscription() {
@@ -30,20 +49,27 @@ public class ParticipationChallenge {
         this.dateInscription = dateInscription;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public float getScoreActuel() {
+        return scoreActuel;
     }
 
-    public long getId() {
-        return id;
+    public void setScoreActuel(float scoreActuel) {
+        this.scoreActuel = scoreActuel;
     }
 
-    public void mettreAJourScore(float nouveauScore) {
-        this.scoreActuel = nouveauScore;
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
     }
 
-    public void verifierPosition() {
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
     }
 
+    public Challenge getChallenge() {
+        return challenge;
+    }
 
+    public void setChallenge(Challenge challenge) {
+        this.challenge = challenge;
+    }
 }
