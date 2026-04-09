@@ -18,18 +18,25 @@ public class AmitieService {
         this.amitieRepository = amitieRepository;
     }
 
+    // Méthode utilitaire pour savoir si un statut bloque une nouvelle demande
+    private boolean statutBloquant(StatutAmitie statut) {
+        return statut == StatutAmitie.EN_ATTENTE || statut == StatutAmitie.ACCEPTEE;
+    }
+
     // Envoyer une demande d'amitié
-    public Amitie envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
+    public String envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
         // Vérifier si une demande existe déjà dans le sens demandeur -> receveur
         Optional<Amitie> existDirecte = amitieRepository
                 .findByUtilisateurDemandeurAndUtilisateurReceveur(demandeur, receveur);
 
         if (existDirecte.isPresent()) {
             Amitie amitieExistante = existDirecte.get();
-            if (amitieExistante.getStatut() == StatutAmitie.EN_ATTENTE ||
-                amitieExistante.getStatut() == StatutAmitie.ACCEPTEE ||
-                amitieExistante.getStatut() == StatutAmitie.REFUSEE) {
-                return amitieExistante; // Bloquer la création d'une nouvelle demande
+            if (statutBloquant(amitieExistante.getStatut())) {
+                return "Vous avez déjà une demande en attente ou acceptée.";
+            } else {
+                
+                return "Votre précédente demande a été " + amitieExistante.getStatut().name() + 
+                       ". Vous pouvez renvoyer une nouvelle demande.";
             }
         }
 
@@ -37,54 +44,45 @@ public class AmitieService {
         Optional<Amitie> existInverse = amitieRepository
                 .findByUtilisateurDemandeurAndUtilisateurReceveur(receveur, demandeur);
 
-        if (existInverse.isPresent()) {
-            Amitie amitieInverse = existInverse.get();
-            if (amitieInverse.getStatut() == StatutAmitie.EN_ATTENTE ||
-                amitieInverse.getStatut() == StatutAmitie.ACCEPTEE ||
-                amitieInverse.getStatut() == StatutAmitie.REFUSEE) {
-                throw new IllegalStateException(
-                        "Une demande d'amitié existe déjà dans l'autre sens avec un statut actif.");
-            }
+        if (existInverse.isPresent() && statutBloquant(existInverse.get().getStatut())) {
+            return "L'utilisateur vous a déjà envoyé une demande d'amitié qui est en attente ou acceptée.";
         }
 
-        // Créer la nouvelle demande
+        // Créer la nouvelle demande si aucune condition bloquante
         Amitie amitie = new Amitie();
         amitie.setUtilisateurDemandeur(demandeur);
         amitie.setUtilisateurReceveur(receveur);
         amitie.setStatut(StatutAmitie.EN_ATTENTE);
         amitie.setDateDemande(java.time.LocalDate.now());
-        return amitieRepository.save(amitie);
+        amitieRepository.save(amitie);
+
+        return "Demande envoyée avec succès !";
     }
 
-    // Accepter une demande
+   
     public Amitie accepterDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.ACCEPTEE);
         return amitieRepository.save(amitie);
     }
 
-    // Refuser une demande
     public Amitie refuserDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.REFUSEE);
         return amitieRepository.save(amitie);
     }
 
-    // Annuler une demande
     public Amitie annulerDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.ANNULEE);
         return amitieRepository.save(amitie);
     }
 
-    // Rompre une amitié existante
     public void rompreAmitie(Amitie amitie) {
         amitieRepository.delete(amitie);
     }
 
-    // Lister toutes les amitiés d’un utilisateur
     public List<Amitie> getAmities(Utilisateur utilisateur) {
         return amitieRepository.findByUtilisateurDemandeurOrUtilisateurReceveur(utilisateur, utilisateur);
     }
 
-    // Lister uniquement les amitiés acceptées
     public List<Amitie> getAmitiesAcceptees(Utilisateur utilisateur) {
         return amitieRepository.findByStatutAndUtilisateurDemandeurOrUtilisateurReceveur(
                 StatutAmitie.ACCEPTEE, utilisateur, utilisateur);
