@@ -23,7 +23,7 @@ public class Objectif {
     
     private LocalDate dateDebut;
     
-    private String periode; // SEMAINE, MOIS, ANNEE
+    private String periode;
     
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
@@ -44,7 +44,6 @@ public class Objectif {
         this.utilisateur = utilisateur;
     }
 
-    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -109,9 +108,6 @@ public class Objectif {
         this.utilisateur = utilisateur;
     }
 
-    /**
-     * 根据活动列表计算当前进度
-     */
     public Float calculerProgression(List<Activite> activites) {
         if (activites == null || activites.isEmpty() || cible == null || cible == 0) {
             return 0f;
@@ -139,9 +135,6 @@ public class Objectif {
         return total;
     }
 
-    /**
-     * 获取进度百分比
-     */
     public Float getPourcentageProgression(List<Activite> activites) {
         float progression = calculerProgression(activites);
         if (cible == null || cible == 0) {
@@ -150,17 +143,11 @@ public class Objectif {
         return (progression / cible) * 100;
     }
 
-    /**
-     * 判断目标是否达成
-     */
     public Boolean estAtteint(List<Activite> activites) {
         float progression = calculerProgression(activites);
         return progression >= cible;
     }
 
-    /**
-     * 获取结束日期
-     */
     private LocalDate getDateFin() {
         if (dateDebut == null) return LocalDate.now();
         
@@ -176,9 +163,6 @@ public class Objectif {
         }
     }
 
-    /**
-     * 延长目标
-     */
     public void prolongerObjectif(LocalDate nouvelleDate) {
         if (nouvelleDate != null && nouvelleDate.isAfter(dateDebut)) {
             this.dateDebut = nouvelleDate;

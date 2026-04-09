@@ -7,7 +7,6 @@ public class Amitie {
     private long amitieID;
     private StatutAmitie statut;
     private Date dateDemande;
-
     
     public Amitie() {
     }

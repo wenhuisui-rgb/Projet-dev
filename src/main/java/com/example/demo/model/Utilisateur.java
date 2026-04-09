@@ -172,10 +172,71 @@ public class Utilisateur {
         this.listBadges = listBadges;
     }
 
+    public List<Activite> getActivites() {
+        return activites;
+    }
+
+    public void setActivites(List<Activite> activites) {
+        this.activites = activites;
+    }
+
+    public List<Objectif> getObjectifs() {
+        return objectifs;
+    }
+
+    public void setObjectifs(List<Objectif> objectifs) {
+        this.objectifs = objectifs;
+    }
+
+    public List<Amitie> getDemandesEnvoyees() {
+        return demandesEnvoyees;
+    }
+
+    public void setDemandesEnvoyees(List<Amitie> demandesEnvoyees) {
+        this.demandesEnvoyees = demandesEnvoyees;
+    }
+
+    public List<Amitie> getDemandesRecues() {
+        return demandesRecues;
+    }
+
+    public void setDemandesRecues(List<Amitie> demandesRecues) {
+        this.demandesRecues = demandesRecues;
+    }
+
+    public List<ParticipationChallenge> getParticipationsChallenge() {
+        return participationsChallenge;
+    }
+
+    public void setParticipationsChallenge(List<ParticipationChallenge> participationsChallenge) {
+        this.participationsChallenge = participationsChallenge;
+    }
+
+    public List<Commentaire> getCommentaires() {
+        return commentaires;
+    }
+
+    public void setCommentaires(List<Commentaire> commentaires) {
+        this.commentaires = commentaires;
+    }
+
+    public List<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(List<Reaction> reactions) {
+        this.reactions = reactions;
+    }
+
+    public List<Challenge> getChallengesCrees() {
+        return challengesCrees;
+    }
+
+    public void setChallengesCrees(List<Challenge> challengesCrees) {
+        this.challengesCrees = challengesCrees;
+    }
 
     //methodes
-    
-
     public Float calculerIMC() {
         if (this.taille != null && this.poids != null && this.taille > 0) {
             return this.poids / (this.taille * this.taille); // 假设 taille 是米

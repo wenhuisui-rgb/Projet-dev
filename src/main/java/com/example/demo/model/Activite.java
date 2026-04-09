@@ -20,28 +20,26 @@ public class Activite {
     private LocalDateTime dateActivite;
 
     @Column(nullable = false)
-    private Integer duree; // 单位：分钟
+    private Integer duree;//minute
 
-    private Float distance; // 单位：公里
+    private Float distance; //km
 
     private String localisation;
 
-    private Integer evaluation; // 1-5 分
+    private Integer evaluation; // 1-5 etoiles
 
-    private Float calories; // 消耗卡路里
+    private Float calories; 
 
     @Column(length = 500)
-    private String meteo; // 天气描述
+    private String meteo;
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
-    // 无参构造器（JPA 要求）
     public Activite() {
     }
 
-    // 全参构造器（不含 id）
     public Activite(TypeSport typeSport, LocalDateTime dateActivite, Integer duree,
                     Float distance, String localisation, Integer evaluation,
                     Float calories, String meteo, Utilisateur utilisateur) {
@@ -56,7 +54,6 @@ public class Activite {
         this.utilisateur = utilisateur;
     }
 
-    // Getter 和 Setter
     public Long getId() {
         return id;
     }
@@ -137,13 +134,11 @@ public class Activite {
         this.utilisateur = utilisateur;
     }
 
-    // 业务方法：计算卡路里（根据运动类型、时长、体重等）
     public Float calculerCalories(Float poidsUtilisateur) {
         if (typeSport == null || duree == null || poidsUtilisateur == null) {
             return 0f;
         }
-        
-        // MET值（代谢当量），单位：卡路里/公斤/小时
+
         float met = 0f;
         switch (typeSport) {
             case COURSE:
@@ -168,7 +163,6 @@ public class Activite {
                 met = 5.0f;
         }
         
-        // 卡路里 = MET × 体重(kg) × 时长(小时)
         float heures = duree / 60.0f;
         float caloriesCalculees = met * poidsUtilisateur * heures;
         

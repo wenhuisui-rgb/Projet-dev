@@ -1,23 +1,41 @@
 package com.example.demo.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "reactions")
 public class Reaction {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private TypeReaction typeReaction;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TypeReaction type;
+
+    @Column(nullable = false)
     private LocalDateTime dateReaction;
 
-    // Constructeurs
-    public Reaction(Long id, TypeReaction typeReaction, LocalDateTime dateReaction) {
-        this.id = id;
-        this.typeReaction = typeReaction;
-        this.dateReaction = dateReaction;
-    }
+    @ManyToOne
+    @JoinColumn(name = "auteur_id", nullable = false)
+    private Utilisateur auteur;
+
+    @ManyToOne
+    @JoinColumn(name = "activite_id", nullable = false)
+    private Activite activite;
 
     public Reaction() {
     }
 
-    // Getters et Setters
+    public Reaction(TypeReaction type, LocalDateTime dateReaction, Utilisateur auteur, Activite activite) {
+        this.type = type;
+        this.dateReaction = dateReaction;
+        this.auteur = auteur;
+        this.activite = activite;
+    }
+
     public Long getId() {
         return id;
     }
@@ -26,12 +44,12 @@ public class Reaction {
         this.id = id;
     }
 
-    public TypeReaction getTypeReaction() {
-        return typeReaction;
+    public TypeReaction getType() {
+        return type;
     }
 
-    public void setTypeReaction(TypeReaction typeReaction) {
-        this.typeReaction = typeReaction;
+    public void setType(TypeReaction type) {
+        this.type = type;
     }
 
     public LocalDateTime getDateReaction() {
@@ -42,12 +60,19 @@ public class Reaction {
         this.dateReaction = dateReaction;
     }
 
-    //methodes
-    public void changerType(TypeReaction nouveauType) {
-        // TODO: Implement logic
+    public Utilisateur getAuteur() {
+        return auteur;
     }
 
-    public void retirerReaction() {
-        // TODO: Implement logic
+    public void setAuteur(Utilisateur auteur) {
+        this.auteur = auteur;
+    }
+
+    public Activite getActivite() {
+        return activite;
+    }
+
+    public void setActivite(Activite activite) {
+        this.activite = activite;
     }
 }
