@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détail de l'activité - Suivi Sportif</title>
+</head>
+<body>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Détail de l'activité</h2>
+                </div>
+                <div class="card-body">
+                    
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 200px;">Type de sport</th>
+                            <td th:text="${activite.typeSport}"></td>
+                        </tr>
+                        <tr>
+                            <th>Date et heure</th>
+                            <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}"></td>
+                        </tr>
+                        <tr>
+                            <th>Durée</th>
+                            <td th:text="${activite.duree} + ' minutes'"></td>
+                        </tr>
+                        <tr th:if="${activite.distance != null}">
+                            <th>Distance</th>
+                            <td th:text="${activite.distance} + ' km'"></td>
+                        </tr>
+                        <tr th:unless="${activite.distance != null}">
+                            <th>Distance</th>
+                            <td class="text-muted">Non renseignée</td>
+                        </tr>
+                        <tr th:if="${activite.localisation != null and activite.localisation != ''}">
+                            <th>Localisation</th>
+                            <td th:text="${activite.localisation}"></td>
+                        </tr>
+                        <tr th:unless="${activite.localisation != null and activite.localisation != ''}">
+                            <th>Localisation</th>
+                            <td class="text-muted">Non renseignée</td>
+                        </tr>
+                        <tr th:if="${activite.evaluation != null}">
+                            <th>Évaluation</th>
+                            <td>
+                                <span th:if="${activite.evaluation == 1}">⭐ 1 - Très mauvais</span>
+                                <span th:if="${activite.evaluation == 2}">⭐⭐ 2 - Moyen</span>
+                                <span th:if="${activite.evaluation == 3}">⭐⭐⭐ 3 - Bien</span>
+                                <span th:if="${activite.evaluation == 4}">⭐⭐⭐⭐ 4 - Très bien</span>
+                                <span th:if="${activite.evaluation == 5}">⭐⭐⭐⭐⭐ 5 - Excellent</span>
+                            </td>
+                        </tr>
+                        <tr th:unless="${activite.evaluation != null}">
+                            <th>Évaluation</th>
+                            <td class="text-muted">Non évaluée</td>
+                        </tr>
+                        <tr>
+                            <th>Calories consommées</th>
+                            <td>
+                                <span th:text="${activite.calories != null ? activite.calories : 'En cours de calcul...'}"></span>
+                                <span th:if="${activite.calories != null}">kcal</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${activite.meteo != null}">
+                            <th>Météo</th>
+                            <td th:text="${activite.meteo}"></td>
+                        </tr>
+                    </table>
+                    
+                    <div class="mt-4">
+                        <a th:href="@{/activites/edit/{id}(id=${activite.id})}" class="btn btn-warning">Modifier</a>
+                        <a th:href="@{/activites/delete/{id}(id=${activite.id})}" class="btn btn-danger" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette activité ?')">Supprimer</a>
+                        <a th:href="@{/dashboard}" class="btn btn-secondary">Retour au tableau de bord</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

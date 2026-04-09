@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouvelle activité - Suivi Sportif</title>
+    <title>Modifier l'activité - Suivi Sportif</title>
 </head>
 <body>
 
@@ -12,17 +12,16 @@
         <div class="col-md-8 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="mb-0">Nouvelle activité sportive</h2>
+                    <h2 class="mb-0">Modifier l'activité</h2>
                 </div>
                 <div class="card-body">
                     
-                    <form th:action="@{/activites/save}" th:object="${activite}" method="post">
+                    <form th:action="@{/activites/update/{id}(id=${activite.id})}" th:object="${activite}" method="post">
                         
                         <div class="mb-3">
                             <label for="typeSport" class="form-label">Type de sport *</label>
                             <select th:field="*{typeSport}" id="typeSport" class="form-select" required>
-                                <option value="">Sélectionnez un sport</option>
-                                <option th:each="sport : ${T(com.example.demo.model.TypeSport).values()}" 
+                                <option th:each="sport : ${typesSport}" 
                                         th:value="${sport}" th:text="${sport}"></option>
                             </select>
                         </div>
@@ -35,35 +34,34 @@
                         <div class="mb-3">
                             <label for="duree" class="form-label">Durée (minutes) *</label>
                             <input type="number" th:field="*{duree}" id="duree" class="form-control" min="1" required>
-                            <div class="form-text">Entrez la durée en minutes</div>
                         </div>
                         
                         <div class="mb-3">
                             <label for="distance" class="form-label">Distance (km)</label>
                             <input type="number" th:field="*{distance}" id="distance" class="form-control" step="0.01">
-                            <div class="form-text">Optionnel - Pour la course, vélo, natation...</div>
+                            <div class="form-text">Optionnel</div>
                         </div>
                         
                         <div class="mb-3">
                             <label for="localisation" class="form-label">Localisation</label>
-                            <input type="text" th:field="*{localisation}" id="localisation" class="form-control" placeholder="Ex: Parc Montsouris, Paris">
+                            <input type="text" th:field="*{localisation}" id="localisation" class="form-control" placeholder="Ex: Paris, France">
                         </div>
                         
                         <div class="mb-3">
                             <label for="evaluation" class="form-label">Évaluation (1-5)</label>
                             <select th:field="*{evaluation}" id="evaluation" class="form-select">
                                 <option value="">Non évalué</option>
-                                <option value="1">⭐ 1 - Très mauvais</option>
-                                <option value="2">⭐⭐ 2 - Moyen</option>
-                                <option value="3">⭐⭐⭐ 3 - Bien</option>
-                                <option value="4">⭐⭐⭐⭐ 4 - Très bien</option>
-                                <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+                                <option value="1">⭐ 1</option>
+                                <option value="2">⭐⭐ 2</option>
+                                <option value="3">⭐⭐⭐ 3</option>
+                                <option value="4">⭐⭐⭐⭐ 4</option>
+                                <option value="5">⭐⭐⭐⭐⭐ 5</option>
                             </select>
                         </div>
                         
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">Enregistrer l'activité</button>
-                            <a th:href="@{/dashboard}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            <a th:href="@{/activites/{id}(id=${activite.id})}" class="btn btn-secondary">Annuler</a>
                         </div>
                     </form>
                 </div>
