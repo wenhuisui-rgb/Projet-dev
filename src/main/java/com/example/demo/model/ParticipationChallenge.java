@@ -1,7 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class ParticipationChallenge {
@@ -10,7 +10,7 @@ public class ParticipationChallenge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate dateInscription;
+    private LocalDateTime dateInscription; // modifié pour stocker date + heure
 
     private float scoreActuel;
 
@@ -22,13 +22,12 @@ public class ParticipationChallenge {
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    public ParticipationChallenge() {
-    }
+    public ParticipationChallenge() {}
 
     public ParticipationChallenge(Utilisateur utilisateur, Challenge challenge) {
         this.utilisateur = utilisateur;
         this.challenge = challenge;
-        this.dateInscription = LocalDate.now();
+        this.dateInscription = LocalDateTime.now(); // date + heure
         this.scoreActuel = 0;
     }
 
@@ -36,16 +35,16 @@ public class ParticipationChallenge {
         this.scoreActuel = nouveauScore;
     }
 
-
+    // Getters / Setters
     public Long getId() {
         return id;
     }
 
-    public LocalDate getDateInscription() {
+    public LocalDateTime getDateInscription() {
         return dateInscription;
     }
 
-    public void setDateInscription(LocalDate dateInscription) {
+    public void setDateInscription(LocalDateTime dateInscription) {
         this.dateInscription = dateInscription;
     }
 
