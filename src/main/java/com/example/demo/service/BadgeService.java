@@ -35,19 +35,4 @@ public class BadgeService {
         return badgeRepository.findById(id).orElse(null);
     }
 
-    
-    //Vérifie si un utilisateur peut obtenir le badge selon le sport et le seuil
-    
-    public boolean verifierCondition(Badge badge, Utilisateur utilisateur, TypeSport sportRealise, float valeur) {
-        
-        if (obtentionBadgeService.utilisateurPossedeBadge(utilisateur, badge)) {
-            return false;
-        }
-        
-        if (!badge.getTypeSport().equals(sportRealise)) {
-            return false;
-        }
-
-        return valeur >= badge.getSeuil();
-    }
 }

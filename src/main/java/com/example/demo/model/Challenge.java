@@ -10,7 +10,7 @@ public class Challenge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  
+    private Long id;
 
     private String titre;
 
@@ -29,7 +29,11 @@ public class Challenge {
 
     public Challenge() {}
 
-    public Challenge(String titre, TypeSport typeSport, LocalDate dateDebut, LocalDate dateFin, Utilisateur createur) {
+    public Challenge(String titre,
+                     TypeSport typeSport,
+                     LocalDate dateDebut,
+                     LocalDate dateFin,
+                     Utilisateur createur) {
         this.titre = titre;
         this.typeSport = typeSport;
         this.dateDebut = dateDebut;
@@ -39,10 +43,6 @@ public class Challenge {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitre() {
@@ -89,18 +89,12 @@ public class Challenge {
         return participations;
     }
 
-    public void ajouterParticipant(Utilisateur utilisateur) {
-        ParticipationChallenge participation = new ParticipationChallenge(utilisateur, this);
-        participations.add(participation);
-    }
-
-    public void retirerParticipant(Utilisateur utilisateur) {
-        participations.removeIf(p -> p.getUtilisateur().equals(utilisateur));
-    }
-
+    /**
+     * Vérifie si le challenge est actif
+     */
     public boolean estActif() {
         LocalDate aujourdHui = LocalDate.now();
-        return !aujourdHui.isBefore(dateDebut) && !aujourdHui.isAfter(dateFin);
+        return !aujourdHui.isBefore(dateDebut)
+                && !aujourdHui.isAfter(dateFin);
     }
-
 }
