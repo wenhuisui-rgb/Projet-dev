@@ -74,7 +74,13 @@
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-community-dialects</artifactId>
 		</dependency>
-	</dependencies>
+	
+   <dependency>
+     <groupId>cn.enaium</groupId>
+     <artifactId>kook-spring-boot-starter</artifactId>
+     <version>0.3.0</version>
+   </dependency>
+ </dependencies>
 
 	<build>
 		<plugins>
