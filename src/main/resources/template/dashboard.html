@@ -13,12 +13,11 @@
             <div>
                 <h1>Dashboard</h1>
                 <div>
-                    <span>Bienvenue ! <strong th:text="${session.utilisateur.prenom} + ' ' + ${session.utilisateur.nom}"></strong> !</span>
+                    <span>Bienvenue ! <strong th:text="${session.utilisateur.prenom} + ' ' + ${session.utilisateur.nom}"></strong></span>
                     <a href="/profil">Mon profil</a>
-                    <a href="/activites/nouvelle">+ Nouvelle activité</a>
-                    <a href="/challenges">Défis</a>
+                    <a href="/challenges">Challenges</a>
                     <a href="/amis">Amis</a>
-                    <a href="/feed">Fil d'actualité</a>
+                    <a href="/feed">Feed</a>
                     <a href="/deconnexion">Déconnexion</a>
                 </div>
             </div>
@@ -73,7 +72,7 @@
             <div>
                 <div>
                     <h3>Mes activités récentes</h3>
-                    <a href="/activites/nouvelle">+ Ajouter</a>
+                    <a href="/activites/nouvelle">Ajouter une nouvelle activité</a>
                 </div>
                 
                 <div th:if="${activites != null and !activites.isEmpty()}">
@@ -85,7 +84,7 @@
                                 <th>Durée</th>
                                 <th>Distance</th>
                                 <th>Calories</th>
-                                <th>Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,7 +98,7 @@
                                     <a th:href="@{/activites/{id}(id=${activite.id})}">Voir</a>
                                     <a th:href="@{/activites/edit/{id}(id=${activite.id})}">Modifier</a>
                                     <a th:href="@{/activites/delete/{id}(id=${activite.id})}" 
-                                       onclick="return confirm('Supprimer cette activité ?')">Supprimer</a>
+                                       onclick="return confirm('Veuillez supprimer cette activité ?')">Supprimer</a>
                                 </td>
                             </tr>
                         </tbody>
@@ -107,7 +106,7 @@
                 </div>
                 
                 <div th:unless="${activites != null and !activites.isEmpty()}">
-                    <p>Aucune activité enregistrée pour le moment.</p>
+                    <p>Aucune activité enregistrée</p>
                     <a href="/activites/nouvelle">Enregistrer ma première activité</a>
                 </div>
             </div>
