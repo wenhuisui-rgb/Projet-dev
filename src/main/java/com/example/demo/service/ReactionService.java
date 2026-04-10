@@ -44,7 +44,7 @@ public class ReactionService {
         if (existing.isPresent()) {
             Reaction reaction = existing.get();
             activite.retirerReaction(reaction);
-            reactionRepository.deleteByAuteurAndActivite(auteur, activite);
+            reactionRepository.delete(reaction);
         }
     }
 

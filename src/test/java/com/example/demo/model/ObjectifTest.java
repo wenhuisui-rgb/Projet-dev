@@ -22,7 +22,7 @@ class ObjectifTest {
         objectif.setDescription("Courir 50 km par mois");
         objectif.setTypeSport(TypeSport.COURSE);
         objectif.setCible(50f);
-        objectif.setUnite("km");
+        objectif.setUnite(Unite.KM);
         objectif.setDateDebut(LocalDate.of(2026, 4, 1));
         objectif.setPeriode(Periode.MOIS);
         objectif.setUtilisateur(utilisateur);
@@ -39,13 +39,13 @@ class ObjectifTest {
     @DisplayName("Test constructeur avec paramètres")
     void testAllArgsConstructor() {
         LocalDate date = LocalDate.of(2026, 5, 1);
-        Objectif obj = new Objectif(2L, "Nager 10 km", TypeSport.NATATION, 10f, "km", date, Periode.MOIS, utilisateur);
+        Objectif obj = new Objectif(2L, "Nager 10 km", TypeSport.NATATION, 10f, Unite.KM, date, null, Periode.MOIS, utilisateur);
         
         assertEquals(2L, obj.getId());
         assertEquals("Nager 10 km", obj.getDescription());
         assertEquals(TypeSport.NATATION, obj.getTypeSport());
         assertEquals(10f, obj.getCible());
-        assertEquals("km", obj.getUnite());
+        assertEquals(Unite.KM, obj.getUnite());
         assertEquals(date, obj.getDateDebut());
         assertEquals(Periode.MOIS, obj.getPeriode());
         assertEquals(utilisateur, obj.getUtilisateur());
@@ -60,7 +60,7 @@ class ObjectifTest {
         objectif.setDescription("Faire 20h de sport");
         objectif.setTypeSport(TypeSport.VELO);
         objectif.setCible(1200f);
-        objectif.setUnite("minutes");
+        objectif.setUnite(Unite.MINUTES);
         objectif.setDateDebut(date);
         objectif.setPeriode(Periode.SEMAINE);
         
@@ -68,7 +68,7 @@ class ObjectifTest {
         assertEquals("Faire 20h de sport", objectif.getDescription());
         assertEquals(TypeSport.VELO, objectif.getTypeSport());
         assertEquals(1200f, objectif.getCible());
-        assertEquals("minutes", objectif.getUnite());
+        assertEquals(Unite.MINUTES, objectif.getUnite());
         assertEquals(date, objectif.getDateDebut());
         assertEquals(Periode.SEMAINE, objectif.getPeriode());
     }
@@ -89,20 +89,40 @@ class ObjectifTest {
     }
 
     @Test
+    @DisplayName("Test getDateFin avec dateFin personnalisée")
+    void testGetDateFinPersonnalisee() {
+        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
+        objectif.setPeriode(Periode.MOIS);
+        LocalDate customDateFin = LocalDate.of(2026, 6, 30);
+        objectif.setDateFin(customDateFin);
+        
+        assertEquals(customDateFin, objectif.getDateFin());
+    }
+
+    @Test
     @DisplayName("Test prolongerObjectif")
     void testProlongerObjectif() {
-        LocalDate nouvelleDate = LocalDate.of(2026, 5, 1);
-        objectif.prolongerObjectif(nouvelleDate);
-        assertEquals(nouvelleDate, objectif.getDateDebut());
+        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
+        objectif.setPeriode(Periode.MOIS);
+        LocalDate dateFinOriginale = objectif.getDateFin();
+        
+        LocalDate nouvelleDateFin = LocalDate.of(2026, 6, 30);
+        objectif.prolongerObjectif(nouvelleDateFin);
+        
+        assertEquals(nouvelleDateFin, objectif.getDateFin());
     }
 
     @Test
     @DisplayName("Test prolongerObjectif - date antérieure ne change pas")
     void testProlongerObjectifDateAnterieure() {
-        LocalDate dateOriginale = objectif.getDateDebut();
-        LocalDate dateAnterieure = LocalDate.of(2026, 3, 1);
+        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
+        objectif.setPeriode(Periode.MOIS);
+        LocalDate dateFinOriginale = objectif.getDateFin();
+        
+        LocalDate dateAnterieure = dateFinOriginale.minusDays(5);
         objectif.prolongerObjectif(dateAnterieure);
-        assertEquals(dateOriginale, objectif.getDateDebut());
+        
+        assertEquals(dateFinOriginale, objectif.getDateFin());
     }
 
     @Test
