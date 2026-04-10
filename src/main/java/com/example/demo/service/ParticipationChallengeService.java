@@ -1,7 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.Challenge;
+import com.example.demo.model.ParticipationChallenge;
+import com.example.demo.model.Utilisateur;
+import com.example.demo.repository.ParticipationChallengeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,32 +12,26 @@ import java.util.List;
 public class ParticipationChallengeService {
 
     private final ParticipationChallengeRepository participationRepository;
-    private final ChallengeRepository challengeRepository;
-    private final UtilisateurRepository utilisateurRepository;
 
-    public ParticipationChallengeService(
-            ParticipationChallengeRepository participationRepository,
-            ChallengeRepository challengeRepository,
-            UtilisateurRepository utilisateurRepository
-    ) {
+    public ParticipationChallengeService(ParticipationChallengeRepository participationRepository) {
         this.participationRepository = participationRepository;
-        this.challengeRepository = challengeRepository;
-        this.utilisateurRepository = utilisateurRepository;
     }
 
-    public ParticipationChallenge rejoindreChallenge(Long userId, Long challengeId) {
+    /**
+     * Rejoindre un challenge
+     */
+    public ParticipationChallenge rejoindreChallenge(Utilisateur utilisateur,
+                                                     Challenge challenge) {
 
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow();
+        ParticipationChallenge existing =
+                participationRepository.findByUtilisateurIdAndChallengeId(
+                        utilisateur.getId(),
+                        challenge.getId()
+                );
 
-        Utilisateur utilisateur = utilisateurRepository.findById(userId)
-                .orElseThrow();
-
-        participationRepository
-                .findByUtilisateurIdAndChallengeId(userId, challengeId)
-                .ifPresent(p -> {
-                    throw new RuntimeException("Déjà inscrit");
-                });
+        if (existing != null) {
+            return existing;
+        }
 
         ParticipationChallenge participation =
                 new ParticipationChallenge(utilisateur, challenge);
@@ -43,24 +39,59 @@ public class ParticipationChallengeService {
         return participationRepository.save(participation);
     }
 
-    public void mettreAJourScore(Long participationId, float nouveauScore) {
-        ParticipationChallenge participation = participationRepository
-                .findById(participationId)
-                .orElseThrow();
+    
+    //Quitter un challenge
+    
+    public void quitterChallenge(Utilisateur utilisateur,
+                                 Challenge challenge) {
 
-        participation.setScoreActuel(nouveauScore);
+        ParticipationChallenge participation =
+                participationRepository.findByUtilisateurIdAndChallengeId(
+                        utilisateur.getId(),
+                        challenge.getId()
+                );
 
-        participationRepository.save(participation);
+        if (participation != null) {
+            participationRepository.delete(participation);
+        }
     }
 
+    
+    //Mettre à jour le score d'un utilisateur
+     
+    public ParticipationChallenge mettreAJourScore(Utilisateur utilisateur,
+                                                    Challenge challenge,
+                                                    float score) {
+
+        ParticipationChallenge participation =
+                participationRepository.findByUtilisateurIdAndChallengeId(
+                        utilisateur.getId(),
+                        challenge.getId()
+                );
+
+        if (participation == null) {
+            throw new RuntimeException("Participation introuvable");
+        }
+
+        participation.setScoreActuel(score);
+
+        return participationRepository.save(participation);
+    }
+
+    
+    //Classement du challenge
+     
     public List<ParticipationChallenge> obtenirClassement(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow();
-
-        return challenge.obtenirClassement();
+        return participationRepository.findByChallengeIdOrderByScoreActuelDesc(challengeId);
     }
 
-    public void quitterChallenge(Long participationId) {
-        participationRepository.deleteById(participationId);
+    
+    //Vérifier si déjà inscrit
+     
+    public boolean estDejaInscrit(Long utilisateurId, Long challengeId) {
+        return participationRepository.findByUtilisateurIdAndChallengeId(
+                utilisateurId,
+                challengeId
+        ) != null;
     }
 }

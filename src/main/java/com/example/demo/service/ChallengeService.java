@@ -1,70 +1,70 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Challenge;
-import com.example.demo.model.ParticipationChallenge;
+import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ChallengeRepository;
-import com.example.demo.repository.ParticipationChallengeRepository;
-import com.example.demo.repository.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
-    private final ParticipationChallengeRepository participationRepository;
-    private final UtilisateurRepository utilisateurRepository;
 
-    public ChallengeService(
-            ChallengeRepository challengeRepository,
-            ParticipationChallengeRepository participationRepository,
-            UtilisateurRepository utilisateurRepository
-    ) {
+    public ChallengeService(ChallengeRepository challengeRepository) {
         this.challengeRepository = challengeRepository;
-        this.participationRepository = participationRepository;
-        this.utilisateurRepository = utilisateurRepository;
     }
 
-    // Créer un challenge
-    public Challenge creerChallenge(Challenge challenge) {
+    /**
+     * Créer un challenge
+     */
+    public Challenge creerChallenge(String titre,
+                                    TypeSport typeSport,
+                                    LocalDate dateDebut,
+                                    LocalDate dateFin,
+                                    Utilisateur createur) {
+
+        Challenge challenge = new Challenge(
+                titre,
+                typeSport,
+                dateDebut,
+                dateFin,
+                createur
+        );
+
         return challengeRepository.save(challenge);
     }
 
-    // Récupérer tous les challenges
+    /**
+     * Récupérer tous les challenges
+     */
     public List<Challenge> getTousLesChallenges() {
         return challengeRepository.findAll();
     }
 
-    // Rejoindre un challenge
-    public ParticipationChallenge rejoindreChallenge(
-            Long utilisateurId,
-            Long challengeId
-    ) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new RuntimeException("Challenge introuvable"));
-
-        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        participationRepository
-                .findByUtilisateurIdAndChallengeId(utilisateurId, challengeId)
-                .ifPresent(p -> {
-                    throw new RuntimeException("Utilisateur déjà inscrit");
-                });
-
-        ParticipationChallenge participation =
-                new ParticipationChallenge(utilisateur, challenge);
-
-        return participationRepository.save(participation);
+    /**
+     * Récupérer un challenge par ID
+     */
+    public Challenge getChallengeById(Long id) {
+        return challengeRepository.findById(id).orElse(null);
     }
 
-    // Classement challenge
-    public List<ParticipationChallenge> obtenirClassement(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-                .orElseThrow(() -> new RuntimeException("Challenge introuvable"));
+    /**
+     * Récupérer les challenges créés par un utilisateur
+     */
+    public List<Challenge> getChallengesByCreateur(Long createurId) {
+        return challengeRepository.findByCreateurId(createurId);
+    }
 
-        return challenge.obtenirClassement();
+    /**
+     * Vérifier si un challenge est actif
+     */
+    public boolean estActif(Challenge challenge) {
+        LocalDate today = LocalDate.now();
+        return !today.isBefore(challenge.getDateDebut())
+                && !today.isAfter(challenge.getDateFin());
     }
 }
