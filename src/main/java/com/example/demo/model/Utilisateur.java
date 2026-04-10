@@ -3,6 +3,8 @@ package com.example.demo.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,7 +19,9 @@ public class Utilisateur {
 
     @Column(nullable = false, unique = true)
     private String email;
+    
     @Column(nullable = false)
+    @JsonIgnore
     private String motDePasse;
 
     @Enumerated(EnumType.STRING)
@@ -25,8 +29,9 @@ public class Utilisateur {
     private Sexe sexe;
 
     private Integer age;
-    private Float taille; // en mètres
-    private Float poids; // en kilogrammes
+    private Float taille;
+    private Float poids;
+    private String objectifPersonnel;
 
     @Enumerated(EnumType.STRING)
     private NiveauPratique niveauPratique;
@@ -37,36 +42,39 @@ public class Utilisateur {
     @Column(name = "type_sport")
     private List<TypeSport> preferencesSports = new ArrayList<>();
 
-    
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Activite> activites = new ArrayList<>();
+    
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Objectif> objectifs = new ArrayList<>();
     
     @OneToMany(mappedBy = "demandeur")
-    private List<Amitie> demandesEnvoyees = new ArrayList<>(); // demander
+    private List<Amitie> demandesEnvoyees = new ArrayList<>();
+    
     @OneToMany(mappedBy = "receveur")
-    private List<Amitie> demandesRecues = new ArrayList<>();   // recevoir
+    private List<Amitie> demandesRecues = new ArrayList<>();
     
     @OneToMany(mappedBy = "utilisateur")
     private List<ObtentionBadge> listBadges = new ArrayList<>();
     
     @OneToMany(mappedBy = "createur")
     private List<Challenge> challengesCrees = new ArrayList<>();
+    
     @OneToMany(mappedBy = "utilisateur")
     private List<ParticipationChallenge> participationsChallenge = new ArrayList<>();
     
     @OneToMany(mappedBy = "auteur")
     private List<Commentaire> commentaires = new ArrayList<>();
+    
     @OneToMany(mappedBy = "auteur")
     private List<Reaction> reactions = new ArrayList<>();
 
-    // Constructeurs
     public Utilisateur() {
     }
+    
     public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, 
-                       Float taille, Float poids, NiveauPratique niveauPratique, List<TypeSport> preferencesSports, 
-                       List<ObtentionBadge> listBadges) {
+                       Float taille, Float poids, NiveauPratique niveauPratique, 
+                       List<TypeSport> preferencesSports, List<ObtentionBadge> listBadges) {
         this.id = id;
         this.pseudo = pseudo;
         this.email = email;
@@ -80,7 +88,6 @@ public class Utilisateur {
         this.listBadges = listBadges;
     }
 
-    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -145,6 +152,14 @@ public class Utilisateur {
         this.poids = poids;
     }
 
+    public String getObjectifPersonnel() {
+        return objectifPersonnel;
+    }
+
+    public void setObjectifPersonnel(String objectifPersonnel) {
+        this.objectifPersonnel = objectifPersonnel;
+    }
+
     public NiveauPratique getNiveauPratique() {
         return niveauPratique;
     }
@@ -169,41 +184,75 @@ public class Utilisateur {
         this.listBadges = listBadges;
     }
 
+    public List<Activite> getActivites() {
+        return activites;
+    }
 
-    //methodes
-    
+    public void setActivites(List<Activite> activites) {
+        this.activites = activites;
+    }
+
+    public List<Objectif> getObjectifs() {
+        return objectifs;
+    }
+
+    public void setObjectifs(List<Objectif> objectifs) {
+        this.objectifs = objectifs;
+    }
+
+    public List<Amitie> getDemandesEnvoyees() {
+        return demandesEnvoyees;
+    }
+
+    public void setDemandesEnvoyees(List<Amitie> demandesEnvoyees) {
+        this.demandesEnvoyees = demandesEnvoyees;
+    }
+
+    public List<Amitie> getDemandesRecues() {
+        return demandesRecues;
+    }
+
+    public void setDemandesRecues(List<Amitie> demandesRecues) {
+        this.demandesRecues = demandesRecues;
+    }
+
+    public List<ParticipationChallenge> getParticipationsChallenge() {
+        return participationsChallenge;
+    }
+
+    public void setParticipationsChallenge(List<ParticipationChallenge> participationsChallenge) {
+        this.participationsChallenge = participationsChallenge;
+    }
+
+    public List<Commentaire> getCommentaires() {
+        return commentaires;
+    }
+
+    public void setCommentaires(List<Commentaire> commentaires) {
+        this.commentaires = commentaires;
+    }
+
+    public List<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(List<Reaction> reactions) {
+        this.reactions = reactions;
+    }
+
+    public List<Challenge> getChallengesCrees() {
+        return challengesCrees;
+    }
+
+    public void setChallengesCrees(List<Challenge> challengesCrees) {
+        this.challengesCrees = challengesCrees;
+    }
 
     public Float calculerIMC() {
-    if (this.taille != null && this.poids != null && this.taille > 0) {
-        return this.poids / (this.taille * this.taille); // 假设 taille 是米
-    }
-    return null;
-}
-
-    public List<Utilisateur> obtenirListeAmis() {
-        // TODO: Implement logic
+        if (this.taille != null && this.poids != null && this.taille > 0) {
+            return this.poids / (this.taille * this.taille);
+        }
         return null;
     }
 
-    public List<Badge> obtenirMesBadges() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public List<Challenge> obtenirMesChallenges() {
-        // TODO: Implement logic
-        return null;
-    }
-
-    public void envoyerDemandeAmi(Utilisateur cible) {
-        // TODO: Implement logic
-    }
-
-    public void traiterDemande(Amitie demande, Boolean accepter) {
-        // TODO: Implement logic
-    }
-
-    public void supprimerAmi(Utilisateur ami) {
-        // TODO: Implement logic
-    }
 }

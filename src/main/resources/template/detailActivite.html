@@ -7,48 +7,48 @@
 </head>
 <body>
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="mb-0">Détail de l'activité</h2>
+<div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <h2>Détail de l'activité</h2>
                 </div>
-                <div class="card-body">
+                <div>
                     
-                    <table class="table table-bordered">
+                    <table border="1">
                         <tr>
-                            <th style="width: 200px;">Type de sport</th>
-                            <td th:text="${activite.typeSport}"></td>
+                            <th>Type de sport</th>
+                            <td th:text="${activite.typeSport}">quan
                         </tr>
                         <tr>
                             <th>Date et heure</th>
-                            <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan
                         </tr>
                         <tr>
                             <th>Durée</th>
-                            <td th:text="${activite.duree} + ' minutes'"></td>
+                            <td th:text="${activite.duree} + ' minutes'">quan
                         </tr>
                         <tr th:if="${activite.distance != null}">
                             <th>Distance</th>
-                            <td th:text="${activite.distance} + ' km'"></td>
+                            <td th:text="${activite.distance} + ' km'">quan
                         </tr>
                         <tr th:unless="${activite.distance != null}">
                             <th>Distance</th>
-                            <td class="text-muted">Non renseignée</td>
+                            <td>Non renseignée</td>
                         </tr>
                         <tr th:if="${activite.localisation != null and activite.localisation != ''}">
                             <th>Localisation</th>
-                            <td th:text="${activite.localisation}"></td>
+                            <td th:text="${activite.localisation}">quan
                         </tr>
                         <tr th:unless="${activite.localisation != null and activite.localisation != ''}">
                             <th>Localisation</th>
-                            <td class="text-muted">Non renseignée</td>
+                            <td>Non renseignée</td>
                         </tr>
                         <tr th:if="${activite.evaluation != null}">
                             <th>Évaluation</th>
                             <td>
-                                <span th:if="${activite.evaluation == 1}">⭐ 1 - Très mauvais</span>
+                                <span th:if="${activite.evaluation == 1}">⭐ 1 - À améliorer</span>
                                 <span th:if="${activite.evaluation == 2}">⭐⭐ 2 - Moyen</span>
                                 <span th:if="${activite.evaluation == 3}">⭐⭐⭐ 3 - Bien</span>
                                 <span th:if="${activite.evaluation == 4}">⭐⭐⭐⭐ 4 - Très bien</span>
@@ -57,7 +57,7 @@
                         </tr>
                         <tr th:unless="${activite.evaluation != null}">
                             <th>Évaluation</th>
-                            <td class="text-muted">Non évaluée</td>
+                            <td>Non évaluée</td>
                         </tr>
                         <tr>
                             <th>Calories consommées</th>
@@ -68,15 +68,61 @@
                         </tr>
                         <tr th:if="${activite.meteo != null}">
                             <th>Météo</th>
-                            <td th:text="${activite.meteo}"></td>
+                            <td th:text="${activite.meteo}">quan
                         </tr>
                     </table>
+
+                    <div>
+                        <h3>Réactions</h3>
+                        
+                        <div>
+                            <span>👍 KUDOS: <strong th:text="${kudosCount != null ? kudosCount : 0}"></strong></span>
+                            <span>👏 BRAVO: <strong th:text="${bravoCount != null ? bravoCount : 0}"></strong></span>
+                            <span>💪 SOUTIEN: <strong th:text="${soutienCount != null ? soutienCount : 0}"></strong></span>
+                        </div>
+
+                        <div>
+                            <form th:action="@{/reactions/ajouter}" method="post">
+                                <input type="hidden" name="activiteId" th:value="${activite.id}">
+                                <button type="submit" name="type" value="KUDOS">👍 KUDOS</button>
+                                <button type="submit" name="type" value="BRAVO">👏 BRAVO</button>
+                                <button type="submit" name="type" value="SOUTIEN">💪 SOUTIEN</button>
+                            </form>
+                            <p>Cliquez sur une réaction pour ajouter ou retirer</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Commentaires</h3>
+                        
+                        <div th:if="${not #lists.isEmpty(activite.commentaires)}">
+                            <div th:each="c : ${activite.commentaires}">
+                                <div>
+                                    <strong th:text="${c.auteur.pseudo}"></strong>
+                                    <span th:text="${#temporals.format(c.dateCommentaire, 'dd/MM/yyyy HH:mm')}"></span>
+                                    <p th:text="${c.contenu}"></p>
+                                </div>
+                                <hr>
+                            </div>
+                        </div>
+                        <div th:unless="${not #lists.isEmpty(activite.commentaires)}">
+                            <p>Aucun commentaire pour le moment</p>
+                        </div>
+
+                        <div>
+                            <form th:action="@{/commentaires/ajouter}" method="post">
+                                <input type="hidden" name="activiteId" th:value="${activite.id}">
+                                <textarea name="contenu" rows="3" placeholder="Ajouter un commentaire..." required></textarea>
+                                <button type="submit">Publier</button>
+                            </form>
+                        </div>
+                    </div>
                     
-                    <div class="mt-4">
-                        <a th:href="@{/activites/edit/{id}(id=${activite.id})}" class="btn btn-warning">Modifier</a>
-                        <a th:href="@{/activites/delete/{id}(id=${activite.id})}" class="btn btn-danger" 
+                    <div>
+                        <a th:href="@{/activites/edit/{id}(id=${activite.id})}">Modifier</a>
+                        <a th:href="@{/activites/delete/{id}(id=${activite.id})}" 
                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette activité ?')">Supprimer</a>
-                        <a th:href="@{/dashboard}" class="btn btn-secondary">Retour au tableau de bord</a>
+                        <a th:href="@{/dashboard}">Retour au tableau de bord</a>
                     </div>
                 </div>
             </div>

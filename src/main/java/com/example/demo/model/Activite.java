@@ -2,7 +2,8 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import com.example.demo.model.TypeSport;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "activites")
@@ -20,15 +21,15 @@ public class Activite {
     private LocalDateTime dateActivite;
 
     @Column(nullable = false)
-    private Integer duree;//minute
+    private Integer duree;
 
-    private Float distance; //km
+    private Float distance;
 
     private String localisation;
 
-    private Integer evaluation; // 1-5 etoiles
+    private Integer evaluation;
 
-    private Float calories; 
+    private Float calories;
 
     @Column(length = 500)
     private String meteo;
@@ -36,6 +37,12 @@ public class Activite {
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
+
+    @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Commentaire> commentaires = new ArrayList<>();
+
+    @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reaction> reactions = new ArrayList<>();
 
     public Activite() {
     }
@@ -134,11 +141,47 @@ public class Activite {
         this.utilisateur = utilisateur;
     }
 
+    public List<Commentaire> getCommentaires() {
+        return commentaires;
+    }
+
+    public void setCommentaires(List<Commentaire> commentaires) {
+        this.commentaires = commentaires;
+    }
+
+    public List<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(List<Reaction> reactions) {
+        this.reactions = reactions;
+    }
+
+    public void ajouterCommentaire(Commentaire commentaire) {
+        commentaires.add(commentaire);
+        commentaire.setActivite(this);
+    }
+
+    public void retirerCommentaire(Commentaire commentaire) {
+        commentaires.remove(commentaire);
+        commentaire.setActivite(null);
+    }
+
+    public void ajouterReaction(Reaction reaction) {
+        reactions.add(reaction);
+        reaction.setActivite(this);
+    }
+
+    public void retirerReaction(Reaction reaction) {
+        reactions.remove(reaction);
+        reaction.setActivite(null);
+    }
+
     public Float calculerCalories(Float poidsUtilisateur) {
         if (typeSport == null || duree == null || poidsUtilisateur == null) {
             return 0f;
         }
-
+        
         float met = 0f;
         switch (typeSport) {
             case COURSE:
@@ -165,7 +208,6 @@ public class Activite {
         
         float heures = duree / 60.0f;
         float caloriesCalculees = met * poidsUtilisateur * heures;
-        
         this.calories = Math.round(caloriesCalculees * 10) / 10.0f;
         return this.calories;
     }

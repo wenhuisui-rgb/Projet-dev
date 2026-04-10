@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon profil - Suivi Sportif</title>
+</head>
+<body>
+
+<div>
+    <h1>Mon profil</h1>
+    
+    <form th:action="@{/profil/modifier}" th:object="${utilisateur}" method="post">
+        
+        <h2>Informations personnelles</h2>
+        
+        <div>
+            <label>Pseudo</label>
+            <input type="text" th:field="*{pseudo}" required>
+        </div>
+        
+        <div>
+            <label>Email</label>
+            <input type="email" th:field="*{email}" required>
+        </div>
+        
+        <div>
+            <label>Sexe</label>
+            <select th:field="*{sexe}">
+                <option th:each="s : ${T(com.example.demo.model.Sexe).values()}" 
+                        th:value="${s}" th:text="${s}"></option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Âge</label>
+            <input type="number" th:field="*{age}">
+        </div>
+        
+        <div>
+            <label>Taille (m)</label>
+            <input type="number" th:field="*{taille}" step="0.01">
+        </div>
+        
+        <div>
+            <label>Poids (kg)</label>
+            <input type="number" th:field="*{poids}" step="0.1">
+        </div>
+        
+        <h2>Préférences sportives</h2>
+        
+        <div>
+            <label>Niveau de pratique</label>
+            <select th:field="*{niveauPratique}">
+                <option th:each="n : ${T(com.example.demo.model.NiveauPratique).values()}" 
+                        th:value="${n}" th:text="${n}"></option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Sports préférés</label>
+            <select th:field="*{preferencesSports}" multiple>
+                <option th:each="s : ${T(com.example.demo.model.TypeSport).values()}" 
+                        th:value="${s}" th:text="${s}"></option>
+            </select>
+            <div>Maintenez Ctrl pour sélectionner plusieurs sports</div>
+        </div>
+        
+        <div>
+            <button type="submit">Enregistrer les modifications</button>
+            <a href="/dashboard">Annuler</a>
+        </div>
+    </form>
+    
+    <hr>
+    
+    <h2>Mes objectifs</h2>
+    
+    <div>
+        <a href="/objectifs/nouveau">+ Ajouter un objectif</a>
+    </div>
+    
+    <div th:if="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Sport</th>
+                    <th>Cible</th>
+                    <th>Période</th>
+                    <th>Progression</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="obj : ${utilisateur.objectifs}">
+                    <td th:text="${obj.description}">quan</td>
+                    <td th:text="${obj.typeSport != null ? obj.typeSport : 'Tous'}">quan</td>
+                    <td th:text="${obj.cible} + ' ' + ${obj.unite}">quan</td>
+                    <td th:text="${obj.periode != null ? obj.periode.libelle : '-'}">quan</td>
+                    <td>
+                        <span th:text="${objectifProgressions[obj.id] != null ? objectifProgressions[obj.id] + '%' : '0%'}"></span>
+                    </td>
+                    <td>
+                        <a th:href="@{/objectifs/{id}(id=${obj.id})}">Voir</a>
+                        <a th:href="@{/objectifs/delete/{id}(id=${obj.id})}" 
+                           onclick="return confirm('Supprimer cet objectif ?')">Supprimer</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div th:unless="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
+        <p>Aucun objectif défini.</p>
+        <a href="/objectifs/nouveau">Créez votre premier objectif !</a>
+    </div>
+    
+    <hr>
+    
+    <div>
+        <h3>Mon IMC</h3>
+        <p th:if="${utilisateur.taille != null and utilisateur.poids != null}">
+            Votre IMC est de <strong th:text="${utilisateur.calculerIMC()}"></strong>
+        </p>
+        <p th:unless="${utilisateur.taille != null and utilisateur.poids != null}">
+            Renseignez votre taille et votre poids pour calculer votre IMC.
+        </p>
+    </div>
+    
+    <div>
+        <a href="/dashboard">Retour au tableau de bord</a>
+        <a href="/deconnexion">Déconnexion</a>
+    </div>
+</div>
+
+</body>
+</html>

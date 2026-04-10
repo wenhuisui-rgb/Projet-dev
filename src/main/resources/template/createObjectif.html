@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvel objectif - Suivi Sportif</title>
+</head>
+<body>
+
+<div>
+    <h1>Définir un nouvel objectif</h1>
+    
+    <form th:action="@{/objectifs/sauvegarder}" th:object="${objectif}" method="post">
+        
+        <div>
+            <label>Description *</label>
+            <input type="text" th:field="*{description}" required>
+            <div>Ex: Courir 50 km, Nager 10 km, Faire 10h de sport...</div>
+        </div>
+        
+        <div>
+            <label>Type de sport</label>
+            <select th:field="*{typeSport}">
+                <option value="">Tous les sports</option>
+                <option th:each="sport : ${typesSport}" th:value="${sport}" th:text="${sport}"></option>
+            </select>
+            <div>Laissez "Tous les sports" pour un objectif général</div>
+        </div>
+        
+        <div>
+            <label>Objectif cible *</label>
+            <input type="number" th:field="*{cible}" step="0.1" required>
+        </div>
+        
+        <div>
+            <label>Unité *</label>
+            <select th:field="*{unite}" required>
+                <option value="">Sélectionnez une unité</option>
+                <option value="km">Kilomètres (km)</option>
+                <option value="minutes">Minutes</option>
+                <option value="kcal">Calories (kcal)</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Période *</label>
+            <select th:field="*{periode}" required>
+                <option th:each="p : ${periodes}" th:value="${p.name()}" th:text="${p.libelle}"></option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Date de début</label>
+            <input type="date" th:field="*{dateDebut}">
+            <div>Laissez vide pour commencer aujourd'hui</div>
+        </div>
+        
+        <div>
+            <button type="submit">Créer l'objectif</button>
+            <a href="/profil">Annuler</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
