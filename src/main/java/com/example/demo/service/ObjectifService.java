@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.Objectif;
 import com.example.demo.model.Periode;
 import com.example.demo.model.TypeSport;
+import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ActiviteRepository;
 import com.example.demo.repository.ObjectifRepository;
@@ -62,14 +63,14 @@ public class ObjectifService {
         LocalDateTime debut = getDateDebutDateTime(objectif);
         LocalDateTime fin = getDateFinDateTime(objectif);
 
-        if ("km".equals(objectif.getUnite())) {
+        if (objectif.getUnite() == Unite.KM) {
             if (objectif.getTypeSport() != null) {
                 return activiteRepository.getDistanceBySportAndPeriod(
                     utilisateur, objectif.getTypeSport(), debut, fin);
             } else {
                 return activiteRepository.getDistanceByPeriod(utilisateur, debut, fin);
             }
-        } else if ("minutes".equals(objectif.getUnite())) {
+        } else if (objectif.getUnite() == Unite.MINUTES) {
             if (objectif.getTypeSport() != null) {
                 Integer duree = activiteRepository.getDureeBySportAndPeriod(
                     utilisateur, objectif.getTypeSport(), debut, fin);
@@ -78,14 +79,15 @@ public class ObjectifService {
                 Integer duree = activiteRepository.getDureeByPeriod(utilisateur, debut, fin);
                 return duree != null ? duree.floatValue() : 0f;
             }
-        } else if ("kcal".equals(objectif.getUnite())) {
+        } else if (objectif.getUnite() == Unite.KCAL) {
             if (objectif.getTypeSport() != null) {
                 return activiteRepository.getCaloriesBySportAndPeriod(
                     utilisateur, objectif.getTypeSport(), debut, fin);
             } else {
-                return activiteRepository.getCaloriesTotales(utilisateur);
+                return activiteRepository.getCaloriesByPeriod(utilisateur, debut, fin);
             }
         }
+
         return 0f;
     }
 
@@ -112,23 +114,6 @@ public class ObjectifService {
     }
 
     private LocalDateTime getDateFinDateTime(Objectif objectif) {
-        LocalDate debut = objectif.getDateDebut() != null ? objectif.getDateDebut() : LocalDate.now();
-        LocalDate fin;
-
-        if (objectif.getPeriode() == null) {
-            fin = debut.plusMonths(1);
-        } else {
-            switch (objectif.getPeriode()) {
-                case SEMAINE:
-                    fin = debut.plusWeeks(1);
-                    break;
-                case ANNEE:
-                    fin = debut.plusYears(1);
-                    break;
-                default:
-                    fin = debut.plusMonths(1);
-            }
-        }
-        return fin.atTime(23, 59, 59);
+        return objectif.getDateFin().atTime(23, 59, 59);
     }
 }

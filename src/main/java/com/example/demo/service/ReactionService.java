@@ -33,9 +33,7 @@ public class ReactionService {
         
         Reaction saved = reactionRepository.save(reaction);
         
-        if (activite.getReactions() != null) {
-            activite.getReactions().add(saved);
-        }
+        activite.ajouterReaction(saved);
         
         return saved;
     }
@@ -45,9 +43,7 @@ public class ReactionService {
         Optional<Reaction> existing = reactionRepository.findByAuteurAndActivite(auteur, activite);
         if (existing.isPresent()) {
             Reaction reaction = existing.get();
-            if (activite.getReactions() != null) {
-                activite.getReactions().remove(reaction);
-            }
+            activite.retirerReaction(reaction);
             reactionRepository.deleteByAuteurAndActivite(auteur, activite);
         }
     }
@@ -87,5 +83,4 @@ public class ReactionService {
     public long getNombreReactionsParType(Long activiteId, TypeReaction type) {
         return reactionRepository.countByActiviteIdAndType(activiteId, type);
     }
-
 }

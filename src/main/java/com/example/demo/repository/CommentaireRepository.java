@@ -12,9 +12,11 @@ public interface CommentaireRepository extends JpaRepository<Commentaire, Long> 
     
     List<Commentaire> findByActiviteOrderByDateCommentaireDesc(Activite activite);
     
-    List<Commentaire> findByAuteurOrderByDateCommentaireDesc(Utilisateur auteur);
-    
     List<Commentaire> findByActiviteId(Long activiteId);
     
+    List<Commentaire> findByAuteurOrderByDateCommentaireDesc(Utilisateur auteur);
+    
     void deleteByActiviteId(Long activiteId);
+    
+    long countByActiviteId(Long activiteId);
 }

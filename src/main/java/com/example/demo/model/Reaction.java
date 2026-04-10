@@ -2,9 +2,12 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
-@Table(name = "reactions")
+@Table(name = "reactions", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"auteur_id", "activite_id"})
+})
 public class Reaction {
 
     @Id
@@ -74,5 +77,27 @@ public class Reaction {
 
     public void setActivite(Activite activite) {
         this.activite = activite;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Reaction)) return false;
+        Reaction reaction = (Reaction) o;
+        return id != null && id.equals(reaction.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Reaction{" +
+                "id=" + id +
+                ", type=" + type +
+                ", dateReaction=" + dateReaction +
+                '}';
     }
 }
