@@ -1,5 +1,4 @@
 package com.example.demo.service;
-
 import com.example.demo.model.Challenge;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ChallengeRepository;
@@ -17,7 +16,7 @@ public class ChallengeService {
     }
 
     public Challenge creerChallenge(String titre, com.example.demo.model.TypeSport typeSport,
-                                    LocalDate dateDebut, LocalDate dateFin, Utilisateur createur) {
+            LocalDate dateDebut, LocalDate dateFin, Utilisateur createur) {
         Challenge challenge = new Challenge(titre, typeSport, dateDebut, dateFin, createur);
         return challengeRepository.save(challenge);
     }
@@ -26,8 +25,11 @@ public class ChallengeService {
         return challengeRepository.findByCreateurId(createurId);
     }
 
-
     public Challenge getChallengeById(Long id) {
         return challengeRepository.findById(id).orElse(null);
+    }
+
+    public static List<Challenge> getAllChallenges() {
+        return challengeRepository.findAll();
     }
 }
