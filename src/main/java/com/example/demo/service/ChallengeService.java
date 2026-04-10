@@ -1,11 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Challenge;
+import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ChallengeRepository;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ChallengeService {
@@ -16,18 +18,53 @@ public class ChallengeService {
         this.challengeRepository = challengeRepository;
     }
 
-    public Challenge creerChallenge(String titre, com.example.demo.model.TypeSport typeSport,
-                                    LocalDate dateDebut, LocalDate dateFin, Utilisateur createur) {
-        Challenge challenge = new Challenge(titre, typeSport, dateDebut, dateFin, createur);
+    /**
+     * Créer un challenge
+     */
+    public Challenge creerChallenge(String titre,
+                                    TypeSport typeSport,
+                                    LocalDate dateDebut,
+                                    LocalDate dateFin,
+                                    Utilisateur createur) {
+
+        Challenge challenge = new Challenge(
+                titre,
+                typeSport,
+                dateDebut,
+                dateFin,
+                createur
+        );
+
         return challengeRepository.save(challenge);
     }
 
+    /**
+     * Récupérer tous les challenges
+     */
+    public List<Challenge> getTousLesChallenges() {
+        return challengeRepository.findAll();
+    }
+
+    /**
+     * Récupérer un challenge par ID
+     */
+    public Challenge getChallengeById(Long id) {
+        return challengeRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Récupérer les challenges créés par un utilisateur
+     */
     public List<Challenge> getChallengesByCreateur(Long createurId) {
         return challengeRepository.findByCreateurId(createurId);
     }
 
-
-    public Challenge getChallengeById(Long id) {
-        return challengeRepository.findById(id).orElse(null);
+    /**
+     * Vérifier si un challenge est actif
+     */
+    public boolean estActif(Challenge challenge) {
+        LocalDate today = LocalDate.now();
+        return !today.isBefore(challenge.getDateDebut())
+                && !today.isAfter(challenge.getDateFin());
     }
 }

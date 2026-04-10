@@ -9,4 +9,6 @@ public interface ObtentionBadgeRepository extends JpaRepository<ObtentionBadge, 
     List<ObtentionBadge> findByUtilisateurId(Long utilisateurId);
 
     List<ObtentionBadge> findByBadgeId(Long badgeId);
+
+    boolean existsByUtilisateurIdAndBadgeId(Long utilisateurId, Long badgeId);
 }
