@@ -1,5 +1,4 @@
 package com.example.demo.service;
-
 import com.example.demo.model.Challenge;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
@@ -59,12 +58,8 @@ public class ChallengeService {
         return challengeRepository.findByCreateurId(createurId);
     }
 
-    /**
-     * Vérifier si un challenge est actif
-     */
-    public boolean estActif(Challenge challenge) {
-        LocalDate today = LocalDate.now();
-        return !today.isBefore(challenge.getDateDebut())
-                && !today.isAfter(challenge.getDateFin());
+
+    public List<Challenge> getAllChallenges() {
+        return challengeRepository.findAll();
     }
 }
