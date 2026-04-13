@@ -3,15 +3,24 @@ package com.example.demo.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ActiviteTest {
 
     private Activite activite;
+    private Commentaire commentaire;
+    private Reaction reaction;
+    private Utilisateur utilisateur;
 
     @BeforeEach
     void setUp() {
+        utilisateur = new Utilisateur();
+        utilisateur.setId(1L);
+        utilisateur.setPseudo("testUser");
+
         activite = new Activite();
         activite.setId(1L);
         activite.setTypeSport(TypeSport.COURSE);
@@ -22,6 +31,19 @@ class ActiviteTest {
         activite.setEvaluation(4);
         activite.setCalories(300f);
         activite.setMeteo("Ensoleillé");
+        activite.setUtilisateur(utilisateur);
+
+        commentaire = new Commentaire();
+        commentaire.setId(1L);
+        commentaire.setContenu("Super performance !");
+        commentaire.setAuteur(utilisateur);
+        commentaire.setActivite(activite);
+
+        reaction = new Reaction();
+        reaction.setId(1L);
+        reaction.setType(TypeReaction.KUDOS);
+        reaction.setAuteur(utilisateur);
+        reaction.setActivite(activite);
     }
 
     @Test
@@ -68,6 +90,68 @@ class ActiviteTest {
         assertEquals(3, activite.getEvaluation());
         assertEquals(800f, activite.getCalories());
         assertEquals("Pluie", activite.getMeteo());
+    }
+
+    @Test
+    void testGetCommentaires() {
+        List<Commentaire> commentaires = new ArrayList<>();
+        commentaires.add(commentaire);
+        activite.setCommentaires(commentaires);
+        
+        assertNotNull(activite.getCommentaires());
+        assertEquals(1, activite.getCommentaires().size());
+    }
+
+    @Test
+    void testGetReactions() {
+        List<Reaction> reactions = new ArrayList<>();
+        reactions.add(reaction);
+        activite.setReactions(reactions);
+        
+        assertNotNull(activite.getReactions());
+        assertEquals(1, activite.getReactions().size());
+    }
+
+    @Test
+    void testAjouterCommentaire() {
+        int tailleAvant = activite.getCommentaires().size();
+        activite.ajouterCommentaire(commentaire);
+        
+        assertEquals(tailleAvant + 1, activite.getCommentaires().size());
+        assertTrue(activite.getCommentaires().contains(commentaire));
+        assertEquals(activite, commentaire.getActivite());
+    }
+
+    @Test
+    void testRetirerCommentaire() {
+        activite.ajouterCommentaire(commentaire);
+        assertTrue(activite.getCommentaires().contains(commentaire));
+        
+        activite.retirerCommentaire(commentaire);
+        
+        assertFalse(activite.getCommentaires().contains(commentaire));
+        assertNull(commentaire.getActivite());
+    }
+
+    @Test
+    void testAjouterReaction() {
+        int tailleAvant = activite.getReactions().size();
+        activite.ajouterReaction(reaction);
+        
+        assertEquals(tailleAvant + 1, activite.getReactions().size());
+        assertTrue(activite.getReactions().contains(reaction));
+        assertEquals(activite, reaction.getActivite());
+    }
+
+    @Test
+    void testRetirerReaction() {
+        activite.ajouterReaction(reaction);
+        assertTrue(activite.getReactions().contains(reaction));
+        
+        activite.retirerReaction(reaction);
+        
+        assertFalse(activite.getReactions().contains(reaction));
+        assertNull(reaction.getActivite());
     }
 
     @Test
