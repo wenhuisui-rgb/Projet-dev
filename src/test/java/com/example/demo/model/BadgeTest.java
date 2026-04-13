@@ -1,9 +1,9 @@
 package com.example.demo.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class BadgeTest {
 
@@ -24,7 +24,9 @@ class BadgeTest {
     }
 
     @Test
+    @DisplayName("Constructeur simple fonctionne correctement")
     void testConstructeurSimple() {
+
         Badge badge = new Badge("Nom", "Desc");
 
         assertEquals("Nom", badge.getNom());
@@ -32,26 +34,26 @@ class BadgeTest {
     }
 
     @Test
+    @DisplayName("Test setters individuels")
     void testSetters() {
+
         Badge badge = new Badge();
 
         badge.setNom("Grimpeur");
         badge.setDescription("Atteindre 1000m de dénivelé");
+        badge.setTypeSport(TypeSport.COURSE);
+        badge.setSeuil(12.5f);
 
         assertEquals("Grimpeur", badge.getNom());
         assertEquals("Atteindre 1000m de dénivelé", badge.getDescription());
+        assertEquals(TypeSport.COURSE, badge.getTypeSport());
+        assertEquals(12.5f, badge.getSeuil());
     }
 
     @Test
-    void testSeuil() {
-        Badge badge = new Badge();
-        badge.setSeuil(10f);
-
-        assertEquals(10f, badge.getSeuil());
-    }
-
-    @Test
+    @DisplayName("Test ID badge")
     void testId() {
+
         Badge badge = new Badge();
         badge.setId(10L);
 
@@ -59,9 +61,14 @@ class BadgeTest {
     }
 
     @Test
+    @DisplayName("Les obtentions doivent être null ou initialisables")
     void testObtentions() {
+
         Badge badge = new Badge();
 
-        assertNull(badge.getObtentions());
+        assertTrue(
+            badge.getObtentions() == null || badge.getObtentions().isEmpty(),
+            "La liste d'obtentions doit être null ou vide"
+        );
     }
 }

@@ -52,4 +52,18 @@ class AmitieTest {
 
         assertEquals(100L, amitie.getAmitieID());
     }
+
+     @Test
+    @DisplayName("Devrait initialiser correctement le constructeur vide")
+    void testConstructeurVide() {
+
+        Amitie amitie = new Amitie();
+
+        assertNotNull(amitie, "L'objet ne doit pas être null");
+        assertEquals(StatutAmitie.EN_ATTENTE, amitie.getStatut(),
+                "Le statut par défaut doit être EN_ATTENTE");
+        assertNotNull(amitie.getDateDemande(),
+                "La date de demande doit être initialisée automatiquement");
+    }
+
 }

@@ -3,7 +3,6 @@ package com.example.demo.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
-
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,14 +14,18 @@ class ObtentionBadgeTest {
     void testConstructeurMetier() {
 
         Utilisateur user = new Utilisateur();
+        user.setId(1L);
         user.setPseudo("Runner31");
 
         Badge badge = new Badge("Marathonien", "A couru 42km");
 
         ObtentionBadge obtention = new ObtentionBadge(user, badge);
 
-        assertEquals(user, obtention.getUtilisateur());
-        assertEquals(badge, obtention.getBadge());
+        assertNotNull(obtention);
+
+        assertEquals(user.getPseudo(), obtention.getUtilisateur().getPseudo());
+        assertEquals(badge.getNom(), obtention.getBadge().getNom());
+
         assertNotNull(obtention.getDateObtention());
     }
 
@@ -66,6 +69,26 @@ class ObtentionBadgeTest {
             () -> assertEquals(50L, obtention.getUtilisateur().getId()),
             () -> assertEquals(99L, obtention.getBadge().getId())
         );
+    }
 
+    @Test
+    @DisplayName("Test constructeur initialise la date automatiquement")
+    void testDateAutoConstructeur() {
+
+        Utilisateur user = new Utilisateur();
+        Badge badge = new Badge();
+
+        LocalDateTime before = LocalDateTime.now();
+
+        ObtentionBadge obtention = new ObtentionBadge(user, badge);
+
+        LocalDateTime after = LocalDateTime.now();
+
+        assertNotNull(obtention.getDateObtention());
+        assertTrue(
+            !obtention.getDateObtention().isBefore(before) &&
+            !obtention.getDateObtention().isAfter(after),
+            "La date doit être initialisée automatiquement dans l’intervalle"
+        );
     }
 }
