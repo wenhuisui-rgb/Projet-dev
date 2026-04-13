@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Amitiés</title>
+</head>
+
+<body>
+
+<h1>Gestion des amitiés</h1>
+
+<!-- 🔎 RECHERCHE / DEMANDE -->
+<h2>Envoyer une demande d’amitié</h2>
+
+<form th:action="@{/amities/demande}" method="post">
+
+    <label>Pseudo de l'utilisateur :</label>
+    <input type="text" name="pseudoReceveur" required>
+
+    <button type="submit">Ajouter</button>
+
+</form>
+
+<hr>
+
+<!-- 📩 DEMANDES RECUES -->
+<h2>Demandes reçues</h2>
+
+<table border="1">
+    <tr>
+        <th>Demandeur</th>
+        <th>Statut</th>
+        <th>Actions</th>
+    </tr>
+
+    <tr th:each="amitie : ${demandesRecues}">
+        <td th:text="${amitie.utilisateurDemandeur.pseudo}"></td>
+        <td th:text="${amitie.statut}"></td>
+        <td>
+            <a th:href="@{'/amities/' + ${amitie.amitieID} + '/accepter'}">Accepter</a>
+            |
+            <a th:href="@{'/amities/' + ${amitie.amitieID} + '/refuser'}">Refuser</a>
+        </td>
+    </tr>
+</table>
+
+<hr>
+
+<!-- 👥 MES AMIS -->
+<h2>Mes amis</h2>
+
+<table border="1">
+    <tr>
+        <th>Pseudo</th>
+    </tr>
+
+    <tr th:each="amitie : ${amitiesAcceptees}">
+
+        <td>
+            <span th:if="${amitie.utilisateurDemandeur.pseudo != utilisateur.pseudo}"
+                  th:text="${amitie.utilisateurDemandeur.pseudo}"></span>
+
+            <span th:if="${amitie.utilisateurReceveur.pseudo != utilisateur.pseudo}"
+                  th:text="${amitie.utilisateurReceveur.pseudo}"></span>
+        </td>
+
+    </tr>
+</table>
+
+</body>
+</html>

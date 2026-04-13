@@ -54,6 +54,10 @@ public class UtilisateurService {
         utilisateurRepository.deleteById(id);
     }
 
+    public Utilisateur findByPseudo(String pseudo) {
+    return utilisateurRepository.findByPseudo(pseudo).orElse(null);
+}
+
     // gestion des amis
     /**
      * Obtenir la liste d'amis (obtenirListeAmis)
