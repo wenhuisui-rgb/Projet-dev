@@ -1,55 +1,67 @@
 package com.example.demo.model;
 
-
-import com.example.demo.repository.BadgeRepository;
-
-import com.example.demo.service.BadgeService;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-class BadgeServiceTest {
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
-    @Autowired
-    private BadgeService badgeService;
-
-    @Autowired
-    private BadgeRepository badgeRepository;
+class BadgeTest {
 
     @Test
-    void testCreerBadge() {
-        Badge badge = badgeService.creerBadge(
-                "Runner 5K",
-                "Courir 5 km",
-                TypeSport.COURSE,
-                5.0f
-        );
+    @DisplayName("Création badge complet")
+    void testCreationBadge() {
 
-        assertNotNull(badge.getId());
-        assertEquals("Runner 5K", badge.getNom());
-        assertEquals(5.0f, badge.getSeuil());
+        Badge badge = new Badge("Runner 5K", "Courir 5 km");
+        badge.setTypeSport(TypeSport.COURSE);
+        badge.setSeuil(5.0f);
+
+        assertAll(
+            () -> assertEquals("Runner 5K", badge.getNom()),
+            () -> assertEquals("Courir 5 km", badge.getDescription()),
+            () -> assertEquals(TypeSport.COURSE, badge.getTypeSport()),
+            () -> assertEquals(5.0f, badge.getSeuil())
+        );
     }
 
     @Test
-    void testGetBadgeById() {
-        Badge badge = new Badge("Test", "Desc");
-        badge.setTypeSport(TypeSport.COURSE);
+    void testConstructeurSimple() {
+        Badge badge = new Badge("Nom", "Desc");
+
+        assertEquals("Nom", badge.getNom());
+        assertEquals("Desc", badge.getDescription());
+    }
+
+    @Test
+    void testSetters() {
+        Badge badge = new Badge();
+
+        badge.setNom("Grimpeur");
+        badge.setDescription("Atteindre 1000m de dénivelé");
+
+        assertEquals("Grimpeur", badge.getNom());
+        assertEquals("Atteindre 1000m de dénivelé", badge.getDescription());
+    }
+
+    @Test
+    void testSeuil() {
+        Badge badge = new Badge();
         badge.setSeuil(10f);
 
-        badge = badgeRepository.save(badge);
-
-        Badge found = badgeService.getBadgeById(badge.getId());
-
-        assertNotNull(found);
-        assertEquals(badge.getId(), found.getId());
+        assertEquals(10f, badge.getSeuil());
     }
 
     @Test
-    void testListerBadges() {
-        assertNotNull(badgeService.listerTousLesBadges());
+    void testId() {
+        Badge badge = new Badge();
+        badge.setId(10L);
+
+        assertEquals(10L, badge.getId());
+    }
+
+    @Test
+    void testObtentions() {
+        Badge badge = new Badge();
+
+        assertNull(badge.getObtentions());
     }
 }

@@ -28,8 +28,8 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
-    - name: Compile and test
-      run: mvn clean compile test
+    - name: Compile, test and generate coverage report
+      run: mvn clean test jacoco:report
 
     - name: Check Javadoc
       run: mvn javadoc:javadoc
@@ -37,4 +37,4 @@ jobs:
     - name: SonarQube Cloud Scan
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn sonar:sonar -Dsonar.projectKey=ton_projet_key -Dsonar.organization=ton_org
+      run: mvn sonar:sonar -Dsonar.projectKey=Projet-dev -Dsonar.organization=wenhuisui-rgb -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
