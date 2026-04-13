@@ -68,6 +68,13 @@ class ActiviteTest {
     }
 
     @Test
+    void testGetUtilisateur() {
+        assertNotNull(activite.getUtilisateur());
+        assertEquals(1L, activite.getUtilisateur().getId());
+        assertEquals("testUser", activite.getUtilisateur().getPseudo());
+    }
+
+    @Test
     void testAllGettersAndSetters() {
         LocalDateTime date = LocalDateTime.now();
         
@@ -90,6 +97,8 @@ class ActiviteTest {
         assertEquals(3, activite.getEvaluation());
         assertEquals(800f, activite.getCalories());
         assertEquals("Pluie", activite.getMeteo());
+        activite.setUtilisateur(utilisateur);
+        assertEquals(utilisateur, activite.getUtilisateur());
     }
 
     @Test
