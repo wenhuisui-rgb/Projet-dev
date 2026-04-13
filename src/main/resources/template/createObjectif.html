@@ -2,7 +2,7 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Nouvel objectif - Suivi Sportif</title>
+    <title>Nouvel objectif</title>
 </head>
 <body>
 
@@ -14,7 +14,7 @@
         <div>
             <label>Description *</label>
             <input type="text" th:field="*{description}" required>
-            <div>Ex: Courir 50 km </div>
+            <div>Ex: Courir 50 km</div>
         </div>
         
         <div>
@@ -35,9 +35,9 @@
             <label>Unité *</label>
             <select th:field="*{unite}" required>
                 <option value="">Sélectionnez une unité</option>
-                <option value="km">Distance - km</option>
-                <option value="minutes">Durée - minutes</option>
-                <option value="kcal">Calories - kcal</option>
+                <option value="KM">Kilomètres</option>
+                <option value="MINUTES">Minutes</option>
+                <option value="KCAL">Calories - kcal</option>
             </select>
         </div>
         
@@ -55,7 +55,13 @@
         </div>
         
         <div>
-            <button type="submit">Créer</button>
+            <label>Date de fin</label>
+            <input type="date" th:field="*{dateFin}">
+            <div>Laissez vide pour une durée basée sur la période</div>
+        </div>
+        
+        <div>
+            <button type="submit">Créer l'objectif</button>
             <a href="/profil">Annuler</a>
         </div>
     </form>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Classement</title>
+</head>
+<body>
+
+    <p><a href="/challenges"> < Retour à la liste</a></p>
+
+    <h1 th:text="${'Classement : ' + challenge.titre}"></h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Rang</th>
+                <th>Utilisateur</th>
+                <th>Score</th>
+                <th>Date d'inscription</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="p, iter : ${classement}">
+                <td th:text="${iter.index + 1}">1</td>
+                <td th:text="${p.utilisateur.nom}">Nom</td>
+                <td th:text="${p.scoreActuel}">0</td>
+                <td th:text="${#temporals.format(p.dateInscription, 'dd/MM/yyyy HH:mm')}">Date</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${#lists.isEmpty(classement)}">Personne n'est encore inscrit à ce défi.</p>
+
+</body>
+</html>
