@@ -75,7 +75,6 @@
 			<artifactId>hibernate-community-dialects</artifactId>
 		</dependency>
 	
-   
  </dependencies>
 
 	<build>

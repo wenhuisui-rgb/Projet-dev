@@ -9,10 +9,13 @@
 
 <h1>Gestion des amitiés</h1>
 
-<!-- 🔎 RECHERCHE / DEMANDE -->
+<!-- RECHERCHE / DEMANDE -->
 <h2>Envoyer une demande d’amitié</h2>
 
 <form th:action="@{/amities/demande}" method="post">
+
+    <!-- 👤 ID du demandeur (caché) -->
+    <input type="hidden" name="demandeurID" th:value="${utilisateur.id}">
 
     <label>Pseudo de l'utilisateur :</label>
     <input type="text" name="pseudoReceveur" required>
@@ -23,7 +26,7 @@
 
 <hr>
 
-<!-- 📩 DEMANDES RECUES -->
+<!-- DEMANDES RECUES -->
 <h2>Demandes reçues</h2>
 
 <table border="1">
@@ -37,6 +40,7 @@
         <td th:text="${amitie.utilisateurDemandeur.pseudo}"></td>
         <td th:text="${amitie.statut}"></td>
         <td>
+            <!-- idéalement utiliser POST/PUT mais on garde simple -->
             <a th:href="@{'/amities/' + ${amitie.amitieID} + '/accepter'}">Accepter</a>
             |
             <a th:href="@{'/amities/' + ${amitie.amitieID} + '/refuser'}">Refuser</a>
@@ -46,7 +50,7 @@
 
 <hr>
 
-<!-- 👥 MES AMIS -->
+<!-- MES AMIS -->
 <h2>Mes amis</h2>
 
 <table border="1">
@@ -57,10 +61,11 @@
     <tr th:each="amitie : ${amitiesAcceptees}">
 
         <td>
-            <span th:if="${amitie.utilisateurDemandeur.pseudo != utilisateur.pseudo}"
+            <!-- afficher l'autre utilisateur -->
+            <span th:if="${amitie.utilisateurDemandeur.id != utilisateur.id}"
                   th:text="${amitie.utilisateurDemandeur.pseudo}"></span>
 
-            <span th:if="${amitie.utilisateurReceveur.pseudo != utilisateur.pseudo}"
+            <span th:if="${amitie.utilisateurReceveur.id != utilisateur.id}"
                   th:text="${amitie.utilisateurReceveur.pseudo}"></span>
         </td>
 

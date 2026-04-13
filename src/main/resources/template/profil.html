@@ -2,7 +2,7 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Mon profil - Suivi Sportif</title>
+    <title>Profil</title>
 </head>
 <body>
 
@@ -79,7 +79,19 @@
     <h2>Mes objectifs</h2>
 
     <div>
-        <a href="/objectifs/nouveau">+ Ajouter un objectif</a>
+        <label>Niveau de pratique :</label>
+        <span th:text="${utilisateur.niveauPratique}"></span>
+    </div>
+    
+    <div>
+        <label>Sports preferes :</label>
+        <span th:text="${#strings.listJoin(utilisateur.preferencesSports, ', ')}"></span>
+    </div>
+    
+    <h2>Objectifs</h2>
+    
+    <div th:if="${isOwner}">
+        <a href="/objectifs/nouveau">Ajouter un objectif !</a>
     </div>
 
     <div th:if="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">

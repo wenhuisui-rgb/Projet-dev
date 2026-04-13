@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier l'activité - Suivi Sportif</title>
+    <title>Modifier l'activité</title>
 </head>
 <body>
 
@@ -12,7 +12,7 @@
         <div class="col-md-8 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="mb-0">Modifier l'activité</h2>
+                    <h2 class="mb-0">Modifier une activité</h2>
                 </div>
                 <div class="card-body">
                     
@@ -32,12 +32,12 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="duree" class="form-label">Durée (minutes) *</label>
+                            <label for="duree" class="form-label">Durée - minutes *</label>
                             <input type="number" th:field="*{duree}" id="duree" class="form-control" min="1" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="distance" class="form-label">Distance (km)</label>
+                            <label for="distance" class="form-label">Distance - km</label>
                             <input type="number" th:field="*{distance}" id="distance" class="form-control" step="0.01">
                             <div class="form-text">Optionnel</div>
                         </div>
@@ -48,7 +48,7 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="evaluation" class="form-label">Évaluation (1-5)</label>
+                            <label for="evaluation" class="form-label">Évaluation</label>
                             <select th:field="*{evaluation}" id="evaluation" class="form-select">
                                 <option value="">Non évalué</option>
                                 <option value="1">⭐ 1</option>
@@ -60,7 +60,7 @@
                         </div>
                         
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
                             <a th:href="@{/activites/{id}(id=${activite.id})}" class="btn btn-secondary">Annuler</a>
                         </div>
                     </form>

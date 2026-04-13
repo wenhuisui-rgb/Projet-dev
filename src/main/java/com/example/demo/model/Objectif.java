@@ -18,9 +18,12 @@ public class Objectif {
 
     private Float cible;
 
-    private String unite;
+    @Enumerated(EnumType.STRING)
+    private Unite unite;
 
     private LocalDate dateDebut;
+
+    private LocalDate dateFin;
 
     @Enumerated(EnumType.STRING)
     private Periode periode;
@@ -33,15 +36,16 @@ public class Objectif {
     }
 
     public Objectif(Long id, String description, TypeSport typeSport, Float cible,
-                String unite, LocalDate dateDebut, Periode periode, Utilisateur utilisateur) {
-    this.id = id;
-    this.description = description;
-    this.typeSport = typeSport;
-    this.cible = cible;
-    this.unite = unite;
-    this.dateDebut = dateDebut;
-    this.periode = periode;
-    this.utilisateur = utilisateur;
+                    Unite unite, LocalDate dateDebut, LocalDate dateFin, Periode periode, Utilisateur utilisateur) {
+        this.id = id;
+        this.description = description;
+        this.typeSport = typeSport;
+        this.cible = cible;
+        this.unite = unite;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.periode = periode;
+        this.utilisateur = utilisateur;
     }
 
     public Long getId() {
@@ -76,11 +80,11 @@ public class Objectif {
         this.cible = cible;
     }
 
-    public String getUnite() {
+    public Unite getUnite() {
         return unite;
     }
 
-    public void setUnite(String unite) {
+    public void setUnite(Unite unite) {
         this.unite = unite;
     }
 
@@ -90,6 +94,26 @@ public class Objectif {
 
     public void setDateDebut(LocalDate dateDebut) {
         this.dateDebut = dateDebut;
+    }
+
+    public LocalDate getDateFin() {
+        if (dateFin != null) {
+            return dateFin;
+        }
+        if (dateDebut == null) return LocalDate.now();
+        if (periode == null) return dateDebut.plusMonths(1);
+        switch (periode) {
+            case SEMAINE:
+                return dateDebut.plusWeeks(1);
+            case ANNEE:
+                return dateDebut.plusYears(1);
+            default:
+                return dateDebut.plusMonths(1);
+        }
+    }
+
+    public void setDateFin(LocalDate dateFin) {
+        this.dateFin = dateFin;
     }
 
     public Periode getPeriode() {
@@ -108,22 +132,9 @@ public class Objectif {
         this.utilisateur = utilisateur;
     }
 
-    public LocalDate getDateFin() {
-        if (dateDebut == null) return LocalDate.now();
-        if (periode == null) return dateDebut.plusMonths(1);
-        switch (periode) {
-            case SEMAINE:
-                return dateDebut.plusWeeks(1);
-            case ANNEE:
-                return dateDebut.plusYears(1);
-            default:
-                return dateDebut.plusMonths(1);
-        }
-    }
-
-    public void prolongerObjectif(LocalDate nouvelleDate) {
-        if (nouvelleDate != null && nouvelleDate.isAfter(dateDebut)) {
-            this.dateDebut = nouvelleDate;
+    public void prolongerObjectif(LocalDate nouvelleDateFin) {
+        if (nouvelleDateFin != null && nouvelleDateFin.isAfter(getDateFin())) {
+            this.dateFin = nouvelleDateFin;
         }
     }
 

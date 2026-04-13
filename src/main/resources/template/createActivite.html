@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouvelle activité - Suivi Sportif</title>
+    <title>Nouvelle activité</title>
 </head>
 <body>
 
@@ -33,13 +33,12 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="duree" class="form-label">Durée (minutes) *</label>
+                            <label for="duree" class="form-label">Durée - minutes *</label>
                             <input type="number" th:field="*{duree}" id="duree" class="form-control" min="1" required>
-                            <div class="form-text">Entrez la durée en minutes</div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="distance" class="form-label">Distance (km)</label>
+                            <label for="distance" class="form-label">Distance - km</label>
                             <input type="number" th:field="*{distance}" id="distance" class="form-control" step="0.01">
                             <div class="form-text">Optionnel - Pour la course, vélo, natation...</div>
                         </div>
@@ -50,19 +49,19 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="evaluation" class="form-label">Évaluation (1-5)</label>
+                            <label for="evaluation" class="form-label">Évaluation</label>
                             <select th:field="*{evaluation}" id="evaluation" class="form-select">
                                 <option value="">Non évalué</option>
-                                <option value="1">⭐ 1 - Très mauvais</option>
-                                <option value="2">⭐⭐ 2 - Moyen</option>
-                                <option value="3">⭐⭐⭐ 3 - Bien</option>
-                                <option value="4">⭐⭐⭐⭐ 4 - Très bien</option>
-                                <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+                                <option value="1">⭐ - Très mauvais</option>
+                                <option value="2">⭐⭐ - Moyen</option>
+                                <option value="3">⭐⭐⭐ - Bien</option>
+                                <option value="4">⭐⭐⭐⭐ - Très bien</option>
+                                <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
                             </select>
                         </div>
                         
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">Enregistrer l'activité</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
                             <a th:href="@{/dashboard}" class="btn btn-secondary">Annuler</a>
                         </div>
                     </form>

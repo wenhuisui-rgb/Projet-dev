@@ -23,6 +23,10 @@ public interface ActiviteRepository extends JpaRepository<Activite, Long> {
 
     List<Activite> findTop5ByUtilisateurOrderByDateActiviteDesc(Utilisateur utilisateur);
 
+    long countByUtilisateur(Utilisateur utilisateur);
+
+    long countByUtilisateurAndDateActiviteBetween(Utilisateur utilisateur, LocalDateTime debut, LocalDateTime fin);
+
     @Query("SELECT COALESCE(SUM(a.distance), 0) FROM Activite a WHERE a.utilisateur = :utilisateur")
     Float getDistanceTotale(@Param("utilisateur") Utilisateur utilisateur);
 
