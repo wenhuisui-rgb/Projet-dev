@@ -53,7 +53,7 @@ public class ParticipationChallengeController {
             redirectAttributes.addFlashAttribute("error", "Challenge non trouvé.");
             return "redirect:/challenges";
         }
-        participationService.retirerParticipant(utilisateur, challenge);
+        participationService.quitterChallenge(utilisateur, challenge);
         redirectAttributes.addFlashAttribute("success", "Vous avez quitté le challenge !");
         return "redirect:/challenges";
     }
