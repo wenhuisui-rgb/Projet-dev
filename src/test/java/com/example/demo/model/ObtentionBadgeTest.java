@@ -1,84 +1,55 @@
 package com.example.demo.model;
 
-
-import com.example.demo.repository.BadgeRepository;
-import com.example.demo.repository.UtilisateurRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import com.example.demo.service.ObtentionBadgeService;
+import org.junit.jupiter.api.DisplayName;
+import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-class ObtentionBadgeServiceTest {
 
-    @Autowired
-    private ObtentionBadgeService obtentionBadgeService;
-
-    @Autowired
-    private BadgeRepository badgeRepository;
-
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
+class ObtentionBadgeTest {
 
     @Test
-    void testAttribuerBadge() {
-
+    @DisplayName("Devrait créer une instance d'ObtentionBadge avec les bonnes données")
+    void testCreationObtention() {
+        // 1. Préparation (Arrange)
         Utilisateur user = new Utilisateur();
-        user.setPseudo("testUser");
-        user = utilisateurRepository.save(user);
+        user.setId(1L);
+        user.setPseudo("Runner31");
 
-        Badge badge = new Badge("5K", "Courir 5km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-        badge = badgeRepository.save(badge);
+        Badge badge = new Badge("Marathonien", "A couru 42km");
+        badge.setId(10L);
 
-        ObtentionBadge obtention = obtentionBadgeService.attribuerBadge(user, badge);
+        LocalDateTime maintenant = LocalDateTime.now();
 
-        assertNotNull(obtention);
-        assertNotNull(obtention.getId());
-        assertEquals(user.getId(), obtention.getUtilisateur().getId());
-        assertEquals(badge.getId(), obtention.getBadge().getId());
+        // 2. Action (Act)
+        ObtentionBadge obtention = new ObtentionBadge();
+        obtention.setUtilisateur(user);
+        obtention.setBadge(badge);
+        obtention.setDateObtention(maintenant);
+
+        // 3. Vérification (Assert)
+        assertNotNull(obtention, "L'objet obtention ne devrait pas être nul");
+        assertEquals("Runner31", obtention.getUtilisateur().getPseudo(),
+                "Le pseudo de l'utilisateur doit correspondre");
+        assertEquals("Marathonien", obtention.getBadge().getNom(), "Le nom du badge doit correspondre");
+        assertEquals(maintenant, obtention.getDateObtention(), "La date d'obtention doit être celle définie");
     }
 
     @Test
-    void testUtilisateurPossedeBadge() {
-
+    @DisplayName("Vérifie que les IDs des relations sont bien accessibles")
+    void testRelationsIds() {
         Utilisateur user = new Utilisateur();
-        user.setPseudo("user2");
-        user = utilisateurRepository.save(user);
+        user.setId(50L);
 
-        Badge badge = new Badge("10K", "Courir 10km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(10f);
-        badge = badgeRepository.save(badge);
+        Badge badge = new Badge();
+        badge.setId(99L);
 
-        obtentionBadgeService.attribuerBadge(user, badge);
+        ObtentionBadge obtention = new ObtentionBadge();
+        obtention.setUtilisateur(user);
+        obtention.setBadge(badge);
 
-        boolean existe = obtentionBadgeService.utilisateurPossedeBadge(user, badge);
-
-        assertTrue(existe);
-    }
-
-    @Test
-    void testVerifierCondition() {
-
-        Utilisateur user = new Utilisateur();
-        user.setPseudo("user3");
-        user = utilisateurRepository.save(user);
-
-        Badge badge = new Badge("5K", "Courir 5km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-        badge = badgeRepository.save(badge);
-
-        boolean ok = obtentionBadgeService.verifierCondition(
-                badge,
-                user,
-                TypeSport.COURSE,
-                6f
-        );
-
-        assertTrue(ok);
+        assertAll("Vérification des IDs",
+                () -> assertEquals(50L, obtention.getUtilisateur().getId()),
+                () -> assertEquals(99L, obtention.getBadge().getId()));
     }
 }

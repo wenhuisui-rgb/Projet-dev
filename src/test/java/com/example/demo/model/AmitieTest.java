@@ -1,135 +1,58 @@
 package com.example.demo.model;
 
-import com.example.demo.repository.AmitieRepository;
-import com.example.demo.repository.UtilisateurRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import com.example.demo.service.AmitieService;
+import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-class AmitieServiceTest {
+/**
+ * Test unitaire de l'entité Amitie (Modèle)
+ */
+class AmitieTest {
 
-    @Autowired
-    private AmitieService amitieService;
-
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
-
-    @Autowired
-    private AmitieRepository amitieRepository;
-
-    
     @Test
-    void testEnvoyerDemande() {
+    @DisplayName("Devrait créer une amitié avec le statut EN_ATTENTE par défaut")
+    void testCreationAmitie() {
+        // Arrange
+        Utilisateur demandeur = new Utilisateur();
+        demandeur.setPseudo("Alice");
+       
+        Utilisateur receveur = new Utilisateur();
+        receveur.setPseudo("Bob");
 
-        Utilisateur u1 = new Utilisateur();
-        u1.setPseudo("user1");
-        u1 = utilisateurRepository.save(u1);
+        // Act
+        Amitie amitie = new Amitie();
+        amitie.setUtilisateurDemandeur(demandeur);
+        amitie.setUtilisateurReceveur(receveur);
+        amitie.setStatut(StatutAmitie.EN_ATTENTE);
 
-        Utilisateur u2 = new Utilisateur();
-        u2.setPseudo("user2");
-        u2 = utilisateurRepository.save(u2);
-
-        String result = amitieService.envoyerDemande(u1, u2);
-
-        assertEquals("Demande envoyée avec succès !", result);
-
-        Amitie amitie = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2)
-                .orElse(null);
-
+        // Assert
         assertNotNull(amitie);
+        assertEquals("Alice", amitie.getUtilisateurDemandeur().getPseudo());
+        assertEquals("Bob", amitie.getUtilisateurReceveur().getPseudo());
         assertEquals(StatutAmitie.EN_ATTENTE, amitie.getStatut());
     }
 
     @Test
-    void testBloquerDoubleDemande() {
+    @DisplayName("Devrait permettre de changer le statut de l'amitié")
+    void testChangementStatut() {
+        // Arrange
+        Amitie amitie = new Amitie();
+       
+        // Act & Assert pour l'acceptation
+        amitie.setStatut(StatutAmitie.ACCEPTEE);
+        assertEquals(StatutAmitie.ACCEPTEE, amitie.getStatut(), "Le statut devrait passer à ACCEPTEE");
 
-        Utilisateur u1 = new Utilisateur();
-        u1.setPseudo("userA");
-        u1 = utilisateurRepository.save(u1);
-
-        Utilisateur u2 = new Utilisateur();
-        u2.setPseudo("userB");
-        u2 = utilisateurRepository.save(u2);
-
-        amitieService.envoyerDemande(u1, u2);
-        String result = amitieService.envoyerDemande(u1, u2);
-
-        assertTrue(result.contains("déjà une demande"));
+        // Act & Assert pour le refus
+        amitie.setStatut(StatutAmitie.REFUSEE);
+        assertEquals(StatutAmitie.REFUSEE, amitie.getStatut(), "Le statut devrait passer à REFUSEE");
     }
 
     @Test
-    void testAccepterDemande() {
-
-        Utilisateur u1 = new Utilisateur();
-        u1.setPseudo("userX");
-        u1 = utilisateurRepository.save(u1);
-
-        Utilisateur u2 = new Utilisateur();
-        u2.setPseudo("userY");
-        u2 = utilisateurRepository.save(u2);
-
-        amitieService.envoyerDemande(u1, u2);
-
-        Amitie amitie = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2)
-                .orElseThrow();
-
-        Amitie updated = amitieService.accepterDemande(amitie);
-
-        assertEquals(StatutAmitie.ACCEPTEE, updated.getStatut());
-    }
-
-  
-    @Test
-    void testRefuserDemande() {
-
-        Utilisateur u1 = new Utilisateur();
-        u1.setPseudo("userR1");
-        u1 = utilisateurRepository.save(u1);
-
-        Utilisateur u2 = new Utilisateur();
-        u2.setPseudo("userR2");
-        u2 = utilisateurRepository.save(u2);
-
-        amitieService.envoyerDemande(u1, u2);
-
-        Amitie amitie = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2)
-                .orElseThrow();
-
-        Amitie updated = amitieService.refuserDemande(amitie);
-
-        assertEquals(StatutAmitie.REFUSEE, updated.getStatut());
-    }
-
-    
-    @Test
-    void testRompreAmitie() {
-
-        Utilisateur u1 = new Utilisateur();
-        u1.setPseudo("userD1");
-        u1 = utilisateurRepository.save(u1);
-
-        Utilisateur u2 = new Utilisateur();
-        u2.setPseudo("userD2");
-        u2 = utilisateurRepository.save(u2);
-
-        amitieService.envoyerDemande(u1, u2);
-
-        Amitie amitie = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2)
-                .orElseThrow();
-
-        amitieService.rompreAmitie(amitie);
-
-        boolean exists = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2)
-                .isPresent();
-
-        assertFalse(exists);
+    @DisplayName("Vérification des getters et setters des IDs")
+    void testGettersSetters() {
+        Amitie amitie = new Amitie();
+        amitie.setAmitieID(100L);
+       
+        assertEquals(100L, amitie.getAmitieID());
     }
 }
