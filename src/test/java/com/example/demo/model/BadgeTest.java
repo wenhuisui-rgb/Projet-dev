@@ -1,51 +1,67 @@
 package com.example.demo.model;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test unitaire de l'entité Badge (Modèle)
- * Vérifie que les données du badge sont correctement stockées et accessibles.
- */
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
 class BadgeTest {
 
     @Test
-    @DisplayName("Devrait créer un badge avec toutes ses propriétés via le constructeur et setters")
+    @DisplayName("Création badge complet")
     void testCreationBadge() {
-        // 1. Arrange (Préparation)
+
         Badge badge = new Badge("Runner 5K", "Courir 5 km");
         badge.setTypeSport(TypeSport.COURSE);
         badge.setSeuil(5.0f);
 
-        // 2. Act (Action) - Ici on vérifie simplement les valeurs stockées
-       
-        // 3. Assert (Vérification)
-        assertAll("Vérification des propriétés du Badge",
-            () -> assertEquals("Runner 5K", badge.getNom(), "Le nom doit correspondre"),
-            () -> assertEquals("Courir 5 km", badge.getDescription(), "La description doit correspondre"),
-            () -> assertEquals(TypeSport.COURSE, badge.getTypeSport(), "Le type de sport doit correspondre"),
-            () -> assertEquals(5.0f, badge.getSeuil(), "Le seuil doit être de 5.0")
+        assertAll(
+            () -> assertEquals("Runner 5K", badge.getNom()),
+            () -> assertEquals("Courir 5 km", badge.getDescription()),
+            () -> assertEquals(TypeSport.COURSE, badge.getTypeSport()),
+            () -> assertEquals(5.0f, badge.getSeuil())
         );
     }
 
     @Test
-    @DisplayName("Devrait gérer correctement l'ID du badge")
-    void testBadgeId() {
-        Badge badge = new Badge();
-        badge.setId(10L);
-       
-        assertEquals(10L, badge.getId(), "L'ID récupéré doit être celui que l'on a défini");
+    void testConstructeurSimple() {
+        Badge badge = new Badge("Nom", "Desc");
+
+        assertEquals("Nom", badge.getNom());
+        assertEquals("Desc", badge.getDescription());
     }
 
     @Test
-    @DisplayName("Vérifie les setters individuellement")
     void testSetters() {
         Badge badge = new Badge();
+
         badge.setNom("Grimpeur");
         badge.setDescription("Atteindre 1000m de dénivelé");
-       
+
         assertEquals("Grimpeur", badge.getNom());
-        assertTrue(badge.getDescription().contains("1000m"));
+        assertEquals("Atteindre 1000m de dénivelé", badge.getDescription());
+    }
+
+    @Test
+    void testSeuil() {
+        Badge badge = new Badge();
+        badge.setSeuil(10f);
+
+        assertEquals(10f, badge.getSeuil());
+    }
+
+    @Test
+    void testId() {
+        Badge badge = new Badge();
+        badge.setId(10L);
+
+        assertEquals(10L, badge.getId());
+    }
+
+    @Test
+    void testObtentions() {
+        Badge badge = new Badge();
+
+        assertNull(badge.getObtentions());
     }
 }
