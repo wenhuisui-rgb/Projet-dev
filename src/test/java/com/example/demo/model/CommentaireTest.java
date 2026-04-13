@@ -165,4 +165,45 @@ class CommentaireTest {
         commentaire.setDateCommentaire(futureDate);
         assertTrue(commentaire.getDateCommentaire().isAfter(LocalDateTime.now()));
     }
+
+    @Test
+    @DisplayName("Test equals")
+    void testEquals() {
+        Commentaire c1 = new Commentaire();
+        c1.setId(1L);
+        Commentaire c2 = new Commentaire();
+        c2.setId(1L);
+        Commentaire c3 = new Commentaire();
+        c3.setId(2L);
+        
+        assertEquals(c1, c1);
+        
+        assertEquals(c1, c2);
+        
+        assertNotEquals(c1, c3);
+        
+        assertNotEquals(null, c1);
+        
+        assertNotEquals(c1, "test");
+    }
+
+    @Test
+    @DisplayName("Test hashCode")
+    void testHashCode() {
+        Commentaire c1 = new Commentaire();
+        c1.setId(1L);
+        Commentaire c2 = new Commentaire();
+        c2.setId(1L);
+        
+        assertEquals(c1.hashCode(), c2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Test toString")
+    void testToString() {
+        String result = commentaire.toString();
+        assertNotNull(result);
+        assertTrue(result.contains("Super performance !"));
+        assertTrue(result.contains(String.valueOf(commentaire.getId())));
+    }
 }

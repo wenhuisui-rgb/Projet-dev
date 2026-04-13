@@ -128,4 +128,41 @@ class ReactionTest {
         assertEquals(5L, reaction.getActivite().getId());
         assertEquals(TypeSport.NATATION, reaction.getActivite().getTypeSport());
     }
+
+    @Test
+    @DisplayName("Test equals")
+    void testEquals() {
+        Reaction r1 = new Reaction();
+        r1.setId(1L);
+        Reaction r2 = new Reaction();
+        r2.setId(1L);
+        Reaction r3 = new Reaction();
+        r3.setId(2L);
+        
+        assertTrue(r1.equals(r1)); 
+        assertTrue(r1.equals(r2));
+        assertFalse(r1.equals(r3));
+        assertFalse(r1.equals(null));
+        assertFalse(r1.equals("test"));
+    }
+
+    @Test
+    @DisplayName("Test hashCode")
+    void testHashCode() {
+        Reaction r1 = new Reaction();
+        r1.setId(1L);
+        Reaction r2 = new Reaction();
+        r2.setId(1L);
+        
+        assertEquals(r1.hashCode(), r2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Test toString")
+    void testToString() {
+        String result = reaction.toString();
+        assertNotNull(result);
+        assertTrue(result.contains("KUDOS"));
+        assertTrue(result.contains(String.valueOf(reaction.getId())));
+    }
 }
