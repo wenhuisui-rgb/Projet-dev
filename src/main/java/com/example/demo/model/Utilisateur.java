@@ -48,10 +48,10 @@ public class Utilisateur {
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Objectif> objectifs = new ArrayList<>();
     
-    @OneToMany(mappedBy = "demandeur")
+    @OneToMany(mappedBy = "utilisateurDemandeur")
     private List<Amitie> demandesEnvoyees = new ArrayList<>();
     
-    @OneToMany(mappedBy = "receveur")
+    @OneToMany(mappedBy = "utilisateurReceveur")
     private List<Amitie> demandesRecues = new ArrayList<>();
     
     @OneToMany(mappedBy = "utilisateur")
