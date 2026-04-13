@@ -25,11 +25,11 @@ public class AmitieController {
     //Envoyer une demande d'amitié
      
     @PostMapping("/demande")
-    public String envoyerDemande(@RequestParam Long demandeurID,
-                                 @RequestParam Long receveurID) {
+    public String envoyerDemande(@RequestParam Long pseudoDemandeur,
+                                 @RequestParam Long pseudoReceveur) {
 
-        Utilisateur demandeur = utilisateurService.findById(demandeurID);
-        Utilisateur receveur = utilisateurService.findById(receveurID);
+        Utilisateur demandeur = utilisateurService.findById(pseudoDemandeur);
+        Utilisateur receveur = utilisateurService.findById(pseudoReceveur);
 
         if (demandeur == null || receveur == null) {
             return "Utilisateur introuvable.";
