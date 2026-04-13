@@ -25,49 +25,57 @@ public class AmitieController {
     //Envoyer une demande d'amitié
      
     @PostMapping("/demande")
-    public String envoyerDemande(@RequestParam Long pseudoDemandeur,
-                                 @RequestParam Long pseudoReceveur) {
+    public String envoyerDemande(@RequestParam Long demandeurID,
+                                 @RequestParam String pseudoReceveur) {
 
-        Utilisateur demandeur = utilisateurService.findById(pseudoDemandeur);
-        Utilisateur receveur = utilisateurService.findById(pseudoReceveur);
+        // récupération du demandeur via ID
+        Utilisateur demandeur = utilisateurService.findById(demandeurID);
+
+        // conversion pseudo → utilisateur
+        Utilisateur receveur = utilisateurService.findByPseudo(pseudoReceveur);
 
         if (demandeur == null || receveur == null) {
             return "Utilisateur introuvable.";
         }
 
+        // sécurité : éviter de s'ajouter soi-même
+        if (demandeur.equals(receveur)) {
+            return "Vous ne pouvez pas vous ajouter vous-même.";
+        }
+
         return amitieService.envoyerDemande(demandeur, receveur);
     }
 
-    
-    //Accepter une demande
-    
+    /**
+     * Accepter une demande
+     */
     @PutMapping("/{amitieID}/accepter")
     public Amitie accepterDemande(@PathVariable Long amitieID) {
         Amitie amitie = amitieService.getById(amitieID);
         return amitieService.accepterDemande(amitie);
     }
 
-    
-    //Refuser une demande
-     
+    /**
+     * Refuser une demande
+     */
     @PutMapping("/{amitieID}/refuser")
     public Amitie refuserDemande(@PathVariable Long amitieID) {
         Amitie amitie = amitieService.getById(amitieID);
         return amitieService.refuserDemande(amitie);
     }
 
-    
-    //Annuler une demande
-    
+    /**
+     * Annuler une demande
+     */
     @PutMapping("/{amitieID}/annuler")
     public Amitie annulerDemande(@PathVariable Long amitieID) {
         Amitie amitie = amitieService.getById(amitieID);
         return amitieService.annulerDemande(amitie);
     }
 
-    
-    //Rompre une amitié
-    
+    /**
+     * Rompre une amitié
+     */
     @DeleteMapping("/{amitieID}")
     public String rompreAmitie(@PathVariable Long amitieID) {
         Amitie amitie = amitieService.getById(amitieID);
@@ -75,18 +83,18 @@ public class AmitieController {
         return "Amitié supprimée avec succès.";
     }
 
-    
-    //Liste complète des demandes d'amitiées
-     
+    /**
+     * Liste complète des amitiés d’un utilisateur
+     */
     @GetMapping("/utilisateurs/{id}")
     public List<Amitie> getAmitieUtilisateur(@PathVariable Long id) {
         Utilisateur utilisateur = utilisateurService.findById(id);
         return amitieService.getAmities(utilisateur);
     }
 
-    
-    //Liste des amitiés acceptées
-     
+    /**
+     * Liste des amitiés acceptées
+     */
     @GetMapping("/utilisateurs/{id}/acceptees")
     public List<Amitie> getAmitiesAcceptees(@PathVariable Long id) {
         Utilisateur utilisateur = utilisateurService.findById(id);
