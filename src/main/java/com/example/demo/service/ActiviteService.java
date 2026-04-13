@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class ActiviteService {
 
     public Integer getNombreActivitesDuMois(Utilisateur utilisateur) {
         LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
-        return getActivitesEntreDates(utilisateur, debutMois, LocalDateTime.now()).size();
+        return (int) activiteRepository.countByUtilisateurAndDateActiviteBetween(utilisateur, debutMois, LocalDateTime.now());
     }
 
     public Map<String, Object> getStatsDashboard(Utilisateur utilisateur) {
@@ -84,7 +83,7 @@ public class ActiviteService {
         stats.put("totalDistance", getDistanceTotale(utilisateur));
         stats.put("totalDuree", getDureeTotale(utilisateur));
         stats.put("totalCalories", getCaloriesTotales(utilisateur));
-        stats.put("totalActivites", activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur).size());
+        stats.put("totalActivites", activiteRepository.countByUtilisateur(utilisateur));
         stats.put("distanceMois", getDistanceDuMois(utilisateur));
         stats.put("activitesMois", getNombreActivitesDuMois(utilisateur));
         stats.put("dernieresActivites", getDernieresActivites(utilisateur));

@@ -182,30 +182,7 @@ public class Activite {
             return 0f;
         }
         
-        float met = 0f;
-        switch (typeSport) {
-            case COURSE:
-                met = 9.8f;
-                break;
-            case NATATION:
-                met = 8.0f;
-                break;
-            case VELO:
-                met = 7.5f;
-                break;
-            case MUSCULATION:
-                met = 6.0f;
-                break;
-            case YOGA:
-                met = 3.0f;
-                break;
-            case RANDONNEE:
-                met = 5.5f;
-                break;
-            default:
-                met = 5.0f;
-        }
-        
+        float met = typeSport.getMet();
         float heures = duree / 60.0f;
         float caloriesCalculees = met * poidsUtilisateur * heures;
         this.calories = Math.round(caloriesCalculees * 10) / 10.0f;

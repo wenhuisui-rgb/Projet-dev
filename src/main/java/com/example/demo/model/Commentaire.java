@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "commentaires")
@@ -73,5 +74,27 @@ public class Commentaire {
 
     public void setActivite(Activite activite) {
         this.activite = activite;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Commentaire)) return false;
+        Commentaire that = (Commentaire) o;
+        return id != null && id.equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Commentaire{" +
+                "id=" + id +
+                ", contenu='" + contenu + '\'' +
+                ", dateCommentaire=" + dateCommentaire +
+                '}';
     }
 }

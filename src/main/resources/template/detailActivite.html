@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détail de l'activité - Suivi Sportif</title>
+    <title>Détail de l'activité</title>
 </head>
 <body>
 
@@ -12,7 +12,7 @@
         <div>
             <div>
                 <div>
-                    <h2>Détail de l'activité</h2>
+                    <h2>Détail d'activité</h2>
                 </div>
                 <div>
                     
@@ -48,11 +48,11 @@
                         <tr th:if="${activite.evaluation != null}">
                             <th>Évaluation</th>
                             <td>
-                                <span th:if="${activite.evaluation == 1}">⭐ 1 - À améliorer</span>
-                                <span th:if="${activite.evaluation == 2}">⭐⭐ 2 - Moyen</span>
-                                <span th:if="${activite.evaluation == 3}">⭐⭐⭐ 3 - Bien</span>
-                                <span th:if="${activite.evaluation == 4}">⭐⭐⭐⭐ 4 - Très bien</span>
-                                <span th:if="${activite.evaluation == 5}">⭐⭐⭐⭐⭐ 5 - Excellent</span>
+                                <span th:if="${activite.evaluation == 1}">⭐ - À améliorer</span>
+                                <span th:if="${activite.evaluation == 2}">⭐⭐ - Moyen</span>
+                                <span th:if="${activite.evaluation == 3}">⭐⭐ - Bien</span>
+                                <span th:if="${activite.evaluation == 4}">⭐⭐⭐⭐ - Très bien</span>
+                                <span th:if="${activite.evaluation == 5}">⭐⭐⭐⭐⭐ - Excellent</span>
                             </td>
                         </tr>
                         <tr th:unless="${activite.evaluation != null}">
@@ -74,19 +74,13 @@
 
                     <div>
                         <h3>Réactions</h3>
-                        
-                        <div>
-                            <span>👍 KUDOS: <strong th:text="${kudosCount != null ? kudosCount : 0}"></strong></span>
-                            <span>👏 BRAVO: <strong th:text="${bravoCount != null ? bravoCount : 0}"></strong></span>
-                            <span>💪 SOUTIEN: <strong th:text="${soutienCount != null ? soutienCount : 0}"></strong></span>
-                        </div>
 
                         <div>
                             <form th:action="@{/reactions/ajouter}" method="post">
                                 <input type="hidden" name="activiteId" th:value="${activite.id}">
-                                <button type="submit" name="type" value="KUDOS">👍 KUDOS</button>
-                                <button type="submit" name="type" value="BRAVO">👏 BRAVO</button>
-                                <button type="submit" name="type" value="SOUTIEN">💪 SOUTIEN</button>
+                                <button type="submit" name="type" value="KUDOS">👍</button>
+                                <button type="submit" name="type" value="BRAVO">👏</button>
+                                <button type="submit" name="type" value="SOUTIEN">💪</button>
                             </form>
                             <p>Cliquez sur une réaction pour ajouter ou retirer</p>
                         </div>
@@ -122,7 +116,7 @@
                         <a th:href="@{/activites/edit/{id}(id=${activite.id})}">Modifier</a>
                         <a th:href="@{/activites/delete/{id}(id=${activite.id})}" 
                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette activité ?')">Supprimer</a>
-                        <a th:href="@{/dashboard}">Retour au tableau de bord</a>
+                        <a th:href="@{/dashboard}">Retour au DashBoard</a>
                     </div>
                 </div>
             </div>
