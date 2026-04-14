@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Activite;
+import com.example.demo.model.Objectif;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.service.ActiviteService;
@@ -11,9 +12,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.util.List;
+import java.util.Map;
+import com.example.demo.service.ObjectifService;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @Controller
 public class ActiviteController {
@@ -25,6 +30,9 @@ public class ActiviteController {
     private UtilisateurService utilisateurService;
 
     @Autowired
+    private ObjectifService objectifService;
+
+    @Autowired
     private MeteoService meteoService;
 
     @GetMapping("/dashboard")
@@ -33,13 +41,32 @@ public class ActiviteController {
         if (utilisateur == null) {
             return "redirect:/connexion";
         }
-        
-        model.addAttribute("activites", activiteService.getActivitesParUtilisateur(utilisateur));
-        model.addAttribute("stats", activiteService.getStatsDashboard(utilisateur));
-        model.addAttribute("dernieresActivites", activiteService.getDernieresActivites(utilisateur));
-        
-        return "dashboard";
+    
+    // 重新加载用户信息（包含 objectifs）
+    utilisateur = utilisateurService.findById(utilisateur.getId());
+    
+    model.addAttribute("activites", activiteService.getActivitesParUtilisateur(utilisateur));
+    model.addAttribute("stats", activiteService.getStatsDashboard(utilisateur));
+    model.addAttribute("dernieresActivites", activiteService.getDernieresActivites(utilisateur));
+    
+    // 添加 objectifs 数据
+    List<Map<String, Object>> objectifsAvecProgression = new ArrayList<>();
+    if (utilisateur.getObjectifs() != null) {
+        for (Objectif obj : utilisateur.getObjectifs()) {
+            Map<String, Object> objMap = new HashMap<>();
+            objMap.put("id", obj.getId());
+            objMap.put("description", obj.getDescription());
+            objMap.put("cible", obj.getCible());
+            objMap.put("unite", obj.getUnite());
+            Float progression = objectifService.getPourcentageObjectif(obj, utilisateur);
+            objMap.put("progression", progression != null ? Math.round(progression) : 0);
+            objectifsAvecProgression.add(objMap);
+        }
     }
+    model.addAttribute("objectifs", objectifsAvecProgression);
+    
+    return "dashboard";
+}
 
     @GetMapping("/activites/nouvelle")
     public String nouvelleActivite(HttpSession session, Model model) {
