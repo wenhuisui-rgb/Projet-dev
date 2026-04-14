@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Challenges</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="22" height="22"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+    </div>
+</header>
+
+<header class="top-bar">
+    <h1>Challenges</h1>
+    <a class="create-btn" href="/challenges/create">Créer un challenge</a>
+</header>
+
+<!-- FILTER -->
+<section class="filter-bar">
+    <form method="get" action="/challenges">
+        <select name="typeSport">
+            <option value="">Tous les sports</option>
+            <option th:each="t : ${types}"
+                    th:value="${t}"
+                    th:text="${t}"
+                    th:selected="${t == selectedType}">
+            </option>
+        </select>
+        <button type="submit">Filtrer</button>
+    </form>
+</section>
+
+<!-- CARDS -->
+<section class="grid">
+    <div class="card" th:each="c : ${challenges}"
+         th:onclick="'location.href=\'/challenges/detail/' + ${c.id} + '\''">
+        <div class="card-image"></div>
+        <div class="card-body">
+            <h3 th:text="${c.titre}"></h3>
+            <p class="type" th:text="${c.typeSport}"></p>
+            <p class="date">
+                Du <span th:text="${c.dateDebut}"></span>
+                au <span th:text="${c.dateFin}"></span>
+            </p>
+            <div class="actions">
+                <a th:href="@{/participation/classement/{id}(id=${c.id})}"
+                   onclick="event.stopPropagation()">Classement</a>
+                <form th:action="@{/participation/rejoindre/{id}(id=${c.id})}"
+                      method="post" onclick="event.stopPropagation()">
+                    <button type="submit">Rejoindre</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>
