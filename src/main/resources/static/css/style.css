@@ -307,3 +307,160 @@ a {
 a:hover {
   opacity: 0.7;
 }
+
+        .stats-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #111827;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .profile-row {
+            display: flex;
+            gap: 15px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 30px;
+        }
+        .profile-item {
+            text-align: center;
+            flex: 1;
+        }
+        .profile-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .profile-label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            padding: 6px 14px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #374151;
+            font-size: 13px;
+        }
+        .filter-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        .bar-container {
+            display: flex;
+            align-items: end;
+            gap: 15px;
+            height: 220px;
+            padding: 15px 0;
+        }
+        .bar-item {
+            flex: 1;
+            text-align: center;
+        }
+        .bar {
+            background: #3b82f6;
+            width: 100%;
+            min-width: 35px;
+            border-radius: 6px 6px 0 0;
+        }
+        .bar-label {
+            margin-top: 8px;
+            font-size: 11px;
+        }
+        .progress-bg {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 20px;
+            width: 100%;
+        }
+        .progress-bar-blue {
+            background: #3b82f6;
+            height: 20px;
+            border-radius: 10px;
+            width: 0%;
+        }
+        .objectif-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .objectif-label {
+            width: 140px;
+            font-size: 13px;
+        }
+        .objectif-progress {
+            flex: 1;
+        }
+        .objectif-value {
+            width: 70px;
+            font-size: 13px;
+            text-align: right;
+        }
+        .two-columns {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .column-objectifs {
+            flex: 2;
+        }
+        .activites-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .activites-table th, .activites-table td {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+            font-size: 13px;
+        }
+        .activites-table th {
+            background: #f9fafb;
+        }
+    
