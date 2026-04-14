@@ -22,6 +22,57 @@ public class UtilisateurController {
     @Autowired
     private ObjectifService objectifService;
 
+    @GetMapping("/connexion")
+    public String pageConnexion() {
+        return "connexion"; // 返回 connexion.html
+    }
+
+    @PostMapping("/connexion")
+    public String connecter(@RequestParam String email, 
+                            @RequestParam String motDePasse, 
+                            HttpSession session, 
+                            Model model) {
+        Utilisateur utilisateur = utilisateurService.authentifier(email, motDePasse);
+        if (utilisateur != null) {
+            session.setAttribute("utilisateur", utilisateur); 
+            return "redirect:/profil";
+        } else {
+            model.addAttribute("erreur", "Email ou mot de passe incorrect.");
+            return "connexion";
+        }
+    }
+
+    @GetMapping("/inscription")
+    public String pageInscription(Model model) {
+        model.addAttribute("utilisateur", new Utilisateur());
+        return "inscription"; // 返回 inscription.html
+    }
+
+    @PostMapping("/inscription")
+    public String inscrire(@ModelAttribute Utilisateur utilisateur, 
+                           RedirectAttributes redirectAttributes, 
+                           Model model) {
+        // 检查校验逻辑
+        if (utilisateurService.emailExiste(utilisateur.getEmail())) {
+            model.addAttribute("erreur", "Cet email est déjà utilisé.");
+            return "inscription";
+        }
+        if (utilisateurService.pseudoExiste(utilisateur.getPseudo())) {
+            model.addAttribute("erreur", "Ce pseudo est déjà pris.");
+            return "inscription";
+        }
+
+        utilisateurService.inscrireUtilisateur(utilisateur);
+        redirectAttributes.addFlashAttribute("success", "Inscription réussie ! Veuillez vous connecter.");
+        return "redirect:/connexion";
+    }
+
+    @GetMapping("/deconnexion")
+    public String deconnexion(HttpSession session) {
+        session.invalidate();
+        return "redirect:/connexion";
+    }
+
     @GetMapping("/profil")
     public String afficherProfil(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
