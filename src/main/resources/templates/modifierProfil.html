@@ -10,18 +10,13 @@
     <h1>Modifier mon profil</h1>
     
     <form th:action="@{/profil/modifier}" th:object="${utilisateur}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{pseudo}" />
+        <input type="hidden" th:field="*{email}" />
+        <input type="hidden" th:field="*{motDePasse}" />
         
         <h2>Informations personnelles</h2>
-        
-        <div>
-            <label>Pseudo</label>
-            <input type="text" th:field="*{pseudo}" required>
-        </div>
-        
-        <div>
-            <label>Email</label>
-            <input type="email" th:field="*{email}" required>
-        </div>
         
         <div>
             <label>Sexe</label>
@@ -47,7 +42,14 @@
         </div>
 
         <div>
-            <h3>IMC</h3>
+            <label>Niveau de pratique</label>
+            <select th:field="*{niveauPratique}">
+                <option th:each="n : ${T(com.example.demo.model.NiveauPratique).values()}" 
+                        th:value="${n}" th:text="${n}"></option>
+            </select>
+        </div>
+
+        <div>
             <p th:if="${utilisateur.taille != null and utilisateur.poids != null}">
                 Votre IMC est de <strong th:text="${utilisateur.calculerIMC()}"></strong>
             </p>
@@ -56,75 +58,30 @@
             </p>
         </div>
         
-        <h2>Préférences sportives</h2>
         
-        <div>
-            <label>Niveau de pratique</label>
-            <select th:field="*{niveauPratique}">
-                <option th:each="n : ${T(com.example.demo.model.NiveauPratique).values()}" 
-                        th:value="${n}" th:text="${n}"></option>
-            </select>
+
+        <div class="sports-selection">
+        <label><strong>Sports préférés (Maximum 4) :</strong></label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+            <div th:each="sport : ${T(com.example.demo.model.TypeSport).values()}">
+                <input type="checkbox" 
+                       th:field="*{preferencesSports}" 
+                       th:value="${sport}" 
+                       id="${'sport-' + sport}"
+                       class="sport-checkbox">
+                <label th:for="${'sport-' + sport}" th:text="${sport}"></label>
+            </div>
         </div>
-        
-        <div>
-            <label>Sports préférés</label>
-            <select th:field="*{preferencesSports}" multiple>
-                <option th:each="s : ${T(com.example.demo.model.TypeSport).values()}" 
-                        th:value="${s}" th:text="${s}"></option>
-            </select>
-            <div>Maintenez Ctrl pour sélectionner plusieurs sports</div>
+        <p id="limit-message" style="color: red; display: none;">Vous avez atteint la limite de 4 sports.</p>
         </div>
-        
+
         <div>
             <button type="submit">Enregistrer les modifications</button>
             <a href="/profil">Annuler</a>
         </div>
+
     </form>
-    
-    <hr>
-    
-    <h2>Mes objectifs</h2>
-    
-    <div>
-        <a href="/objectifs/nouveau">Ajouter un objectif</a>
-    </div>
-    
-    <div th:if="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Sport</th>
-                    <th>Cible</th>
-                    <th>Période</th>
-                    <th>Progression</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="obj : ${utilisateur.objectifs}">
-                    <td th:text="${obj.description}">quan</td>
-                    <td th:text="${obj.typeSport != null ? obj.typeSport : 'Tous'}">quan</td>
-                    <td th:text="${obj.cible} + ' ' + ${obj.unite}">quan</td>
-                    <td th:text="${obj.periode != null ? obj.periode.libelle : '-'}">quan</td>
-                    <td>
-                        <span th:text="${objectifProgressions[obj.id] != null ? objectifProgressions[obj.id] + '%' : '0%'}"></span>
-                    </td>
-                    <td>
-                        <a th:href="@{/objectifs/{id}(id=${obj.id})}">Voir</a>
-                        <a th:href="@{/objectifs/delete/{id}(id=${obj.id})}" 
-                           onclick="return confirm('Supprimer cet objectif ?')">Supprimer</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    
-    <div th:unless="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
-        <p>Aucun objectif défini</p>
-        <a href="/objectifs/nouveau">Créez mon premier objectif !</a>
-    </div>
-    
+
     <hr>
     
     <div>
@@ -135,3 +92,21 @@
 
 </body>
 </html>
+
+<script>
+    const checkboxes = document.querySelectorAll('.sport-checkbox');
+    const limitMessage = document.getElementById('limit-message');
+    const maxAllowed = 4;
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checkedCount = document.querySelectorAll('.sport-checkbox:checked').length;
+            if (checkedCount > maxAllowed) {
+                cb.checked = false;
+                limitMessage.style.display = 'block';
+            } else {
+                limitMessage.style.display = 'none';
+            }
+        });
+    });
+</script>

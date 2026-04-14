@@ -79,6 +79,44 @@ public class ObjectifController {
         return "detailObjectif";
     }
 
+    // 渲染修改目标的页面
+    @GetMapping("/objectifs/modifier/{id}")
+    public String editerObjectifPage(@PathVariable Long id, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) return "redirect:/connexion";
+
+        Objectif objectif = objectifService.getObjectifParId(id);
+        if (objectif == null || !objectif.getUtilisateur().getId().equals(utilisateur.getId())) {
+            redirectAttributes.addFlashAttribute("error", "Objectif introuvable ou accès refusé.");
+            return "redirect:/profil";
+        }
+
+        model.addAttribute("objectif", objectif);
+        model.addAttribute("typesSport", TypeSport.values());
+        model.addAttribute("periodes", Periode.values());
+        // 注意：你可以复用 "createObjectif.html" 模板，只需在前端稍微根据是否有 id 调整文字
+        return "createObjectif"; 
+    }
+
+    // 接收修改表单并保存
+    @PostMapping("/objectifs/modifier/{id}")
+    public String updateObjectifSave(@PathVariable Long id, 
+                                     @ModelAttribute Objectif objectifModifie, 
+                                     HttpSession session, 
+                                     RedirectAttributes redirectAttributes) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) return "redirect:/connexion";
+
+        Objectif existant = objectifService.getObjectifParId(id);
+        if (existant != null && existant.getUtilisateur().getId().equals(utilisateur.getId())) {
+            objectifService.updateObjectif(id, objectifModifie);
+            redirectAttributes.addFlashAttribute("success", "Objectif mis à jour avec succès !");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Échec de la modification.");
+        }
+        return "redirect:/profil";
+    }
+
     @GetMapping("/objectifs/delete/{id}")
     public String deleteObjectif(@PathVariable Long id,
                                   HttpSession session,
@@ -91,11 +129,11 @@ public class ObjectifController {
         Objectif objectif = objectifService.getObjectifParId(id);
         if (objectif != null && objectif.getUtilisateur().getId().equals(utilisateur.getId())) {
             objectifService.supprimerObjectif(id);
-            redirectAttributes.addFlashAttribute("success", "Objectif supprimé");
+            redirectAttributes.addFlashAttribute("success", "Objectif supprimé avec succès !");
         } else {
-            redirectAttributes.addFlashAttribute("error", "Impossible de supprimer");
+            redirectAttributes.addFlashAttribute("error", "Impossible de supprimer cet objectif.");
         }
 
-        return "redirect:/profil";
+        return "redirect:/profil"; 
     }
 }

@@ -5,12 +5,16 @@ import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ActiviteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 public class ActiviteService {
@@ -153,5 +157,11 @@ public class ActiviteService {
         if (objectifDistance == null) return false;
         Float distanceMois = getDistanceDuMois(utilisateur);
         return distanceMois >= objectifDistance;
+    }
+
+    public Page<Activite> getActivitesPaginees(Utilisateur utilisateur, int page, int size) {
+        // 注意：Spring Data JPA 的页码是从 0 开始的 (0 代表第一页)
+        Pageable pageable = PageRequest.of(page, size);
+        return activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur, pageable);
     }
 }
