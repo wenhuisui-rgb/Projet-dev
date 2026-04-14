@@ -21,14 +21,18 @@ public class ChallengeTest {
     }
 
     @Test
-    @DisplayName("Test de création d'un challenge avec des dates valides")
+    @DisplayName("Le challenge doit être actif si la date du jour est entre début et fin")
     void testEstActif_Succes() {
+        
+        challenge.setDateDebut(LocalDate.now().minusDays(1)); // Hier
+        challenge.setDateFin(LocalDate.now().plusDays(1)); // Demain
+
         assertTrue(challenge.estActif(), "Le challenge devrait être actif");
     }
 
     @Test
     @DisplayName("Test de création d'un challenge avec une date de début passée")
-    void testEstActif_DateDebutPassee() {
+    void testEstActif_Future() {
         challenge.setDateDebut(LocalDate.now().plusDays(1));
         challenge.setDateFin(LocalDate.now().plusDays(5));
 
@@ -40,7 +44,7 @@ public class ChallengeTest {
     void testEstActif_Passe() {
         challenge.setDateDebut(LocalDate.now().minusDays(10));
         challenge.setDateFin(LocalDate.now().minusDays(1));
-        
+
         assertFalse(challenge.estActif(), "Le challenge ne devrait plus être actif (fini hier)");
     }
 

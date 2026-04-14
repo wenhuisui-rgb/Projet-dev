@@ -1,84 +1,94 @@
 package com.example.demo.model;
 
-
-import com.example.demo.repository.BadgeRepository;
-import com.example.demo.repository.UtilisateurRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import com.example.demo.service.ObtentionBadgeService;
+import org.junit.jupiter.api.DisplayName;
+
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-class ObtentionBadgeServiceTest {
-
-    @Autowired
-    private ObtentionBadgeService obtentionBadgeService;
-
-    @Autowired
-    private BadgeRepository badgeRepository;
-
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
+class ObtentionBadgeTest {
 
     @Test
-    void testAttribuerBadge() {
+    @DisplayName("Test constructeur métier ObtentionBadge")
+    void testConstructeurMetier() {
 
         Utilisateur user = new Utilisateur();
-        user.setPseudo("testUser");
-        user = utilisateurRepository.save(user);
+        user.setId(1L);
+        user.setPseudo("Runner31");
 
-        Badge badge = new Badge("5K", "Courir 5km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-        badge = badgeRepository.save(badge);
+        Badge badge = new Badge("Marathonien", "A couru 42km");
 
-        ObtentionBadge obtention = obtentionBadgeService.attribuerBadge(user, badge);
+        ObtentionBadge obtention = new ObtentionBadge(user, badge);
 
         assertNotNull(obtention);
-        assertNotNull(obtention.getId());
-        assertEquals(user.getId(), obtention.getUtilisateur().getId());
-        assertEquals(badge.getId(), obtention.getBadge().getId());
+
+        assertEquals(user.getPseudo(), obtention.getUtilisateur().getPseudo());
+        assertEquals(badge.getNom(), obtention.getBadge().getNom());
+
+        assertNotNull(obtention.getDateObtention());
     }
 
     @Test
-    void testUtilisateurPossedeBadge() {
+    @DisplayName("Test setters et date manuelle")
+    void testSetters() {
 
         Utilisateur user = new Utilisateur();
-        user.setPseudo("user2");
-        user = utilisateurRepository.save(user);
+        user.setId(1L);
 
-        Badge badge = new Badge("10K", "Courir 10km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(10f);
-        badge = badgeRepository.save(badge);
+        Badge badge = new Badge();
+        badge.setId(10L);
 
-        obtentionBadgeService.attribuerBadge(user, badge);
+        LocalDateTime date = LocalDateTime.now();
 
-        boolean existe = obtentionBadgeService.utilisateurPossedeBadge(user, badge);
+        ObtentionBadge obtention = new ObtentionBadge();
+        obtention.setUtilisateur(user);
+        obtention.setBadge(badge);
+        obtention.setDateObtention(date);
 
-        assertTrue(existe);
+        assertEquals(user, obtention.getUtilisateur());
+        assertEquals(badge, obtention.getBadge());
+        assertEquals(date, obtention.getDateObtention());
     }
 
     @Test
-    void testVerifierCondition() {
+    @DisplayName("Test relations IDs")
+    void testRelationsIds() {
 
         Utilisateur user = new Utilisateur();
-        user.setPseudo("user3");
-        user = utilisateurRepository.save(user);
+        user.setId(50L);
 
-        Badge badge = new Badge("5K", "Courir 5km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-        badge = badgeRepository.save(badge);
+        Badge badge = new Badge();
+        badge.setId(99L);
 
-        boolean ok = obtentionBadgeService.verifierCondition(
-                badge,
-                user,
-                TypeSport.COURSE,
-                6f
+        ObtentionBadge obtention = new ObtentionBadge();
+        obtention.setUtilisateur(user);
+        obtention.setBadge(badge);
+
+        assertAll(
+            () -> assertEquals(50L, obtention.getUtilisateur().getId()),
+            () -> assertEquals(99L, obtention.getBadge().getId())
         );
+    }
 
-        assertTrue(ok);
+    @Test
+    @DisplayName("Test constructeur initialise la date automatiquement")
+    void testDateAutoConstructeur() {
+
+        Utilisateur user = new Utilisateur();
+        Badge badge = new Badge();
+
+        LocalDateTime before = LocalDateTime.now();
+
+        ObtentionBadge obtention = new ObtentionBadge(user, badge);
+
+        LocalDateTime after = LocalDateTime.now();
+
+        assertNotNull(obtention.getDateObtention());
+        assertTrue(
+            !obtention.getDateObtention().isBefore(before) &&
+            !obtention.getDateObtention().isAfter(after),
+            "La date doit être initialisée automatiquement dans l’intervalle"
+        );
     }
 }
