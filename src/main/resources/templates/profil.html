@@ -10,7 +10,10 @@
 
     <h1>Mon profil</h1>
 
-    <!-- FORMULAIRE PROFIL -->
+    <div th:if="${isOwner}">
+        <a href="/profil/modifier">Modifier mon profil</a>
+    </div>
+
     <form th:action="@{/profil/modifier}" th:object="${utilisateur}" method="post">
 
         <h2>Informations personnelles</h2>
@@ -39,12 +42,12 @@
         </div>
 
         <div>
-            <label>Taille (m)</label>
+            <label>Taille - m</label>
             <input type="number" th:field="*{taille}" step="0.01">
         </div>
 
         <div>
-            <label>Poids (kg)</label>
+            <label>Poids - kg</label>
             <input type="number" th:field="*{poids}" step="0.1">
         </div>
 
@@ -64,6 +67,7 @@
                 <option th:each="s : ${T(com.example.demo.model.TypeSport).values()}"
                         th:value="${s}" th:text="${s}"></option>
             </select>
+            <div>Maintenez Ctrl pour sélectionner plusieurs sports</div>
         </div>
 
         <div>
@@ -75,7 +79,6 @@
 
     <hr>
 
-    <!-- OBJECTIFS -->
     <h2>Mes objectifs</h2>
 
     <div>
@@ -129,12 +132,11 @@
 
     <div th:unless="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
         <p>Aucun objectif défini.</p>
-        <a href="/objectifs/nouveau">Créer votre premier objectif</a>
+        <a href="/objectifs/nouveau">Créer mon premier objectif</a>
     </div>
 
     <hr>
 
-    <!-- BADGES -->
     <h2>Mes badges</h2>
 
     <div th:if="${utilisateur.listBadges != null and !utilisateur.listBadges.isEmpty()}">
@@ -157,22 +159,20 @@
 
     <hr>
 
-    <!-- IMC -->
     <h2>Mon IMC</h2>
 
     <p th:if="${utilisateur.taille != null and utilisateur.poids != null}">
-        Votre IMC est de <strong th:text="${utilisateur.calculerIMC()}"></strong>
+        Mon IMC est de <strong th:text="${utilisateur.calculerIMC()}"></strong>
     </p>
 
     <p th:unless="${utilisateur.taille != null and utilisateur.poids != null}">
-        Renseignez votre taille et votre poids pour calculer votre IMC.
+        Renseigner la taille et le poids pour calculer l'IMC.
     </p>
 
     <hr>
 
-    <!-- NAV -->
     <div>
-        <a href="/dashboard">Retour au tableau de bord</a>
+        <a href="/dashboard">Retour au DashBoard</a>
         <a href="/deconnexion">Déconnexion</a>
     </div>
 

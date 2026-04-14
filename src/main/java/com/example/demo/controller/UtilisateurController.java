@@ -24,7 +24,7 @@ public class UtilisateurController {
 
     @GetMapping("/connexion")
     public String pageConnexion() {
-        return "connexion"; // 返回 connexion.html
+        return "connexion";
     }
 
     @PostMapping("/connexion")
@@ -45,14 +45,13 @@ public class UtilisateurController {
     @GetMapping("/inscription")
     public String pageInscription(Model model) {
         model.addAttribute("utilisateur", new Utilisateur());
-        return "inscription"; // 返回 inscription.html
+        return "inscription";
     }
 
     @PostMapping("/inscription")
     public String inscrire(@ModelAttribute Utilisateur utilisateur, 
                            RedirectAttributes redirectAttributes, 
                            Model model) {
-        // 检查校验逻辑
         if (utilisateurService.emailExiste(utilisateur.getEmail())) {
             model.addAttribute("erreur", "Cet email est déjà utilisé.");
             return "inscription";
@@ -74,25 +73,53 @@ public class UtilisateurController {
     }
 
     @GetMapping("/profil")
-    public String afficherProfil(HttpSession session, Model model) {
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) {
+    public String afficherProfil(@RequestParam(required = false) Long userId,
+                                  HttpSession session, 
+                                  Model model) {
+        Utilisateur currentUser = (Utilisateur) session.getAttribute("utilisateur");
+        if (currentUser == null) {
             return "redirect:/connexion";
         }
         
-        utilisateur = utilisateurService.findById(utilisateur.getId());
+        Utilisateur profilUser;
+        boolean isOwner;
+        
+        if (userId != null && !userId.equals(currentUser.getId())) {
+            profilUser = utilisateurService.findById(userId);
+            isOwner = false;
+        } else {
+            profilUser = currentUser;
+            isOwner = true;
+        }
+        
+        if (profilUser == null) {
+            return "redirect:/profil";
+        }
+        
+        profilUser = utilisateurService.findById(profilUser.getId());
         
         Map<Long, Float> progressions = new HashMap<>();
-        if (utilisateur.getObjectifs() != null) {
-            for (Objectif obj : utilisateur.getObjectifs()) {
-                Float progression = objectifService.getPourcentageObjectif(obj, utilisateur);
+        if (profilUser.getObjectifs() != null) {
+            for (Objectif obj : profilUser.getObjectifs()) {
+                Float progression = objectifService.getPourcentageObjectif(obj, profilUser);
                 progressions.put(obj.getId(), progression);
             }
         }
         
-        model.addAttribute("utilisateur", utilisateur);
+        model.addAttribute("utilisateur", profilUser);
         model.addAttribute("objectifProgressions", progressions);
+        model.addAttribute("isOwner", isOwner);
         return "profil";
+    }
+    
+    @GetMapping("/profil/modifier")
+    public String modifierProfilPage(HttpSession session, Model model) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) {
+            return "redirect:/connexion";
+        }
+        model.addAttribute("utilisateur", utilisateur);
+        return "modifierProfil";
     }
     
     @PostMapping("/profil/modifier")
