@@ -1,4 +1,5 @@
 package com.example.demo.service;
+
 import com.example.demo.model.Challenge;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
@@ -17,9 +18,6 @@ public class ChallengeService {
         this.challengeRepository = challengeRepository;
     }
 
-    /**
-     * Créer un challenge
-     */
     public Challenge creerChallenge(String titre,
                                     TypeSport typeSport,
                                     LocalDate dateDebut,
@@ -37,29 +35,23 @@ public class ChallengeService {
         return challengeRepository.save(challenge);
     }
 
-    /**
-     * Récupérer tous les challenges
-     */
-    public List<Challenge> getTousLesChallenges() {
+    public List<Challenge> getAllChallenges() {
         return challengeRepository.findAll();
     }
 
-    /**
-     * Récupérer un challenge par ID
-     */
     public Challenge getChallengeById(Long id) {
         return challengeRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Récupérer les challenges créés par un utilisateur
-     */
+    public List<Challenge> findByTypeSport(TypeSport typeSport) {
+        return challengeRepository.findByTypeSport(typeSport);
+    }
+
     public List<Challenge> getChallengesByCreateur(Long createurId) {
         return challengeRepository.findByCreateurId(createurId);
     }
 
-
-    public List<Challenge> getAllChallenges() {
-        return challengeRepository.findAll();
+    public List<Challenge> findChallengesByUser(Utilisateur user) {
+        return challengeRepository.findChallengesByUser(user);
     }
 }

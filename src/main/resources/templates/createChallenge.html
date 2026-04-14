@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Challenge</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<h1>Créer un Challenge</h1>
+
+<!-- ERROR -->
+<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+
+<!-- FORM -->
+<form th:action="@{/challenges/creer}"
+      th:object="${challenge}"
+      method="post">
+
+    <label>Titre</label>
+    <input type="text" th:field="*{titre}" required>
+    <br><br>
+
+    <label>Type Sport</label>
+    <select th:field="*{typeSport}">
+        <option th:each="t : ${types}"
+                th:value="${t}"
+                th:text="${t}">
+        </option>
+    </select>
+    <br><br>
+
+    <label>Date début</label>
+    <input type="date" th:field="*{dateDebut}" required>
+    <br><br>
+
+    <label>Date fin</label>
+    <input type="date" th:field="*{dateFin}" required>
+    <br><br>
+
+    <button type="submit">Créer</button>
+
+</form>
+
+<br>
+
+<a href="/challenges">← Retour</a>
+
+</body>
+</html>

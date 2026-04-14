@@ -97,4 +97,5 @@ public class Challenge {
         return !aujourdHui.isBefore(dateDebut)
                 && !aujourdHui.isAfter(dateFin);
     }
+
 }
