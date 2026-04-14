@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>FitTrack</title>
-
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -12,16 +11,15 @@
 <header class="navbar">
   <div class="navbar-left">
     <div class="logo">FitTrack</div>
-
     <nav class="nav-links">
-      <a href="#">Dashboard</a>
-      <a href="#">Feed</a>
-      <a href="#">Challenges</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/feed">Feed</a>
+      <a href="/challenges">Challenges</a>
     </nav>
   </div>
 
   <div class="navbar-right">
-    <button class="logout" title="Déconnexion">
+    <a href="/deconnexion" class="logout" title="Déconnexion">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="22" height="22"
            viewBox="0 0 24 24"
@@ -34,9 +32,8 @@
         <polyline points="17 16 22 12 17 8"/>
         <line x1="22" y1="12" x2="10" y2="12"/>
       </svg>
-    </button>
-
-    <img src="/images/profile.jpg" class="profile-pic">
+    </a>
+    <img src="/images/profile.jpg" class="profile-pic" alt="profile">
   </div>
 </header>
 

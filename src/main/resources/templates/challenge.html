@@ -8,6 +8,34 @@
 
 <body>
 
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="22" height="22"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+    </div>
+</header>
+
 <header class="top-bar">
     <h1>Mes Challenges</h1>
     <a class="create-btn" href="/challenges/create">Créer un challenge</a>
@@ -31,7 +59,7 @@
 <!-- CARDS -->
 <section class="grid">
 
-    <div class="card" th:each="c : ${challenges}">
+    <div class="card" th:each="c : ${challenges}" th:onclick="'location.href=\'/challenges/detail/' + ${c.id} + '\''">
 
         <div class="card-image"></div>
 
@@ -46,7 +74,7 @@
                 au <span th:text="${c.dateFin}"></span>
             </p>
 
-            <div class="actions">
+            <div class="actions" onclick="event.stopPropagation()">
                 <a th:href="@{/participation/classement/{id}(id=${c.id})}">
                     Voir classement
                 </a>

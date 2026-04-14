@@ -8,44 +8,64 @@
 
 <body>
 
-<h1>Créer un Challenge</h1>
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="22" height="22"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+    </div>
+</header>
 
-<!-- ERROR -->
-<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+<div style="max-width: 500px; margin: 40px auto; padding: 0 20px;">
+    <h1>Créer un Challenge</h1>
 
-<!-- FORM -->
-<form th:action="@{/challenges/creer}"
-      th:object="${challenge}"
-      method="post">
+    <p th:if="${error}" style="color:red;" th:text="${error}"></p>
 
-    <label>Titre</label>
-    <input type="text" th:field="*{titre}" required>
-    <br><br>
+    <form th:action="@{/challenges/creer}" th:object="${challenge}" method="post">
+        <label>Titre</label>
+        <input type="text" th:field="*{titre}" required>
+        <br><br>
 
-    <label>Type Sport</label>
-    <select th:field="*{typeSport}">
-        <option th:each="t : ${types}"
-                th:value="${t}"
-                th:text="${t}">
-        </option>
-    </select>
-    <br><br>
+        <label>Type Sport</label>
+        <select th:field="*{typeSport}">
+            <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+        </select>
+        <br><br>
 
-    <label>Date début</label>
-    <input type="date" th:field="*{dateDebut}" required>
-    <br><br>
+        <label>Date début</label>
+        <input type="date" th:field="*{dateDebut}" required>
+        <br><br>
 
-    <label>Date fin</label>
-    <input type="date" th:field="*{dateFin}" required>
-    <br><br>
+        <label>Date fin</label>
+        <input type="date" th:field="*{dateFin}" required>
+        <br><br>
 
-    <button type="submit">Créer</button>
+        <button type="submit">Créer</button>
+    </form>
 
-</form>
-
-<br>
-
-<a href="/challenges">← Retour</a>
+    <br>
+    <a href="/challenges">← Retour</a>
+</div>
 
 </body>
 </html>

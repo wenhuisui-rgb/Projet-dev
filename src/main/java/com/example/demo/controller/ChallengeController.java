@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Challenge;
+import com.example.demo.model.ParticipationChallenge;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.service.ChallengeService;
@@ -14,7 +15,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 
 @Controller
 public class ChallengeController {
@@ -148,5 +148,27 @@ public String myChallenges(@RequestParam(required = false) TypeSport typeSport,
     model.addAttribute("utilisateur", utilisateur);
 
     return "challenge";
+    }
+
+    @GetMapping("/challenges/detail/{id}")
+    public String detailChallenge(@PathVariable Long id,
+                                HttpSession session,
+                                Model model) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) return "redirect:/connexion";
+        
+        Challenge challenge = challengeService.getChallengeById(id);
+        if (challenge == null) {
+            return "redirect:/challenges";
+        }
+        
+        // 获取参与者排名
+        List<ParticipationChallenge> classement = participationService.obtenirClassement(id);
+        
+        model.addAttribute("challenge", challenge);
+        model.addAttribute("classement", classement);
+        model.addAttribute("utilisateur", utilisateur);
+        
+        return "detailChallenge";
     }
 }

@@ -27,13 +27,6 @@ public class ActiviteController {
     @Autowired
     private MeteoService meteoService;
 
-    @GetMapping("/bar")
-    public String barreNavigation(HttpSession session, Model model) {
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        model.addAttribute("utilisateur", utilisateur);
-        return "barNavigation";
-    }
-
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");

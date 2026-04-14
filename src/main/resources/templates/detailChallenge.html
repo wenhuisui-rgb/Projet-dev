@@ -1,1 +1,87 @@
-// mettre la classement de challenge ici
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail du Challenge</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+    </div>
+</header>
+
+<div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    <div style="background: white; border-radius: 16px; padding: 30px; border: 1px solid rgba(0,0,0,0.06);">
+        <div>
+            <div style="font-size: 48px;">🏆 <span th:text="${challenge.titre}" style="font-size: 28px; font-weight: bold;"></span></div>
+            <div style="margin-top: 20px;">
+                <p><strong>Créé par :</strong> <span th:text="${challenge.createur.pseudo}"></span></p>
+                <p><strong>Sport :</strong> <span th:text="${challenge.typeSport}"></span></p>
+                <p><strong>Du</strong> <span th:text="${challenge.dateDebut}"></span> <strong>au</strong> <span th:text="${challenge.dateFin}"></span></p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3>Classement</h3>
+            
+            <div th:if="${classement != null and !classement.isEmpty()}">
+                <table border="1" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px;">Position</th>
+                            <th style="padding: 10px;">Participant</th>
+                            <th style="padding: 10px;">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="entry,iterStat : ${classement}">
+                            <td> style="padding: 10px;">
+                                <span th:if="${iterStat.index == 0}">🥇 1er</span>
+                                <span th:if="${iterStat.index == 1}">🥈 2ème</span>
+                                <span th:if="${iterStat.index == 2}">🥉 3ème</span>
+                                <span th:if="${iterStat.index >= 3}" th:text="|${iterStat.count}ème|"></span>
+                            </td>
+                            <td style="padding: 10px;" th:text="${entry.utilisateur.pseudo}"></td>
+                            <td style="padding: 10px;" th:text="${entry.score} + ' points'"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div th:unless="${classement != null and !classement.isEmpty()}">
+                <p>Aucun participant pour le moment.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <a href="/challenges" style="padding: 10px 20px; background: #111827; color: white; text-decoration: none; border-radius: 10px;">← Retour</a>
+            
+            <form th:action="@{/participation/rejoindre/{id}(id=${challenge.id})}" method="post" style="display: inline;">
+                <button type="submit" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer;">Rejoindre</button>
+            </form>
+            
+            <a href="/participation/classement/{id}" th:href="@{/participation/classement/{id}(id=${challenge.id})}" style="padding: 10px 20px; background: #111827; color: white; text-decoration: none; border-radius: 10px;">Voir classement détaillé</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
