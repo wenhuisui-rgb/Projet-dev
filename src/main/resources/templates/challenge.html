@@ -2,78 +2,66 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Challenges Sportifs</title>
+    <title>Mes Challenges</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
-    <header>
-        <h1>Liste des Challenges</h1>
-        <p>Bienvenue, <span th:text="${utilisateur.nom}">Utilisateur</span></p>
-    </header>
+<header class="top-bar">
+    <h1>Mes Challenges</h1>
+    <a class="create-btn" href="/challenges/create">Créer un challenge</a>
+</header>
 
-    <div th:if="${success}" style="color: green;">
-        <p th:text="${success}"></p>
+<!-- FILTER -->
+<section class="filter-bar">
+    <form method="get" action="/challenge">
+        <select name="typeSport">
+            <option value="">Tous les sports</option>
+            <option th:each="t : ${types}"
+                    th:value="${t}"
+                    th:text="${t}"
+                    th:selected="${t == selectedType}">
+            </option>
+        </select>
+        <button type="submit">Filtrer</button>
+    </form>
+</section>
+
+<!-- CARDS -->
+<section class="grid">
+
+    <div class="card" th:each="c : ${challenges}">
+
+        <div class="card-image"></div>
+
+        <div class="card-body">
+
+            <h3 th:text="${c.titre}"></h3>
+
+            <p class="type" th:text="${c.typeSport}"></p>
+
+            <p class="date">
+                Du <span th:text="${c.dateDebut}"></span>
+                au <span th:text="${c.dateFin}"></span>
+            </p>
+
+            <div class="actions">
+                <a th:href="@{/participation/classement/{id}(id=${c.id})}">
+                    Voir classement
+                </a>
+
+                <form th:action="@{/participation/rejoindre/{id}(id=${c.id})}"
+                      method="post">
+                    <button type="submit">Rejoindre</button>
+                </form>
+            </div>
+
+        </div>
+
     </div>
-    <div th:if="${error}" style="color: red;">
-        <p th:text="${error}"></p>
-    </div>
 
-    <hr>
-
-    <section>
-        <h2>Créer un nouveau défi</h2>
-        <form th:action="@{/challenges/creer}" method="post">
-            <label>Titre :</label>
-            <input type="text" name="titre" required>
-
-            <label>Type de sport :</label>
-            <select name="typeSport">
-                <option th:each="type : ${T(com.example.demo.model.TypeSport).values()}" 
-                        th:value="${type}" th:text="${type}"></option>
-            </select>
-
-            <label>Date de début :</label>
-            <input type="date" name="dateDebut" required>
-
-            <label>Date de fin :</label>
-            <input type="date" name="dateFin" required>
-
-            <button type="submit">Lancer le challenge</button>
-        </form>
-    </section>
-
-    <hr>
-
-    <section>
-        <h2>Défis en cours</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Titre</th>
-                    <th>Sport</th>
-                    <th>Période</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="c : ${challenges}">
-                    <td th:text="${c.titre}"></td>
-                    <td th:text="${c.typeSport}"></td>
-                    <td>
-                        Du <span th:text="${c.dateDebut}"></span> 
-                        au <span th:text="${c.dateFin}"></span>
-                    </td>
-                    <td>
-                        <a th:href="@{/participation/classement/{id}(id=${c.id})}">Voir Classement</a>
-                        
-                        <form th:action="@{/participation/rejoindre/{id}(id=${c.id})}" method="post" style="display:inline;">
-                            <button type="submit">Rejoindre</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+</section>
 
 </body>
 </html>

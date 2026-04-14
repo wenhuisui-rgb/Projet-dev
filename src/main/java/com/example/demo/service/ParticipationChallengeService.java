@@ -17,9 +17,9 @@ public class ParticipationChallengeService {
         this.participationRepository = participationRepository;
     }
 
-    /**
-     * Rejoindre un challenge
-     */
+    /* =========================
+       JOIN CHALLENGE
+    ========================== */
     public ParticipationChallenge rejoindreChallenge(Utilisateur utilisateur,
                                                      Challenge challenge) {
 
@@ -30,7 +30,7 @@ public class ParticipationChallengeService {
                 );
 
         if (existing != null) {
-            return existing;
+            throw new RuntimeException("Déjà inscrit à ce challenge");
         }
 
         ParticipationChallenge participation =
@@ -39,9 +39,9 @@ public class ParticipationChallengeService {
         return participationRepository.save(participation);
     }
 
-    
-    //Quitter un challenge
-    
+    /* =========================
+       QUITTER CHALLENGE
+    ========================== */
     public void quitterChallenge(Utilisateur utilisateur,
                                  Challenge challenge) {
 
@@ -56,9 +56,9 @@ public class ParticipationChallengeService {
         }
     }
 
-    
-    //Mettre à jour le score d'un utilisateur
-     
+    /* =========================
+       UPDATE SCORE
+    ========================== */
     public ParticipationChallenge mettreAJourScore(Utilisateur utilisateur,
                                                     Challenge challenge,
                                                     float score) {
@@ -78,16 +78,16 @@ public class ParticipationChallengeService {
         return participationRepository.save(participation);
     }
 
-    
-    //Classement du challenge
-     
+    /* =========================
+       LEADERBOARD
+    ========================== */
     public List<ParticipationChallenge> obtenirClassement(Long challengeId) {
         return participationRepository.findByChallengeIdOrderByScoreActuelDesc(challengeId);
     }
 
-    
-    //Vérifier si déjà inscrit
-     
+    /* =========================
+       CHECK IF ALREADY JOINED
+    ========================== */
     public boolean estDejaInscrit(Long utilisateurId, Long challengeId) {
         return participationRepository.findByUtilisateurIdAndChallengeId(
                 utilisateurId,

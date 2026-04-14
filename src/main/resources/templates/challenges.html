@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Challenges</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<header class="top-bar">
+    <h1>Challenges</h1>
+
+    <!-- Create button -->
+    <a class="create-btn" href="/challenges/create">
+        Créer un challenge
+    </a>
+</header>
+
+<!-- FILTER -->
+<section class="filter-bar">
+    <form method="get" action="/challenges">
+        
+        <select name="typeSport">
+            <option value="">Tous les sports</option>
+
+            <option th:each="t : ${types}"
+                    th:value="${t}"
+                    th:text="${t}"
+                    th:selected="${t == selectedType}">
+            </option>
+        </select>
+
+        <button type="submit">Filtrer</button>
+    </form>
+</section>
+
+<!-- CARDS -->
+<section class="grid">
+
+    <div class="card" th:each="c : ${challenges}">
+
+        <div class="card-image"></div>
+
+        <div class="card-body">
+            <h3 th:text="${c.titre}"></h3>
+
+            <p class="type" th:text="${c.typeSport}"></p>
+
+            <p class="date">
+                Du <span th:text="${c.dateDebut}"></span>
+                au <span th:text="${c.dateFin}"></span>
+            </p>
+
+            <div class="actions">
+                <a th:href="@{/participation/classement/{id}(id=${c.id})}">
+                    Classement
+                </a>
+
+                <form th:action="@{/participation/rejoindre/{id}(id=${c.id})}"
+                      method="post">
+                    <button type="submit">Rejoindre</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>
