@@ -64,6 +64,10 @@
                         <span class="label">IMC:</span> 
                         <span class="type">Données incomplètes</span>
                     </li>
+                    <li>
+                        <span class="label">Niveau:</span> 
+                        <span class="val" th:text="${utilisateur.niveauPratique != null ? utilisateur.niveauPratique : '-'}"></span>
+                    </li>
                 </ul>
             </div>
 

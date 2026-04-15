@@ -33,74 +33,76 @@
 
 <div style="max-width: 800px; margin: 40px auto; padding: 20px;">
     <div style="background: white; border-radius: 16px; padding: 20px; border: 1px solid #e5e7eb;">
-        <h2>Detail de l'activite</h2>
+        <h2>Détail de l'activite</h2>
         
+        <div style="background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
         <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Type de sport</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;" th:text="${activite.typeSport}">quan
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; width: 140px; font-weight: 600; color: #374151; background: #fafafa;">Type de sport</th>
+                <td style="padding: 14px 16px; color: #111827;" th:text="${activite.typeSport}">quan</td>
             </tr>
-            <tr>
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Date et heure</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;" th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Date et heure</th>
+                <td style="padding: 14px 16px; color: #111827;" th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan</td>
             </tr>
-            <tr>
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Duree</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;" th:text="${activite.duree} + ' minutes'">quan
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Durée</th>
+                <td style="padding: 14px 16px; color: #111827;" th:text="${activite.duree} + ' minutes'">quan</td>
             </tr>
-            <tr th:if="${activite.distance != null}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Distance</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;" th:text="${activite.distance} + ' km'">quan
+            <tr th:if="${activite.distance != null}" style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Distance</th>
+                <td style="padding: 14px 16px; color: #111827;" th:text="${activite.distance} + ' km'">quan</td>
             </tr>
-            <tr th:unless="${activite.distance != null}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Distance</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">Non renseignee</td>
+            <tr th:if="${activite.localisation != null and activite.localisation != ''}" style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Localisation</th>
+                <td style="padding: 14px 16px; color: #111827;" th:text="${activite.localisation}">quan</td>
             </tr>
-            <tr th:if="${activite.localisation != null and activite.localisation != ''}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Localisation</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;" th:text="${activite.localisation}">quan
-            </tr>
-            <tr th:unless="${activite.localisation != null and activite.localisation != ''}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Localisation</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">Non renseignee</td>
-            </tr>
-            <tr th:if="${activite.evaluation != null}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Evaluation</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">
-                    <span th:if="${activite.evaluation == 1}">⭐ - A ameliorer</span>
+            <tr th:if="${activite.evaluation != null}" style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Évaluation</th>
+                <td style="padding: 14px 16px; color: #111827;">
+                    <span th:if="${activite.evaluation == 1}">⭐ - À améliorer</span>
                     <span th:if="${activite.evaluation == 2}">⭐⭐ - Moyen</span>
                     <span th:if="${activite.evaluation == 3}">⭐⭐⭐ - Bien</span>
-                    <span th:if="${activite.evaluation == 4}">⭐⭐⭐⭐ - Tres bien</span>
+                    <span th:if="${activite.evaluation == 4}">⭐⭐⭐⭐ - Très bien</span>
                     <span th:if="${activite.evaluation == 5}">⭐⭐⭐⭐⭐ - Excellent</span>
                 </td>
             </tr>
-            <tr th:unless="${activite.evaluation != null}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Evaluation</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">Non evaluee</td>
-            </tr>
-            <tr>
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Calories consommees</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Calories consommées</th>
+                <td style="padding: 14px 16px; color: #111827;">
                     <span th:text="${activite.calories != null ? activite.calories : 'En cours de calcul...'}"></span>
                     <span th:if="${activite.calories != null}">kcal</span>
                 </td>
             </tr>
             <tr th:if="${activite.meteo != null}">
-                <th style="padding: 10px; border: 1px solid #e5e7eb; text-align: left;">Meteo</th>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;" th:text="${activite.meteo}">quan
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; color: #374151; background: #fafafa;">Météo</th>
+                <td style="padding: 14px 16px; color: #111827;" th:text="${activite.meteo}">quan</td>
             </tr>
         </table>
+    </div>
 
         <div style="margin-top: 30px;">
-            <h3>Reactions</h3>
-            <div>
-                <form th:action="@{/reactions/ajouter}" method="post" style="display: inline;">
-                    <input type="hidden" name="activiteId" th:value="${activite.id}">
-                    <button type="submit" name="type" value="KUDOS" style="background: none; border: none; font-size: 24px; cursor: pointer;">👍</button>
-                    <button type="submit" name="type" value="BRAVO" style="background: none; border: none; font-size: 24px; cursor: pointer;">👏</button>
-                    <button type="submit" name="type" value="SOUTIEN" style="background: none; border: none; font-size: 24px; cursor: pointer;">💪</button>
-                </form>
-                <p>Cliquez sur une reaction pour ajouter ou retirer</p>
+            <h3>Laissez une réaction</h3>
+            <p style="color: #6b7280;">Cliquez sur une reaction pour ajouter ou retirer</p>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="position: relative; display: inline-block;">
+                    <button type="button" class="reaction-btn" data-type="KUDOS" onclick="toggleReaction('KUDOS')" style="background: none; border: 1px solid #e5e7eb; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 30px; background-color: white;">
+                        👍
+                    </button>
+                    <span class="reaction-count" id="count-KUDOS" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 20px; min-width: 18px; text-align: center;">0</span>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                    <button type="button" class="reaction-btn" data-type="BRAVO" onclick="toggleReaction('BRAVO')" style="background: none; border: 1px solid #e5e7eb; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 30px; background-color: white;">
+                        👏
+                    </button>
+                    <span class="reaction-count" id="count-BRAVO" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 20px; min-width: 18px; text-align: center;">0</span>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                    <button type="button" class="reaction-btn" data-type="SOUTIEN" onclick="toggleReaction('SOUTIEN')" style="background: none; border: 1px solid #e5e7eb; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 30px; background-color: white;">
+                        💪
+                    </button>
+                    <span class="reaction-count" id="count-SOUTIEN" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 20px; min-width: 18px; text-align: center;">0</span>
+                </div>
             </div>
         </div>
 
@@ -134,6 +136,67 @@
         </div>
     </div>
 </div>
+
+    <script th:inline="javascript">
+        var activiteId = /*[[${activite.id}]]*/ 0;
+        console.log('activiteId:', activiteId);
+        
+        function loadCounts() {
+            fetch('/api/reactions/count?activiteId=' + activiteId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('count-KUDOS').innerText = data.KUDOS || 0;
+                    document.getElementById('count-BRAVO').innerText = data.BRAVO || 0;
+                    document.getElementById('count-SOUTIEN').innerText = data.SOUTIEN || 0;
+                });
+        }
+        
+        function loadUserReaction() {
+            fetch('/api/reactions/user-reaction?activiteId=' + activiteId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.type) {
+                        var btn = document.querySelector(`.reaction-btn[data-type="${data.type}"]`);
+                        if (btn) btn.style.backgroundColor = '#e0e7ff';
+                    }
+                });
+        }
+        
+        function toggleReaction(type) {
+            fetch('/api/reactions/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    activiteId: activiteId,
+                    type: type
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    return;
+                }
+                document.getElementById('count-KUDOS').innerText = data.counts.KUDOS || 0;
+                document.getElementById('count-BRAVO').innerText = data.counts.BRAVO || 0;
+                document.getElementById('count-SOUTIEN').innerText = data.counts.SOUTIEN || 0;
+                
+                document.querySelectorAll('.reaction-btn').forEach(btn => {
+                    btn.style.backgroundColor = '';
+                });
+                if (data.userReaction) {
+                    var activeBtn = document.querySelector(`.reaction-btn[data-type="${data.userReaction}"]`);
+                    if (activeBtn) activeBtn.style.backgroundColor = '#e0e7ff';
+                }
+            })
+            .catch(error => console.error('Fetch error:', error));
+        }
+        
+        loadCounts();
+        loadUserReaction();
+    </script>
 
 </body>
 </html>

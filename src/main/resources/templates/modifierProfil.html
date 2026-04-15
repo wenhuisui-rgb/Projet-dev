@@ -31,7 +31,6 @@
 </header>
 
 <div>
-    <h1>Modifier mon profil</h1>
     
     <form th:action="@{/profil/modifier}" th:object="${utilisateur}" method="post">
 
@@ -40,7 +39,7 @@
         <input type="hidden" th:field="*{email}" />
         <input type="hidden" th:field="*{motDePasse}" />
         
-        <h2>Informations personnelles</h2>
+        <h2>Modifier mon profil</h2>
         
         <div>
             <label>Sexe</label>
