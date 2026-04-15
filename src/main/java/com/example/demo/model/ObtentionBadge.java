@@ -2,6 +2,8 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 public class ObtentionBadge {
@@ -18,19 +20,18 @@ public class ObtentionBadge {
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id")
+    @JsonIgnore
     private Utilisateur utilisateur;
 
     public ObtentionBadge() {
     }
 
-    
     public ObtentionBadge(Utilisateur utilisateur, Badge badge) {
         this.utilisateur = utilisateur;
         this.badge = badge;
         this.dateObtention = LocalDateTime.now();
     }
 
-    
     public Long getId() {
         return id;
     }

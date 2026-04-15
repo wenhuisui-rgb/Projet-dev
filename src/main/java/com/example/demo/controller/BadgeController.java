@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/badges")
+@RequestMapping("/api/badges")
 public class BadgeController {
 
     private final BadgeService badgeService;
@@ -33,4 +33,6 @@ public class BadgeController {
     public Badge getBadgeById(@PathVariable Long id) {
         return badgeService.getBadgeById(id);
     }
+
+    
 }

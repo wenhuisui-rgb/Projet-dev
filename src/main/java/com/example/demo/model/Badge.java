@@ -3,8 +3,17 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Badge {
+
+    public Badge(String nom, String description, TypeSport typeSport, float seuil) {
+        this.nom = nom;
+        this.description = description;
+        this.typeSport = typeSport;
+        this.seuil = seuil;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,9 +26,10 @@ public class Badge {
     @Enumerated(EnumType.STRING)
     private TypeSport typeSport;
 
-    private float seuil;  // Valeur minimale pour obtenir le badge
+    private float seuil; // Valeur minimale pour obtenir le badge
 
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ObtentionBadge> obtentions;
 
     public Badge() {

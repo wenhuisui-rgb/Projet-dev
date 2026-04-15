@@ -18,4 +18,5 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     boolean existsByPseudo(String pseudo);
 
     List<Utilisateur> findByPseudoContainingIgnoreCase(String pseudo);
+    List<Utilisateur> findByPseudoContainingIgnoreCaseAndIdNot(String pseudo, Long id);
 }
