@@ -24,11 +24,18 @@ public class ActiviteService {
     @Autowired
     private ActiviteRepository activiteRepository;
 
+    @Autowired
+    private ParticipationChallengeService participationChallengeService;
+
     @Transactional
     public Activite sauvegarderActivite(Activite activite, Float poidsUtilisateur) {
         Float caloriesCalculees = activite.calculerCalories(poidsUtilisateur);
         activite.setCalories(caloriesCalculees);
-        return activiteRepository.save(activite);
+        Activite savedActivite = activiteRepository.save(activite);
+
+        participationChallengeService.actualiserScoresApresActivite(savedActivite);
+        
+        return savedActivite;
     }
 
     public Activite getActiviteParId(Long id) {
@@ -145,7 +152,13 @@ public class ActiviteService {
             Float nouvellesCalories = existante.calculerCalories(poidsUtilisateur);
             existante.setCalories(nouvellesCalories);
             
-            return activiteRepository.save(existante);
+            // 保存运动记录到数据库
+            Activite savedActivite = activiteRepository.save(existante);
+            
+            // 🔥 扣动扳机：触发挑战的自动算分机制
+            participationChallengeService.actualiserScoresApresActivite(savedActivite);
+            
+            return savedActivite;
         }
         return null;
     }
@@ -154,6 +167,8 @@ public class ActiviteService {
     public void supprimerActivite(Long id) {
         activiteRepository.deleteById(id);
     }
+
+    
 
     public boolean aAtteintObjectifMensuel(Utilisateur utilisateur, Float objectifDistance) {
         if (objectifDistance == null) return false;

@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.Challenge;
 import com.example.demo.model.TypeSport;
+import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ChallengeRepository;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,18 @@ public class ChallengeService {
                                     TypeSport typeSport,
                                     LocalDate dateDebut,
                                     LocalDate dateFin,
-                                    Utilisateur createur) {
+                                    Utilisateur createur,
+                                    Unite unite,
+                                    Float cible) {
 
         Challenge challenge = new Challenge(
                 titre,
                 typeSport,
                 dateDebut,
                 dateFin,
-                createur
+                createur,
+                unite,
+                cible
         );
 
         return challengeRepository.save(challenge);
@@ -54,4 +59,6 @@ public class ChallengeService {
     public List<Challenge> findChallengesByUser(Utilisateur user) {
         return challengeRepository.findChallengesByUser(user);
     }
+
+    
 }

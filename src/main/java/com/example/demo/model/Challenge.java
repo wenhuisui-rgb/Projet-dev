@@ -20,6 +20,14 @@ public class Challenge {
     private LocalDate dateDebut;
     private LocalDate dateFin;
 
+    @Enumerated(EnumType.STRING)
+    private StatutChallenge statut;
+
+    @Enumerated(EnumType.STRING)
+    private Unite unite;
+
+    private Float cible;
+
     @ManyToOne
     @JoinColumn(name = "createur_id")
     private Utilisateur createur;
@@ -33,12 +41,17 @@ public class Challenge {
                      TypeSport typeSport,
                      LocalDate dateDebut,
                      LocalDate dateFin,
-                     Utilisateur createur) {
+                     Utilisateur createur,
+                     Unite unite,
+                     Float cible) {
         this.titre = titre;
         this.typeSport = typeSport;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.createur = createur;
+        this.unite = unite;
+        this.cible = cible;
+        this.statut = StatutChallenge.ACTIF;
     }
 
     public Long getId() {
@@ -87,6 +100,40 @@ public class Challenge {
 
     public List<ParticipationChallenge> getParticipations() {
         return participations;
+    }
+
+    
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public StatutChallenge getStatut() {
+        return statut;
+    }
+
+    public void setStatut(StatutChallenge statut) {
+        this.statut = statut;
+    }
+
+    public Unite getUnite() {
+        return unite;
+    }
+
+    public void setUnite(Unite unite) {
+        this.unite = unite;
+    }
+
+    public Float getCible() {
+        return cible;
+    }
+
+    public void setCible(Float cible) {
+        this.cible = cible;
+    }
+
+    public void setParticipations(List<ParticipationChallenge> participations) {
+        this.participations = participations;
     }
 
     /**
