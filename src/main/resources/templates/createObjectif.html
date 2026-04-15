@@ -87,9 +87,9 @@
             <input type="date" th:field="*{dateFin}" style="width: 100%; padding: 8px;">
         </div>
         
-        <div style="margin-top: 20px;">
-            <button type="submit" th:text="${objectif.id == null ? 'Creer' : 'Met à jour'}" style="background: #111827; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;"></button>
-            <a href="/profil" style="background: #6b7280; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center;">Annuler</a>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-primary" th:onclick="|window.location.href='@{/profil}'|">Annuler</button>
         </div>
     </form>
 

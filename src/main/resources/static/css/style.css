@@ -746,4 +746,51 @@ form button:hover {
         .activites-table th {
             background: #f9fafb;
         }
+
+        /* 容器：使用 Flexbox 让标签自然排布和换行 */
+.sports-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* 标签之间的间距 */
+    margin-top: 10px;
+}
+
+/* 隐藏原本丑陋的复选框 */
+.sport-checkbox {
+    display: none;
+}
+
+/* 默认状态下的标签样式 */
+.sport-label {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #f1f3f5; /* 浅灰背景 */
+    color: #495057; /* 深灰文字 */
+    border: 1px solid #e9ecef;
+    border-radius: 20px; /* 圆角变成胶囊形状 */
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out; /* 添加平滑过渡动画 */
+    user-select: none; /* 防止双击时选中文本 */
+}
+
+/* 鼠标悬停时的样式 */
+.sport-label:hover {
+    background-color: #e2e6ea;
+}
+
+/* 选中状态下的标签样式 (这是精髓所在) */
+.sport-checkbox:checked ~ .sport-label {
+    background-color: #0d6efd; /* 你可以换成你网站的主色调 btn-primary 的颜色 */
+    color: white;
+    border-color: #0d6efd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 错误提示文字的美化 */
+.limit-warning {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
     

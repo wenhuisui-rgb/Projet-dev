@@ -84,24 +84,26 @@
         
         
 
-        <div class="sports-selection">
-        <label><strong>Sports préférés (Maximum 4) :</strong></label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-            <div th:each="sport : ${T(com.example.demo.model.TypeSport).values()}">
-                <input type="checkbox" 
-                       th:field="*{preferencesSports}" 
-                       th:value="${sport}" 
-                       id="${'sport-' + sport}"
-                       class="sport-checkbox">
-                <label th:for="${'sport-' + sport}" th:text="${sport}"></label>
+        <div class="sports-selection mt-4">
+            <label class="form-label mb-2"><strong>Sports préférés (Maximum 4) :</strong></label>
+            
+            <div class="sports-tags-container">
+                <div th:each="sport : ${T(com.example.demo.model.TypeSport).values()}" class="sport-tag-item">
+                    <input type="checkbox" 
+                        th:field="*{preferencesSports}" 
+                        th:value="${sport}" 
+                        th:id="${'sport-' + sport}"
+                        class="sport-checkbox">
+                    <label th:for="${'sport-' + sport}" th:text="${sport}" class="sport-label"></label>
+                </div>
             </div>
-        </div>
-        <p id="limit-message" style="color: red; display: none;">Vous avez atteint la limite de 4 sports.</p>
+            
+            <p id="limit-message" class="limit-warning" style="display: none;">Vous avez atteint la limite de 4 sports.</p>
         </div>
 
-        <div>
-            <button type="submit">Enregistrer les modifications</button>
-            <a href="/profil">Annuler</a>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-primary" th:onclick="|window.location.href='@{/profil}'|">Annuler</button>
         </div>
 
     </form>
