@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "utilisateurs")
 public class Utilisateur {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,7 +20,7 @@ public class Utilisateur {
 
     @Column(nullable = false, unique = true)
     private String email;
-    
+
     @Column(nullable = false)
     @JsonIgnore
     private String motDePasse;
@@ -44,36 +45,37 @@ public class Utilisateur {
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Activite> activites = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Objectif> objectifs = new ArrayList<>();
-    
+
+    // 🔥 Gestion des amitiés
     @OneToMany(mappedBy = "utilisateurDemandeur")
     private List<Amitie> demandesEnvoyees = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "utilisateurReceveur")
     private List<Amitie> demandesRecues = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "utilisateur")
     private List<ObtentionBadge> listBadges = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "createur")
     private List<Challenge> challengesCrees = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "utilisateur")
     private List<ParticipationChallenge> participationsChallenge = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "auteur")
     private List<Commentaire> commentaires = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "auteur")
     private List<Reaction> reactions = new ArrayList<>();
 
-    public Utilisateur() {
-    }
-    
-    public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age, 
-                       Float taille, Float poids, NiveauPratique niveauPratique, 
+    // 🔥 CONSTRUCTEURS
+    public Utilisateur() {}
+
+    public Utilisateur(Long id, String pseudo, String email, String motDePasse, Sexe sexe, Integer age,
+                       Float taille, Float poids, NiveauPratique niveauPratique,
                        List<TypeSport> preferencesSports, List<ObtentionBadge> listBadges) {
         this.id = id;
         this.pseudo = pseudo;
@@ -88,166 +90,69 @@ public class Utilisateur {
         this.listBadges = listBadges;
     }
 
-    public Long getId() {
-        return id;
-    }
+    // 🔥 GETTERS / SETTERS
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getPseudo() {
-        return pseudo;
-    }
+    public String getPseudo() { return pseudo; }
+    public void setPseudo(String pseudo) { this.pseudo = pseudo; }
 
-    public void setPseudo(String pseudo) {
-        this.pseudo = pseudo;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getMotDePasse() { return motDePasse; }
+    public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public Sexe getSexe() { return sexe; }
+    public void setSexe(Sexe sexe) { this.sexe = sexe; }
 
-    public String getMotDePasse() {
-        return motDePasse;
-    }
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
 
-    public void setMotDePasse(String motDePasse) {
-        this.motDePasse = motDePasse;
-    }
+    public Float getTaille() { return taille; }
+    public void setTaille(Float taille) { this.taille = taille; }
 
-    public Sexe getSexe() {
-        return sexe;
-    }
+    public Float getPoids() { return poids; }
+    public void setPoids(Float poids) { this.poids = poids; }
 
-    public void setSexe(Sexe sexe) {
-        this.sexe = sexe;
-    }
+    public String getObjectifPersonnel() { return objectifPersonnel; }
+    public void setObjectifPersonnel(String objectifPersonnel) { this.objectifPersonnel = objectifPersonnel; }
 
-    public Integer getAge() {
-        return age;
-    }
+    public NiveauPratique getNiveauPratique() { return niveauPratique; }
+    public void setNiveauPratique(NiveauPratique niveauPratique) { this.niveauPratique = niveauPratique; }
 
-    public void setAge(Integer age) {
-        this.age = age;
-    }
+    public List<TypeSport> getPreferencesSports() { return preferencesSports; }
+    public void setPreferencesSports(List<TypeSport> preferencesSports) { this.preferencesSports = preferencesSports; }
 
-    public Float getTaille() {
-        return taille;
-    }
+    public List<Activite> getActivites() { return activites; }
+    public void setActivites(List<Activite> activites) { this.activites = activites; }
 
-    public void setTaille(Float taille) {
-        this.taille = taille;
-    }
+    public List<Objectif> getObjectifs() { return objectifs; }
+    public void setObjectifs(List<Objectif> objectifs) { this.objectifs = objectifs; }
 
-    public Float getPoids() {
-        return poids;
-    }
+    public List<Amitie> getDemandesEnvoyees() { return demandesEnvoyees; }
+    public void setDemandesEnvoyees(List<Amitie> demandesEnvoyees) { this.demandesEnvoyees = demandesEnvoyees; }
 
-    public void setPoids(Float poids) {
-        this.poids = poids;
-    }
+    public List<Amitie> getDemandesRecues() { return demandesRecues; }
+    public void setDemandesRecues(List<Amitie> demandesRecues) { this.demandesRecues = demandesRecues; }
 
-    public String getObjectifPersonnel() {
-        return objectifPersonnel;
-    }
+    public List<ObtentionBadge> getListBadges() { return listBadges; }
+    public void setListBadges(List<ObtentionBadge> listBadges) { this.listBadges = listBadges; }
 
-    public void setObjectifPersonnel(String objectifPersonnel) {
-        this.objectifPersonnel = objectifPersonnel;
-    }
+    public List<Challenge> getChallengesCrees() { return challengesCrees; }
+    public void setChallengesCrees(List<Challenge> challengesCrees) { this.challengesCrees = challengesCrees; }
 
-    public NiveauPratique getNiveauPratique() {
-        return niveauPratique;
-    }
+    public List<ParticipationChallenge> getParticipationsChallenge() { return participationsChallenge; }
+    public void setParticipationsChallenge(List<ParticipationChallenge> participationsChallenge) { this.participationsChallenge = participationsChallenge; }
 
-    public void setNiveauPratique(NiveauPratique niveauPratique) {
-        this.niveauPratique = niveauPratique;
-    }
+    public List<Commentaire> getCommentaires() { return commentaires; }
+    public void setCommentaires(List<Commentaire> commentaires) { this.commentaires = commentaires; }
 
-    public List<TypeSport> getPreferencesSports() {
-        return preferencesSports;
-    }
+    public List<Reaction> getReactions() { return reactions; }
+    public void setReactions(List<Reaction> reactions) { this.reactions = reactions; }
 
-    public void setPreferencesSports(List<TypeSport> preferencesSports) {
-        this.preferencesSports = preferencesSports;
-    }
-
-    public List<ObtentionBadge> getListBadges() {
-        return listBadges;
-    }
-
-    public void setListBadges(List<ObtentionBadge> listBadges) {
-        this.listBadges = listBadges;
-    }
-
-    public List<Activite> getActivites() {
-        return activites;
-    }
-
-    public void setActivites(List<Activite> activites) {
-        this.activites = activites;
-    }
-
-    public List<Objectif> getObjectifs() {
-        return objectifs;
-    }
-
-    public void setObjectifs(List<Objectif> objectifs) {
-        this.objectifs = objectifs;
-    }
-
-    public List<Amitie> getDemandesEnvoyees() {
-        return demandesEnvoyees;
-    }
-
-    public void setDemandesEnvoyees(List<Amitie> demandesEnvoyees) {
-        this.demandesEnvoyees = demandesEnvoyees;
-    }
-
-    public List<Amitie> getDemandesRecues() {
-        return demandesRecues;
-    }
-
-    public void setDemandesRecues(List<Amitie> demandesRecues) {
-        this.demandesRecues = demandesRecues;
-    }
-
-    public List<ParticipationChallenge> getParticipationsChallenge() {
-        return participationsChallenge;
-    }
-
-    public void setParticipationsChallenge(List<ParticipationChallenge> participationsChallenge) {
-        this.participationsChallenge = participationsChallenge;
-    }
-
-    public List<Commentaire> getCommentaires() {
-        return commentaires;
-    }
-
-    public void setCommentaires(List<Commentaire> commentaires) {
-        this.commentaires = commentaires;
-    }
-
-    public List<Reaction> getReactions() {
-        return reactions;
-    }
-
-    public void setReactions(List<Reaction> reactions) {
-        this.reactions = reactions;
-    }
-
-    public List<Challenge> getChallengesCrees() {
-        return challengesCrees;
-    }
-
-    public void setChallengesCrees(List<Challenge> challengesCrees) {
-        this.challengesCrees = challengesCrees;
-    }
-
+    // 🔥 CALCUL IMC
     public Float calculerIMC() {
         if (this.taille != null && this.poids != null && this.taille > 0) {
             return this.poids / (this.taille * this.taille);
@@ -255,4 +160,25 @@ public class Utilisateur {
         return null;
     }
 
+    // 🔥 ⭐ MÉTHODE POUR RÉCUPÉRER LES AMIS ⭐
+    @Transient
+    public List<Utilisateur> getAmis() {
+        List<Utilisateur> amis = new ArrayList<>();
+
+        // demandes envoyées acceptées
+        for (Amitie a : demandesEnvoyees) {
+            if (a.getStatut() == StatutAmitie.ACCEPTEE) {
+                amis.add(a.getUtilisateurReceveur());
+            }
+        }
+
+        // demandes reçues acceptées
+        for (Amitie a : demandesRecues) {
+            if (a.getStatut() == StatutAmitie.ACCEPTEE) {
+                amis.add(a.getUtilisateurDemandeur());
+            }
+        }
+
+        return amis;
+    }
 }

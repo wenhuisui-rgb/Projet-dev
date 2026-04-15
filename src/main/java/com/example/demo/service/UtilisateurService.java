@@ -79,4 +79,8 @@ public class UtilisateurService {
         // TODO: Implement logic
         return null;
     }
+
+    public List<Utilisateur> rechercherParPseudo(String search, Long currentUserId) {
+    return utilisateurRepository.findByPseudoContainingIgnoreCaseAndIdNot(search, currentUserId);
+}
 }
