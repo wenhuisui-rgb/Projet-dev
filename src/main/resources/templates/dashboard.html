@@ -4,124 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<div>
-    <div>
-        <div>
-            <div>
-                <h1>Dashboard</h1>
-                <div>
-                    <span>Bienvenue ! <strong th:text="${session.utilisateur.prenom} + ' ' + ${session.utilisateur.nom}"></strong></span>
-                    <a href="/profil">Mon profil</a>
-                    <a href="/challenges">Challenges</a>
-                    <a href="/amis">Amis</a>
-                    <a href="/feed">Feed</a>
-                    <a href="/deconnexion">Déconnexion</a>
-                </div>
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+    </div>
+</header>
+
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+
+    <h1>Dashboard</h1>
+    <p>Bienvenue <strong th:text="${session.utilisateur.pseudo}"></strong> !</p>
+
+    <div class="profile-row">
+        <div class="profile-item">
+            <div class="profile-value" th:text="${session.utilisateur.taille != null ? session.utilisateur.taille + ' m' : '-'}"></div>
+            <div class="profile-label">Taille</div>
+        </div>
+        <div class="profile-item">
+            <div class="profile-value" th:text="${session.utilisateur.poids != null ? session.utilisateur.poids + ' kg' : '-'}"></div>
+            <div class="profile-label">Poids</div>
+        </div>
+        <div class="profile-item">
+        <div class="profile-value" th:text="${session.utilisateur.calculerIMC() != null ? session.utilisateur.calculerIMC() : '-'}"></div>
+        <div class="profile-label">IMC</div>
+    </div>
+</div>
+
+    <div class="section">
+        <h2 class="section-title">Mon statistique</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value"><span th:text="${totalMinutes != null ? totalMinutes : 0}"></span> min</div>
+                <div class="stat-label">Temps Total</div>
             </div>
-
-            <hr>
-
-            <div>
-                <div>
-                    <h3>Mes statistiques</h3>
-                </div>
-                <div>
-                    <div>
-                        <div>Distance totale</div>
-                        <div><span th:text="${stats.totalDistance != null ? stats.totalDistance : 0}"></span> km</div>
-                    </div>
-                    <div>
-                        <div>Temps total</div>
-                        <div><span th:text="${stats.totalDuree != null ? stats.totalDuree : 0}"></span> minutes</div>
-                    </div>
-                    <div>
-                        <div>Calories totales</div>
-                        <div><span th:text="${stats.totalCalories != null ? stats.totalCalories : 0}"></span> kcal</div>
-                    </div>
-                    <div>
-                        <div>Activités totales</div>
-                        <div><span th:text="${stats.totalActivites != null ? stats.totalActivites : 0}"></span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div>
-                    <h3>Ce mois-ci</h3>
-                </div>
-                <div>
-                    <div>
-                        <div>Distance</div>
-                        <div><span th:text="${stats.distanceMois != null ? stats.distanceMois : 0}"></span> km</div>
-                    </div>
-                    <div>
-                        <div>Activités</div>
-                        <div><span th:text="${stats.activitesMois != null ? stats.activitesMois : 0}"></span></div>
-                    </div>
-                    <div>
-                        <div>Objectif mensuel</div>
-                        <div th:text="${session.utilisateur.objectifPersonnel != null ? session.utilisateur.objectifPersonnel : 'Non défini'}"></div>
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-            <div>
-                <div>
-                    <h3>Mes activités récentes</h3>
-                    <a href="/activites/nouvelle">Ajouter une nouvelle activité</a>
-                </div>
-                
-                <div th:if="${activites != null and !activites.isEmpty()}">
-                    <table border="1">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Sport</th>
-                                <th>Durée</th>
-                                <th>Distance</th>
-                                <th>Calories</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="activite : ${activites}">
-                                <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan</td>
-                                <td th:text="${activite.typeSport}">quan</td>
-                                <td th:text="${activite.duree} + ' min'">quan</td>
-                                <td th:text="${activite.distance != null ? activite.distance + ' km' : '-'}">quan</td>
-                                <td th:text="${activite.calories != null ? activite.calories + ' kcal' : '-'}">quan</td>
-                                <td>
-                                    <a th:href="@{/activites/{id}(id=${activite.id})}">Voir</a>
-                                    <a th:href="@{/activites/edit/{id}(id=${activite.id})}">Modifier</a>
-                                    <a th:href="@{/activites/delete/{id}(id=${activite.id})}" 
-                                       onclick="return confirm('Veuillez supprimer cette activité ?')">Supprimer</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div th:unless="${activites != null and !activites.isEmpty()}">
-                    <p>Aucune activité enregistrée</p>
-                    <a href="/activites/nouvelle">Enregistrer ma première activité</a>
-                </div>
-            </div>
-
-            <hr>
-
-            <div>
-                <a href="/dashboard">Dashboard</a>
-                <a href="/challenges">Challenges</a>
-                <a href="/amis">Amis</a>
-                <a href="/feed">Feed</a>
-                <a href="/profil">Mon profil</a>
+            <div class="stat-card" th:each="entry : ${tempsParSport}">
+                <div class="stat-value"><span th:text="${entry.value}"></span> min</div>
+                <div class="stat-label" th:text="${entry.key}"></div>
             </div>
         </div>
     </div>
+
+    <div class="section">
+        <h2 class="section-title">Mes progres</h2>
+        <div class="filter-buttons">
+            <a th:href="@{/dashboard(periode='semaine')}" class="filter-btn" th:classappend="${param.periode == null or param.periode == 'semaine'} ? 'active' : ''">Semaine</a>
+            <a th:href="@{/dashboard(periode='mois')}" class="filter-btn" th:classappend="${param.periode == 'mois'} ? 'active' : ''">Mois</a>
+            <a th:href="@{/dashboard(periode='annee')}" class="filter-btn" th:classappend="${param.periode == 'annee'} ? 'active' : ''">Annee</a>
+        </div>
+        <div class="chart-container">
+            <div class="bar-container">
+                <div class="bar-item" th:each="data : ${chartData}">
+                    <div class="bar" th:style="'height: ' + (data.value / maxValue * 180) + 'px;'"></div>
+                    <div class="bar-label" th:text="${data.label}"></div>
+                    <div class="bar-label" th:text="${data.value} + ' min'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Mes objectifs</h2>
+        <div class="two-columns">
+            <div class="column-objectifs">
+                <div th:each="obj : ${objectifs}" style="margin-bottom: 20px;">
+                    <div class="objectif-row">
+                        <div class="objectif-label" th:text="${obj.description}"></div>
+                        <div class="objectif-progress">
+                            <div class="progress-bg">
+                                <div class="progress-bar-blue" th:style="'width: ' + (obj.progression != null ? obj.progression : 0) + '%;'"></div>
+                            </div>
+                        </div>
+                        <div class="objectif-value" th:text="${obj.progression != null ? obj.progression + '%' : '0%'}"></div>
+                    </div>
+                </div>
+                <div th:if="${objectifs == null or objectifs.isEmpty()}">
+                    <p>Aucun objectif defini.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Toutes mes activites</h2>
+        <div th:if="${activites != null and !activites.isEmpty()}">
+            <table class="activites-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Sport</th>
+                        <th>Duree</th>
+                        <th>Distance</th>
+                        <th>Calories</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="activite : ${activites}">
+                        <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan</td>
+                        <td th:text="${activite.typeSport}">quan</td>
+                        <td th:text="${activite.duree} + ' min'">quan</td>
+                        <td th:text="${activite.distance != null ? activite.distance + ' km' : '-'}">quan</td>
+                        <td th:text="${activite.calories != null ? activite.calories + ' kcal' : '-'}">quan</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:unless="${activites != null and !activites.isEmpty()}">
+            <p>Aucune activite enregistree.</p>
+        </div>
+    </div>
+
 </div>
 
 </body>

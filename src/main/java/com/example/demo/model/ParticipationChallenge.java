@@ -10,7 +10,7 @@ public class ParticipationChallenge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime dateInscription; // modifié pour stocker date + heure
+    private LocalDateTime dateInscription;
 
     private float scoreActuel;
 
@@ -27,15 +27,16 @@ public class ParticipationChallenge {
     public ParticipationChallenge(Utilisateur utilisateur, Challenge challenge) {
         this.utilisateur = utilisateur;
         this.challenge = challenge;
-        this.dateInscription = LocalDateTime.now(); // date + heure
-        this.scoreActuel = 0;
+        this.dateInscription = LocalDateTime.now();
+        this.scoreActuel = 0f;
     }
 
     public void mettreAJourScore(float nouveauScore) {
         this.scoreActuel = nouveauScore;
     }
 
-    // Getters / Setters
+    /* ================= GETTERS / SETTERS ================= */
+
     public Long getId() {
         return id;
     }

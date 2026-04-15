@@ -62,33 +62,32 @@ public class ObjectifService {
     public Float getProgressionObjectif(Objectif objectif, Utilisateur utilisateur) {
         LocalDateTime debut = getDateDebutDateTime(objectif);
         LocalDateTime fin = getDateFinDateTime(objectif);
+        Float resultat = 0f;
 
-        if (objectif.getUnite() == Unite.KM) {
+        if (Unite.KM.equals(objectif.getUnite())) { // 推荐使用 .equals() 防止枚举为 null 导致异常
             if (objectif.getTypeSport() != null) {
-                return activiteRepository.getDistanceBySportAndPeriod(
-                    utilisateur, objectif.getTypeSport(), debut, fin);
+                resultat = activiteRepository.getDistanceBySportAndPeriod(utilisateur, objectif.getTypeSport(), debut, fin);
             } else {
-                return activiteRepository.getDistanceByPeriod(utilisateur, debut, fin);
+                resultat = activiteRepository.getDistanceByPeriod(utilisateur, debut, fin);
             }
-        } else if (objectif.getUnite() == Unite.MINUTES) {
+        } else if (Unite.MINUTES.equals(objectif.getUnite())) {
+            Integer duree;
             if (objectif.getTypeSport() != null) {
-                Integer duree = activiteRepository.getDureeBySportAndPeriod(
-                    utilisateur, objectif.getTypeSport(), debut, fin);
-                return duree != null ? duree.floatValue() : 0f;
+                duree = activiteRepository.getDureeBySportAndPeriod(utilisateur, objectif.getTypeSport(), debut, fin);
             } else {
-                Integer duree = activiteRepository.getDureeByPeriod(utilisateur, debut, fin);
-                return duree != null ? duree.floatValue() : 0f;
+                duree = activiteRepository.getDureeByPeriod(utilisateur, debut, fin);
             }
-        } else if (objectif.getUnite() == Unite.KCAL) {
+            resultat = (duree != null) ? duree.floatValue() : 0f;
+        } else if (Unite.KCAL.equals(objectif.getUnite())) {
             if (objectif.getTypeSport() != null) {
-                return activiteRepository.getCaloriesBySportAndPeriod(
-                    utilisateur, objectif.getTypeSport(), debut, fin);
+                resultat = activiteRepository.getCaloriesBySportAndPeriod(utilisateur, objectif.getTypeSport(), debut, fin);
             } else {
-                return activiteRepository.getCaloriesByPeriod(utilisateur, debut, fin);
+                resultat = activiteRepository.getCaloriesByPeriod(utilisateur, debut, fin);
             }
         }
-
-        return 0f;
+        
+        // 终极防线：无论查询结果是什么，只要是 null，就返回 0f
+        return resultat != null ? resultat : 0f;
     }
 
     @Transactional(readOnly = true)

@@ -2,181 +2,207 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Profil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil Sportif - Profil</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<div>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="logo">SportifApp</div>
+            <div class="nav-links">
+                <a th:href="@{/dashboard}" class="active">Mon Profil</a>
+                <a href="#objectifs">Objectifs</a>
+                <a href="#activites">Activités</a>
+            </div>
+        </div>
+        <div class="navbar-right">
+            <a th:href="@{/deconnexion}" class="logout" title="Se déconnecter">
+                <i class="fa-solid fa-arrow-right-from-bracket icon-lg"></i>
+            </a>
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${utilisateur.pseudo} + '&background=random&size=128'}" alt="Profile" class="profile-pic">
+        </div>
+    </nav>
 
-    <h1>Mon profil</h1>
+    <main class="main-container">
 
-    <!-- FORMULAIRE PROFIL -->
-    <form th:action="@{/profil/modifier}" th:object="${utilisateur}" method="post">
+        <div class="profile-grid">
+            
+            <div class="card card-body text-center flex-col-center">
+                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${utilisateur.pseudo} + '&background=random&size=128'}" alt="Avatar" class="profile-avatar">
+                <h2 class="profile-name" th:text="${utilisateur.pseudo}">Mon Profil</h2>
+                <div class="profile-links-container">
+                    <a th:href="@{/mesAmis}" class="profile-link"><i class="fa-solid fa-user-group"></i> Mes Amis</a>
+                    <a th:href="@{/mesChallenges}" class="profile-link"><i class="fa-solid fa-trophy"></i> Mes Challenges</a>
+                    <a href="#badges" class="profile-link"><i class="fa-solid fa-medal"></i> Mes Badges (<span th:text="${utilisateur.listBadges != null ? utilisateur.listBadges.size() : 0}">0</span>)</a>
+                </div>
+            </div>
 
-        <h2>Informations personnelles</h2>
+            <div class="card card-body">
+                <div class="section-header">
+                    <h3 class="section-title">Informations Personnelles</h3>
+                    <a th:href="@{/profil/modifier}" class="edit-icon"><i class="fa-solid fa-pen-to-square"></i></a>
+                </div>
+                
+                <ul class="custom-list">
+                    <li><span class="label">Âge:</span> <span class="val" th:text="${utilisateur.age != null ? utilisateur.age + ' ans' : '-'}">25 ans</span></li>
+                    <li><span class="label">Sexe:</span> <span class="val" th:text="${utilisateur.sexe != null ? utilisateur.sexe : '-'}">Homme</span></li>
+                    <li><span class="label">Taille:</span> <span class="val" th:text="${utilisateur.taille != null ? (utilisateur.taille * 100) + ' cm' : '-'}">180 cm</span></li>
+                    <li><span class="label">Poids:</span> <span class="val" th:text="${utilisateur.poids != null ? utilisateur.poids + ' kg' : '-'}">75 kg</span></li>
+                    
+                    <li class="list-item-divider" th:if="${utilisateur.taille != null and utilisateur.poids != null}">
+                        <span class="label">IMC:</span> 
+                        <span th:with="imc=${utilisateur.calculerIMC()}"
+                              class="badge"
+                              th:classappend="${imc < 18.5 ? 'badge-warning' : (imc <= 25.0 ? 'badge-success' : 'badge-danger')}"
+                              th:text="${imc}">
+                        </span>
+                    </li>
+                    <li class="list-item-divider" th:unless="${utilisateur.taille != null and utilisateur.poids != null}">
+                        <span class="label">IMC:</span> 
+                        <span class="type">Données incomplètes</span>
+                    </li>
+                </ul>
+            </div>
 
-        <div>
-            <label>Pseudo</label>
-            <input type="text" th:field="*{pseudo}" required>
+            <div class="card card-body">
+                <div class="section-header">
+                    <h3 class="section-title">Sports Favoris (<span th:text="${utilisateur.preferencesSports != null ? #lists.size(utilisateur.preferencesSports) : 0}"></span>/4)</h3>
+                </div>
+                <ul class="custom-list" th:if="${utilisateur.preferencesSports != null and !utilisateur.preferencesSports.isEmpty()}">
+                    <li th:each="sport : ${utilisateur.preferencesSports}" class="sport-tag">
+                        🏃 <span th:text="${sport}"></span>
+                    </li>
+                </ul>
+                <p class="type" th:unless="${utilisateur.preferencesSports != null and !utilisateur.preferencesSports.isEmpty()}">Aucun sport favori ajouté.</p>
+            </div>
         </div>
 
-        <div>
-            <label>Email</label>
-            <input type="email" th:field="*{email}" required>
+        <div class="top-bar section-top-bar" id="objectifs">
+            <h2 class="section-heading">Mes Objectifs</h2>
+            <a th:href="@{/objectifs/nouveau}" class="create-btn"><i class="fa-solid fa-plus"></i> Nouvel Objectif</a>
+        </div>
+        
+        <div class="card card-body content-card">
+            <div th:if="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}" class="objectifs-list">
+                
+                <div th:each="obj : ${utilisateur.objectifs}" class="objectif-item">
+                    <div class="objectif-header">
+                        <div>
+                            <h4 class="objectif-title">
+                                <span th:text="${obj.typeSport != null ? obj.typeSport : 'Tous les sports'}">Sport</span>
+                                <span class="type" th:text="${obj.periode != null ? '(' + obj.periode.libelle + ')' : ''}">(MOIS)</span>
+                            </h4>
+                            <p class="date date-mt-0" th:if="${obj.dateDebut != null and obj.dateFin != null}">
+                                Du <span class="text-blue-semibold" th:text="${#temporals.format(obj.dateDebut, 'dd/MM/yyyy')}"></span>
+                                au <span class="text-dark-semibold" th:text="${#temporals.format(obj.dateFin, 'dd/MM/yyyy')}"></span>
+                            </p>
+                            <p class="type" th:text="${obj.description}"></p>
+                            <p class="objectif-cible">Cible: <strong class="text-blue" th:text="${obj.cible + ' ' + obj.unite}"></strong></p>
+                        </div>
+                        <div class="actions actions-inline">
+                            <a th:href="@{/objectifs/modifier/{id}(id=${obj.id})}"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <a th:href="@{/objectifs/delete/{id}(id=${obj.id})}" onclick="return confirm('Supprimer cet objectif ?')" class="btn-delete"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div th:with="progression=${objectifProgressions[obj.id] != null ? objectifProgressions[obj.id] : 0}">
+                        <div class="progress-labels">
+                            <span th:text="'Avancement (' + ${progression} + '%)'"></span>
+                        </div>
+                        <div class="progress-bg">
+                            <div class="progress-bar" 
+                                 th:classappend="${progression >= 100 ? 'bg-green' : (progression > 0 ? 'bg-blue' : 'bg-yellow')}"
+                                 th:style="'width: ' + ${progression} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <p class="type" th:unless="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">Aucun objectif défini.</p>
         </div>
 
-        <div>
-            <label>Sexe</label>
-            <select th:field="*{sexe}">
-                <option th:each="s : ${T(com.example.demo.model.Sexe).values()}"
-                        th:value="${s}" th:text="${s}"></option>
-            </select>
+        <div class="top-bar section-top-bar" id="activites">
+            <h2 class="section-heading">Mes Activités Récents</h2>
+            <a th:href="@{/activites/nouvelle}" class="create-btn"><i class="fa-solid fa-plus"></i> Ajouter</a>
+        </div>
+        
+        <div class="card table-card">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Sport</th>
+                        <th>Date & Heure</th>
+                        <th>Durée</th>
+                        <th>Distance / Calories</th>
+                        <th>Localisation</th>
+                        <th>Évaluation</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody th:if="${activitePage != null and !activitePage.content.isEmpty()}">
+                    <tr th:each="act : ${activitePage.content}" 
+                        th:onclick="|window.location.href='@{/activites/{id}(id=${act.id})}'|" 
+                        class="clickable-row">
+                        <td class="font-semibold" th:text="${act.typeSport}"></td>
+                        <td class="type" th:text="${#temporals.format(act.dateActivite, 'dd MMM yyyy, HH:mm')}"></td>
+                        <td th:text="${act.duree != null ? act.duree + ' min' : '-'}"></td>
+                        
+                        <td>
+                            <div class="col-stack">
+                                <span class="text-dark-medium" th:text="${act.distance != null ? act.distance + ' km' : '-'}"></span>
+                                <span class="type type-sm" th:text="${act.calories != null ? act.calories + ' kcal' : ''}"></span>
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <div class="col-stack">
+                                <span th:text="${act.localisation != null ? act.localisation : '-'}"></span>
+                                <span class="type type-sm" th:if="${act.meteo}" th:text="${act.meteo}"></span>
+                            </div>
+                        </td>
+                        
+                        <td class="stars-cell">
+                            <th:block th:if="${act.evaluation != null}">
+                                <i th:each="i : ${#numbers.sequence(1, 5)}" class="fa-star" th:classappend="${i <= act.evaluation ? 'fa-solid' : 'fa-regular'}"></i>
+                            </th:block>
+                        </td>
+
+                        <td class="text-right">
+                            <div class="actions actions-inline justify-end">
+                                    <a th:href="@{/activites/edit/{id}(id=${act.id})}" onclick="event.stopPropagation();"><i class="fa-solid fa-pen"></i></a>
+                                    <a th:href="@{/activites/delete/{id}(id=${act.id})}" onclick="event.stopPropagation(); return confirm('Supprimer ?')" class="btn-delete"><i class="fa-solid fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody th:unless="${activitePage != null and !activitePage.content.isEmpty()}">
+                    <tr>
+                        <td colspan="7" class="type empty-table-message">
+                            Vous n'avez pas encore enregistré d'activité.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container" th:if="${activitePage != null and activitePage.totalPages > 1}">
+            
+            <a th:if="${activitePage.hasPrevious()}" th:href="@{/profil(page=${activitePage.number - 1}, userId=${utilisateur.id})}" class="create-btn btn-outline">&laquo; Précédent</a>
+
+            <div class="page-numbers">
+                <th:block th:each="i : ${#numbers.sequence(0, activitePage.totalPages - 1)}">
+                    <a th:if="${activitePage.number != i}" th:href="@{/profil(page=${i}, userId=${utilisateur.id})}" th:text="${i + 1}" class="page-link"></a>
+                    <span th:if="${activitePage.number == i}" th:text="${i + 1}" class="page-link active"></span>
+                </th:block>
+            </div>
+
+            <a th:if="${activitePage.hasNext()}" th:href="@{/profil(page=${activitePage.number + 1}, userId=${utilisateur.id})}" class="create-btn btn-outline">Suivant &raquo;</a>
+               
         </div>
 
-        <div>
-            <label>Âge</label>
-            <input type="number" th:field="*{age}">
-        </div>
-
-        <div>
-            <label>Taille (m)</label>
-            <input type="number" th:field="*{taille}" step="0.01">
-        </div>
-
-        <div>
-            <label>Poids (kg)</label>
-            <input type="number" th:field="*{poids}" step="0.1">
-        </div>
-
-        <h2>Préférences sportives</h2>
-
-        <div>
-            <label>Niveau de pratique</label>
-            <select th:field="*{niveauPratique}">
-                <option th:each="n : ${T(com.example.demo.model.NiveauPratique).values()}"
-                        th:value="${n}" th:text="${n}"></option>
-            </select>
-        </div>
-
-        <div>
-            <label>Sports préférés</label>
-            <select th:field="*{preferencesSports}" multiple>
-                <option th:each="s : ${T(com.example.demo.model.TypeSport).values()}"
-                        th:value="${s}" th:text="${s}"></option>
-            </select>
-        </div>
-
-        <div>
-            <button type="submit">Enregistrer</button>
-            <a href="/dashboard">Annuler</a>
-        </div>
-
-    </form>
-
-    <hr>
-
-    <!-- OBJECTIFS -->
-    <h2>Mes objectifs</h2>
-
-    <div>
-        <label>Niveau de pratique :</label>
-        <span th:text="${utilisateur.niveauPratique}"></span>
-    </div>
-    
-    <div>
-        <label>Sports preferes :</label>
-        <span th:text="${#strings.listJoin(utilisateur.preferencesSports, ', ')}"></span>
-    </div>
-    
-    <h2>Objectifs</h2>
-    
-    <div th:if="${isOwner}">
-        <a href="/objectifs/nouveau">Ajouter un objectif !</a>
-    </div>
-
-    <div th:if="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
-
-        <table border="1">
-            <thead>
-            <tr>
-                <th>Description</th>
-                <th>Sport</th>
-                <th>Cible</th>
-                <th>Période</th>
-                <th>Progression</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="obj : ${utilisateur.objectifs}">
-                <td th:text="${obj.description}"></td>
-                <td th:text="${obj.typeSport != null ? obj.typeSport : 'Tous'}"></td>
-                <td th:text="${obj.cible + ' ' + obj.unite}"></td>
-                <td th:text="${obj.periode != null ? obj.periode.libelle : '-'}"></td>
-                <td th:text="${objectifProgressions[obj.id] != null ? objectifProgressions[obj.id] + '%' : '0%'}"></td>
-                <td>
-                    <a th:href="@{/objectifs/{id}(id=${obj.id})}">Voir</a>
-                    <a th:href="@{/objectifs/delete/{id}(id=${obj.id})}"
-                       onclick="return confirm('Supprimer cet objectif ?')">Supprimer</a>
-                </td>
-            </tr>
-            </tbody>
-
-        </table>
-
-    </div>
-
-    <div th:unless="${utilisateur.objectifs != null and !utilisateur.objectifs.isEmpty()}">
-        <p>Aucun objectif défini.</p>
-        <a href="/objectifs/nouveau">Créer votre premier objectif</a>
-    </div>
-
-    <hr>
-
-    <!-- BADGES -->
-    <h2>Mes badges</h2>
-
-    <div th:if="${utilisateur.listBadges != null and !utilisateur.listBadges.isEmpty()}">
-
-        <ul>
-            <li th:each="obt : ${utilisateur.listBadges}">
-                <strong th:text="${obt.badge.nom}"></strong>
-                -
-                <span th:text="${obt.badge.description}"></span>
-                -
-                <span th:text="${obt.dateObtention}"></span>
-            </li>
-        </ul>
-
-    </div>
-
-    <div th:unless="${utilisateur.listBadges != null and !utilisateur.listBadges.isEmpty()}">
-        <p>Aucun badge obtenu pour le moment.</p>
-    </div>
-
-    <hr>
-
-    <!-- IMC -->
-    <h2>Mon IMC</h2>
-
-    <p th:if="${utilisateur.taille != null and utilisateur.poids != null}">
-        Votre IMC est de <strong th:text="${utilisateur.calculerIMC()}"></strong>
-    </p>
-
-    <p th:unless="${utilisateur.taille != null and utilisateur.poids != null}">
-        Renseignez votre taille et votre poids pour calculer votre IMC.
-    </p>
-
-    <hr>
-
-    <!-- NAV -->
-    <div>
-        <a href="/dashboard">Retour au tableau de bord</a>
-        <a href="/deconnexion">Déconnexion</a>
-    </div>
-
-</div>
-
+    </main>
 </body>
 </html>
