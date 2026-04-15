@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Controller
 public class ChallengeController {
@@ -34,17 +35,23 @@ public class ChallengeController {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
         if (utilisateur == null) return "redirect:/connexion";
 
-        model.addAttribute("challenges",
-                typeSport != null
-                        ? challengeService.findByTypeSport(typeSport)
-                        : challengeService.getAllChallenges()
-        );
+        List<Challenge> allChallenges = (typeSport != null) 
+            ? challengeService.findByTypeSport(typeSport) 
+            : challengeService.getAllChallenges();
 
+        // 🔥 新增：获取当前用户参加的所有挑战 ID
+        List<Challenge> userJoined = challengeService.findChallengesByUser(utilisateur);
+        Set<Long> joinedChallengeIds = userJoined.stream()
+                .map(Challenge::getId)
+                .collect(Collectors.toSet());
+
+        model.addAttribute("challenges", allChallenges);
+        model.addAttribute("joinedChallengeIds", joinedChallengeIds); // 传给前端
         model.addAttribute("types", TypeSport.values());
         model.addAttribute("selectedType", typeSport);
         model.addAttribute("utilisateur", utilisateur);
 
-        return "challenges";
+    return "challenges";
     }
 
     @GetMapping("/challenges/create")

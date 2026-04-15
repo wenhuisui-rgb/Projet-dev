@@ -97,8 +97,8 @@ public class ParticipationChallengeController {
     /* =========================
        CLASSEMENT
     ========================== */
-    @GetMapping("/classement/{challengeId}")
-    public String voirClassement(@PathVariable Long challengeId,
+    @GetMapping("/classement/{id}")
+    public String voirClassement(@PathVariable Long id,
                                  Model model,
                                  HttpSession session) {
 
@@ -108,7 +108,7 @@ public class ParticipationChallengeController {
             return "redirect:/connexion";
         }
 
-        Challenge challenge = challengeService.getChallengeById(challengeId);
+        Challenge challenge = challengeService.getChallengeById(id);
 
         if (challenge == null) {
             model.addAttribute("error", "Challenge non trouvé.");
@@ -118,8 +118,8 @@ public class ParticipationChallengeController {
         model.addAttribute("challenge", challenge);
 
         model.addAttribute("classement",
-                participationService.obtenirClassement(challengeId));
+                participationService.obtenirClassement(id));
 
-        return "classement";
+        return "detailParticipationChallenge";
     }
 }
