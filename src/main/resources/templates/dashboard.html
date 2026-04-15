@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -26,7 +28,7 @@
             </svg>
         </a>
         <a th:href="@{/profil}">
-            <img th:src="@{https://ui-avatars.com/api/(name=${session.utilisateur.pseudo},background='random',size=128)}" class="profile-pic" alt="profile">
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
         </a>
     </div>
 </header>
@@ -46,10 +48,10 @@
             <div class="profile-label">Poids</div>
         </div>
         <div class="profile-item">
-        <div class="profile-value" th:text="${session.utilisateur.calculerIMC() != null ? session.utilisateur.calculerIMC() : '-'}"></div>
-        <div class="profile-label">IMC</div>
+            <div class="profile-value" th:text="${session.utilisateur.calculerIMC() != null ? #numbers.formatDecimal(session.utilisateur.calculerIMC(), 1, 1) : '-'}"></div>
+            <div class="profile-label">IMC</div>
+        </div>
     </div>
-</div>
 
     <div class="section">
         <h2 class="section-title">Mon statistique</h2>
@@ -65,76 +67,321 @@
         </div>
     </div>
 
+    <!-- 运动类型筛选器 - 放在 Mes progres 和 Mes objectifs 上方 -->
+    <div class="sport-filter-section">
+        <div class="sport-filter-buttons">
+            <span class="filter-label">Filtrer par sport :</span>
+            <button type="button" class="sport-filter-btn" data-sport="">Tous</button>
+            <button type="button" class="sport-filter-btn" data-sport="COURSE">Course</button>
+            <button type="button" class="sport-filter-btn" data-sport="NATATION">Natation</button>
+            <button type="button" class="sport-filter-btn" data-sport="VELO">Velo</button>
+            <button type="button" class="sport-filter-btn" data-sport="MUSCULATION">Musculation</button>
+            <button type="button" class="sport-filter-btn" data-sport="YOGA">Yoga</button>
+            <button type="button" class="sport-filter-btn" data-sport="RANDONNEE">Randonnee</button>
+            <button id="applySportFilter" class="apply-sport-btn">Appliquer</button>
+        </div>
+    </div>
+
     <div class="section">
         <h2 class="section-title">Mes progres</h2>
+        
         <div class="filter-buttons">
-            <a th:href="@{/dashboard(periode='semaine')}" class="filter-btn" th:classappend="${param.periode == null or param.periode == 'semaine'} ? 'active' : ''">Semaine</a>
-            <a th:href="@{/dashboard(periode='mois')}" class="filter-btn" th:classappend="${param.periode == 'mois'} ? 'active' : ''">Mois</a>
-            <a th:href="@{/dashboard(periode='annee')}" class="filter-btn" th:classappend="${param.periode == 'annee'} ? 'active' : ''">Annee</a>
+            <a href="#" class="filter-btn" data-periode="semaine">Semaine</a>
+            <a href="#" class="filter-btn" data-periode="mois">Mois</a>
+            <a href="#" class="filter-btn" data-periode="annee">Annee</a>
         </div>
-        <div class="chart-container">
-            <div class="bar-container">
-                <div class="bar-item" th:each="data : ${chartData}">
-                    <div class="bar" th:style="'height: ' + (data.value / maxValue * 180) + 'px;'"></div>
-                    <div class="bar-label" th:text="${data.label}"></div>
-                    <div class="bar-label" th:text="${data.value} + ' min'"></div>
+        
+        <div class="charts-row">
+            <div class="chart-box">
+                <div class="chart-title">Minutes</div>
+                <div class="chart-container">
+                    <canvas id="progressChartMinutes" width="400" height="250"></canvas>
+                </div>
+            </div>
+            <div class="chart-box">
+                <div class="chart-title">Calories</div>
+                <div class="chart-container">
+                    <canvas id="progressChartCalories" width="400" height="250"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="section">
-        <h2 class="section-title">Mes objectifs</h2>
-        <div class="two-columns">
-            <div class="column-objectifs">
-                <div th:each="obj : ${objectifs}" style="margin-bottom: 20px;">
-                    <div class="objectif-row">
-                        <div class="objectif-label" th:text="${obj.description}"></div>
-                        <div class="objectif-progress">
-                            <div class="progress-bg">
-                                <div class="progress-bar-blue" th:style="'width: ' + (obj.progression != null ? obj.progression : 0) + '%;'"></div>
-                            </div>
-                        </div>
-                        <div class="objectif-value" th:text="${obj.progression != null ? obj.progression + '%' : '0%'}"></div>
+    <h2 class="section-title">Mes objectifs</h2>
+    <div class="two-columns">
+        <div class="column-objectifs">
+            <div th:if="${#lists.isEmpty(objectifs)}">
+                <p>Aucun objectif defini.</p>
+            </div>
+            <div th:each="obj : ${objectifs}" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <strong th:text="${obj.description}"></strong>
+                        <span style="font-size: 12px; color: #6b7280; margin-left: 10px;" th:text="${obj.cible + ' ' + obj.unite}"></span>
+                    </div>
+                    <div style="width: 60px; text-align: right;">
+                        <span th:text="${obj.progression + '%'}"></span>
                     </div>
                 </div>
-                <div th:if="${objectifs == null or objectifs.isEmpty()}">
-                    <p>Aucun objectif defini.</p>
+                <div th:with="progression=${obj.progression}" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                    <div class="progress-bg" style="flex: 1;">
+                        <div class="progress-bar" 
+                             th:classappend="${progression >= 100 ? 'bg-green' : (progression > 0 ? 'bg-blue' : 'bg-yellow')}"
+                             th:style="'width: ' + ${progression} + '%'"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <div class="section">
         <h2 class="section-title">Toutes mes activites</h2>
-        <div th:if="${activites != null and !activites.isEmpty()}">
-            <table class="activites-table">
+        <div class="card table-card">
+            <table class="custom-table">
                 <thead>
                     <tr>
-                        <th>Date</th>
                         <th>Sport</th>
-                        <th>Duree</th>
+                        <th>Date & Heure</th>
+                        <th>Durée</th>
                         <th>Distance</th>
                         <th>Calories</th>
+                        <th>Localisation</th>
+                        <th>Évaluation</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="activite : ${activites}">
-                        <td th:text="${#temporals.format(activite.dateActivite, 'dd/MM/yyyy HH:mm')}">quan</td>
-                        <td th:text="${activite.typeSport}">quan</td>
-                        <td th:text="${activite.duree} + ' min'">quan</td>
-                        <td th:text="${activite.distance != null ? activite.distance + ' km' : '-'}">quan</td>
-                        <td th:text="${activite.calories != null ? activite.calories + ' kcal' : '-'}">quan</td>
+                <tbody th:if="${activites != null and !activites.isEmpty()}">
+                    <tr th:each="act : ${activites}" 
+                        th:onclick="|window.location.href='@{/activites/{id}(id=${act.id})}'|" 
+                        class="clickable-row">
+                        <td class="font-semibold" th:text="${act.typeSport}">quan
+                        </td>
+                        <td class="type" th:text="${#temporals.format(act.dateActivite, 'dd MMM yyyy, HH:mm')}">quan
+                        </td>
+                        <td th:text="${act.duree != null ? act.duree + ' min' : '-'}">quan
+                        </td>
+                        <td class="text-dark-medium" th:text="${act.distance != null ? act.distance + ' km' : '-'}">quan
+                        </td>
+                        <td class="type type-sm" th:text="${act.calories != null ? act.calories + ' kcal' : ''}">quan
+                        </td>
+                        <td>
+                            <div class="col-stack">
+                                <span th:text="${act.localisation != null ? act.localisation : '-'}"></span>
+                                <span class="type type-sm" th:if="${act.meteo}" th:text="${act.meteo}"></span>
+                            </div>
+                        </td>
+                        <td class="stars-cell">
+                            <th:block th:if="${act.evaluation != null}">
+                                <i th:each="i : ${#numbers.sequence(1, 5)}" class="fa-star" th:classappend="${i <= act.evaluation ? 'fa-solid' : 'fa-regular'}"></i>
+                            </th:block>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody th:unless="${activites != null and !activites.isEmpty()}">
+                    <tr>
+                        <td colspan="7" class="type empty-table-message">
+                            Vous n'avez pas encore enregistré d'activité.
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div th:unless="${activites != null and !activites.isEmpty()}">
-            <p>Aucune activite enregistree.</p>
-        </div>
     </div>
 
-</div>
+    <script th:inline="javascript">
+    var currentPeriode = 'semaine';
+    var selectedSports = [];
+    
+    var minutesChart = null;
+    var caloriesChart = null;
+    
+    function loadChartData() {
+        var params = new URLSearchParams();
+        params.append('periode', currentPeriode);
+        selectedSports.forEach(s => params.append('sports', s));
+        
+        fetch('/api/chart-data?' + params.toString())
+            .then(response => response.json())
+            .then(data => {
+                updateMinutesChart(data.labels, data.minutes);
+                updateCaloriesChart(data.labels, data.calories);
+                updateObjectifs(data.objectifs);
+            })
+            .catch(error => {
+                console.error('Error loading chart data:', error);
+            });
+    }
+    
+    function updateObjectifs(objectifs) {
+        var container = document.getElementById('objectifs-container');
+        if (!container) return;
+        
+        if (objectifs && objectifs.length > 0) {
+            var html = '';
+            objectifs.forEach(obj => {
+                var barColor = obj.progression >= 100 ? '#10b981' : (obj.progression > 0 ? '#3b82f6' : '#f59e0b');
+                html += `
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                                <strong>${escapeHtml(obj.description)}</strong>
+                                <span style="font-size: 12px; color: #6b7280; margin-left: 10px;">${obj.cible} ${obj.unite}</span>
+                            </div>
+                            <div style="width: 60px; text-align: right;">
+                                <span>${obj.progression}%</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <div class="progress-bg" style="flex: 1;">
+                                <div class="progress-bar" style="width: ${obj.progression}%; background-color: ${barColor}; height: 100%; border-radius: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p>Aucun objectif defini.</p>';
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function updateMinutesChart(labels, values) {
+        var ctx = document.getElementById('progressChartMinutes').getContext('2d');
+        if (minutesChart) minutesChart.destroy();
+        minutesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Minutes',
+                    data: values,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: function(context) { return context.raw + ' min'; } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Minutes' } },
+                    x: { title: { display: true, text: 'Date' } }
+                }
+            }
+        });
+    }
+    
+    function updateCaloriesChart(labels, values) {
+        var ctx = document.getElementById('progressChartCalories').getContext('2d');
+        if (caloriesChart) caloriesChart.destroy();
+        caloriesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Calories',
+                    data: values,
+                    borderColor: '#e11d48',
+                    backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#e11d48',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: function(context) { return context.raw + ' kcal'; } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Calories' } },
+                    x: { title: { display: true, text: 'Date' } }
+                }
+            }
+        });
+    }
+    
+    // 运动类型筛选 - 按钮点击选中/取消选中
+    document.querySelectorAll('.sport-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var sport = this.getAttribute('data-sport');
+            
+            if (sport === '') {
+                document.querySelectorAll('.sport-filter-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedSports = [];
+            } else {
+                var tousBtn = document.querySelector('.sport-filter-btn[data-sport=""]');
+                if (tousBtn) tousBtn.classList.remove('selected');
+                
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedSports = selectedSports.filter(s => s !== sport);
+                } else {
+                    this.classList.add('selected');
+                    selectedSports.push(sport);
+                }
+            }
+        });
+    });
+    
+    // 点击 Appliquer 按钮
+    var applyBtn = document.getElementById('applySportFilter');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function() {
+            loadChartData();
+        });
+    }
+    
+    // 时间段筛选
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentPeriode = this.getAttribute('data-periode');
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadChartData();
+        });
+    });
+    
+    // 初始加载数据
+    loadChartData();
+    
+    // 高亮当前选中的按钮
+    var currentPeriodeUrl = new URLSearchParams(window.location.search).get('periode') || 'semaine';
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-periode') === currentPeriodeUrl) {
+            btn.classList.add('active');
+        }
+    });
+</script>
 
 </body>
 </html>

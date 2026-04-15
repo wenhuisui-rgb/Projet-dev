@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.example.demo.model.ChartData;
 
 @Controller
 public class ActiviteController {
@@ -36,7 +37,8 @@ public class ActiviteController {
     private MeteoService meteoService;
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
+    public String dashboard(@RequestParam(required = false, defaultValue = "semaine") String periode,
+                            HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
         if (utilisateur == null) {
             return "redirect:/connexion";
@@ -47,6 +49,50 @@ public class ActiviteController {
         model.addAttribute("activites", activiteService.getActivitesParUtilisateur(utilisateur));
         model.addAttribute("stats", activiteService.getStatsDashboard(utilisateur));
         model.addAttribute("dernieresActivites", activiteService.getDernieresActivites(utilisateur));
+        
+        Integer totalMinutes = activiteService.getDureeTotale(utilisateur);
+        model.addAttribute("totalMinutes", totalMinutes);
+        
+        Map<String, Integer> tempsParSport = new HashMap<>();
+        for (TypeSport sport : TypeSport.values()) {
+            List<Activite> activites = activiteService.getActivitesParType(utilisateur, sport);
+            int minutes = activites.stream().mapToInt(Activite::getDuree).sum();
+            if (minutes > 0) {
+                tempsParSport.put(sport.name(), minutes);
+            }
+        }
+        model.addAttribute("tempsParSport", tempsParSport);
+        
+        // 添加图表数据 - 即使没有数据也給空列表
+        List<String> chartLabels = new ArrayList<>();
+        List<Integer> chartValues = new ArrayList<>();
+        
+        if (utilisateur.getActivites() != null && !utilisateur.getActivites().isEmpty()) {
+            // 有活动时才计算图表数据
+            List<ChartData> chartData = activiteService.getChartData(utilisateur, periode);
+            for (ChartData data : chartData) {
+                chartLabels.add(data.getLabel());
+                chartValues.add(data.getValue());
+            }
+        } else {
+            // 没有活动时给默认的7天数据（都是0）
+            for (int i = 6; i >= 0; i--) {
+                chartLabels.add(getDayName(i));
+                chartValues.add(0);
+            }
+        }
+        
+        model.addAttribute("chartLabels", chartLabels);
+        model.addAttribute("chartValues", chartValues);
+        
+        Map<Long, Float> objectifProgressions = new HashMap<>();
+        if (utilisateur.getObjectifs() != null) {
+            for (Objectif obj : utilisateur.getObjectifs()) {
+                Float progression = objectifService.getPourcentageObjectif(obj, utilisateur);
+                objectifProgressions.put(obj.getId(), progression != null ? (float) Math.round(progression) : 0f);
+            }
+        }
+        model.addAttribute("objectifProgressions", objectifProgressions);
         
         List<Map<String, Object>> objectifsAvecProgression = new ArrayList<>();
         if (utilisateur.getObjectifs() != null) {
@@ -62,9 +108,88 @@ public class ActiviteController {
             }
         }
         model.addAttribute("objectifs", objectifsAvecProgression);
-        
+
         return "dashboard";
-}
+
+    }
+
+    @GetMapping("/api/chart-data")
+    @ResponseBody
+    public Map<String, Object> getChartData(@RequestParam String periode,
+                                            @RequestParam(required = false) List<String> sports,
+                                            HttpSession session) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) {
+            return null;
+        }
+        
+        // 重新加载用户，确保所有懒加载集合可用
+        utilisateur = utilisateurService.findById(utilisateur.getId());
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        List<TypeSport> sportTypes = null;
+        if (sports != null && !sports.isEmpty()) {
+            sportTypes = new ArrayList<>();
+            for (String s : sports) {
+                if (s != null && !s.isEmpty()) {
+                    try {
+                        sportTypes.add(TypeSport.valueOf(s));
+                    } catch (IllegalArgumentException e) {
+                        // 忽略无效值
+                    }
+                }
+            }
+            if (sportTypes.isEmpty()) {
+                sportTypes = null;
+            }
+        }
+        
+        List<ChartData> minutesData = activiteService.getChartDataBySports(utilisateur, periode, sportTypes, "minutes");
+        List<ChartData> caloriesData = activiteService.getChartDataBySports(utilisateur, periode, sportTypes, "calories");
+        
+        List<String> labels = new ArrayList<>();
+        List<Integer> minutesValues = new ArrayList<>();
+        List<Integer> caloriesValues = new ArrayList<>();
+        
+        for (ChartData data : minutesData) {
+            labels.add(data.getLabel());
+            minutesValues.add(data.getValue());
+        }
+        for (ChartData data : caloriesData) {
+            caloriesValues.add(data.getValue());
+        }
+        
+        List<Map<String, Object>> filteredObjectifs = new ArrayList<>();
+        if (utilisateur.getObjectifs() != null) {
+            for (Objectif obj : utilisateur.getObjectifs()) {
+                if (sportTypes != null && !sportTypes.isEmpty()) {
+                    if (obj.getTypeSport() != null && !sportTypes.contains(obj.getTypeSport())) {
+                        continue;
+                    }
+                }
+                Map<String, Object> objMap = new HashMap<>();
+                objMap.put("description", obj.getDescription());
+                objMap.put("cible", obj.getCible());
+                objMap.put("unite", obj.getUnite());
+                Float progression = objectifService.getPourcentageObjectif(obj, utilisateur);
+                objMap.put("progression", progression != null ? Math.round(progression) : 0);
+                filteredObjectifs.add(objMap);
+            }
+        }
+        result.put("objectifs", filteredObjectifs);
+        result.put("labels", labels);
+        result.put("minutes", minutesValues);
+        result.put("calories", caloriesValues);
+        
+        return result;
+    }
+
+    private String getDayName(int daysAgo) {
+        LocalDateTime date = LocalDateTime.now().minusDays(daysAgo);
+        return date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.FRENCH);
+    }
+
 
     @GetMapping("/activites/nouvelle")
     public String nouvelleActivite(HttpSession session, Model model) {
