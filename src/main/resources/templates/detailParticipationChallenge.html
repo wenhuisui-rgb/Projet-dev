@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Classement - FitTrack</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges" class="active">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <a th:href="@{/profil}">
+            <img th:if="${session.utilisateur != null}" th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
+        </a>
+    </div>
+</header>
+
+<main class="main-container" style="max-width: 900px;">
+
+    <div class="top-bar section-top-bar" style="padding-left: 0; padding-right: 0;">
+        <div>
+            <h2 class="section-heading" th:text="${'Classement : ' + challenge.titre}">Classement</h2>
+            <p class="type" style="margin-top: 5px;">Retrouvez ici la position de tous les participants.</p>
+        </div>
+        <a href="/challenges" class="create-btn btn-outline" style="background: white; color: #111827; border: 1px solid #ddd;">
+            &larr; Retour aux challenges
+        </a>
+    </div>
+
+    <div class="card table-card">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Rang</th>
+                    <th>Participant</th>
+                    <th>Score Total</th>
+                    <th>Date d'inscription</th>
+                </tr>
+            </thead>
+            <tbody th:if="${classement != null and !classement.isEmpty()}">
+                <tr th:each="p, iter : ${classement}" class="clickable-row">
+                    <td>
+                        <span class="badge" th:classappend="${iter.index == 0 ? 'badge-warning' : (iter.index == 1 ? 'badge-success' : (iter.index == 2 ? 'badge-danger' : ''))}" th:text="${iter.index + 1}"></span>
+                    </td>
+                    <td class="font-semibold text-dark-medium">
+                        <img th:src="@{'https://ui-avatars.com/api/?name=' + ${p.utilisateur.pseudo} + '&background=random&size=32'}" style="width:24px; border-radius:50%; vertical-align:middle; margin-right:8px;">
+                        <span th:text="${p.utilisateur.pseudo}">Pseudo</span>
+                    </td>
+                    <td class="text-blue-semibold" style="font-size: 16px;">
+                        <span th:text="${#numbers.formatDecimal(p.scoreActuel, 1, 1)}">0</span>
+                        <span class="type type-sm" th:text="${challenge.unite != null ? challenge.unite.code : 'pts'}"></span>
+                    </td>
+                    <td class="type type-sm" th:text="${#temporals.format(p.dateInscription, 'dd MMM yyyy, HH:mm')}">Date</td>
+                </tr>
+            </tbody>
+            <tbody th:unless="${classement != null and !classement.isEmpty()}">
+                <tr>
+                    <td colspan="4" class="type empty-table-message" style="text-align: center; padding: 40px;">
+                        Personne n'est encore inscrit à ce défi.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+</body>
+</html>
