@@ -9,24 +9,28 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="navbar-left">
-            <div class="logo">SportifApp</div>
-            <div class="nav-links">
-                <a th:href="@{/dashboard}" class="active">Mon Profil</a>
-                <a href="#objectifs">Objectifs</a>
-                <a href="#activites">Activités</a>
-            </div>
-        </div>
-        <div class="navbar-right">
-            <a th:href="@{/deconnexion}" class="logout" title="Se déconnecter">
-                <i class="fa-solid fa-arrow-right-from-bracket icon-lg"></i>
-            </a>
-            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${utilisateur.pseudo} + '&background=random&size=128'}" alt="Profile" class="profile-pic">
-        </div>
-    </nav>
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img th:src="@{'https://ui-avatars.com/api/?name=' + ${utilisateur.pseudo} + '&background=random&size=128'}" alt="Profile" class="profile-pic">
+    </div>
+</header>
 
-    <main class="main-container">
+<main class="main-container">
 
         <div class="profile-grid">
             
