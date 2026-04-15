@@ -2,96 +2,74 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Mes Challenges</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Mes Challenges - FitTrack</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
 
-<header class="navbar">
-    <div class="navbar-left">
-        <div class="logo">FitTrack</div>
-        <nav class="nav-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/feed">Feed</a>
-            <a href="/challenges">Challenges</a>
-        </nav>
+<div th:replace="~{barNavigation :: navbar}"></div>
+
+<main class="main-container">
+    <div class="top-bar section-top-bar">
+        <div>
+            <h2 class="section-heading">Mes Challenges</h2>
+            <p class="type" style="margin-top: 5px;">Suivez votre progression dans vos défis actuels.</p>
+        </div>
+        <a class="create-btn" href="/challenges/create"><i class="fa-solid fa-plus"></i> Créer un challenge</a>
     </div>
-    <div class="navbar-right">
-        <a href="/deconnexion" class="logout" title="Déconnexion">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="22" height="22"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2"
-                 stroke-linecap="round"
-                 stroke-linejoin="round">
-                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
-                <polyline points="17 16 22 12 17 8"/>
-                <line x1="22" y1="12" x2="10" y2="12"/>
-            </svg>
-        </a>
-        <a th:href="@{/profil}">
-            <img th:src="@{https://ui-avatars.com/api/(name=${session.utilisateur.pseudo},background='random',size=128)}" class="profile-pic" alt="profile">
-        </a>
-    </div>
-</header>
 
-<header class="top-bar">
-    <h1>Mes Challenges</h1>
-    <a class="create-btn" href="/challenges/create">Créer un challenge</a>
-</header>
+    <section class="sport-filter-section">
+        <form method="get" action="/challenge" style="margin:0; padding:0; box-shadow:none; border:none; display:flex; align-items:center; max-width:100%;">
+            <span class="filter-label"><i class="fa-solid fa-filter"></i> Filtrer par sport :</span>
+            <select name="typeSport" style="width: auto; margin-right: 15px; padding: 8px 12px; border-radius: 8px;">
+                <option value="">Tous les sports</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t == selectedType}"></option>
+            </select>
+            <button type="submit" class="create-btn" style="width: auto; margin:0; padding: 8px 16px;">Appliquer</button>
+        </form>
+    </section>
 
-<!-- FILTER -->
-<section class="filter-bar">
-    <form method="get" action="/challenge">
-        <select name="typeSport">
-            <option value="">Tous les sports</option>
-            <option th:each="t : ${types}"
-                    th:value="${t}"
-                    th:text="${t}"
-                    th:selected="${t == selectedType}">
-            </option>
-        </select>
-        <button type="submit">Filtrer</button>
-    </form>
-</section>
-
-<!-- CARDS -->
-<section class="grid">
-
-    <div class="card" th:each="c : ${challenges}" th:onclick="'location.href=\'/challenges/detail/' + ${c.id} + '\''">
-
-        <div class="card-image"></div>
-
-        <div class="card-body">
-
-            <h3 th:text="${c.titre}"></h3>
-
-            <p class="type" th:text="${c.typeSport}"></p>
-
-            <p class="date">
-                Du <span th:text="${c.dateDebut}"></span>
-                au <span th:text="${c.dateFin}"></span>
-            </p>
-
-            <div class="actions" onclick="event.stopPropagation()">
-                <a th:href="@{/participation/classement/{id}(id=${c.id})}">
-                    Voir classement
-                </a>
-
-                <form th:action="@{/participation/rejoindre/{id}(id=${c.id})}"
-                      method="post">
-                    <button type="submit">Rejoindre</button>
-                </form>
+    <section class="grid">
+        <div class="card" th:each="c : ${challenges}" th:onclick="'location.href=\'/challenges/detail/' + ${c.id} + '\''">
+            
+            <div class="status-badge-absolute">
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> En cours</span>
+                <span th:if="${c.createur.id == session.utilisateur.id}" class="badge badge-warning" style="margin-left: 5px;">Admin</span>
             </div>
 
+            <div class="card-image">
+                <span th:text="${c.typeSport != null and c.typeSport.name() == 'COURSE' ? '🏃' : '🚴'}"></span>
+            </div>
+
+            <div class="card-body">
+                <h3 th:text="${c.titre}"></h3>
+                
+                <p class="type" style="margin-bottom: 10px;">
+                    <span class="badge" style="background:#f3f4f6; color:#374151;" th:text="${c.typeSport}"></span>
+                    <span class="text-blue-semibold" style="margin-left:8px;" th:text="${c.unite != null ? c.unite.code : 'pts'}"></span>
+                </p>
+                
+                <p class="date type-sm">
+                    Du <strong class="text-dark-semibold" th:text="${#temporals.format(c.dateDebut, 'dd/MM')}"></strong> 
+                    au <strong class="text-dark-semibold" th:text="${#temporals.format(c.dateFin, 'dd/MM/yyyy')}"></strong>
+                </p>
+
+                <div class="actions" style="border-top: 1px solid #eee; padding-top: 12px; align-items: center;" onclick="event.stopPropagation()">
+                    <a th:href="@{/participation/classement/{id}(id=${c.id})}" class="profile-link" style="padding: 6px 10px;"><i class="fa-solid fa-trophy"></i> Classement</a>
+                    
+                    <form th:if="${c.createur.id != session.utilisateur.id}" th:action="@{/participation/quitter/{id}(id=${c.id})}" method="post" style="margin:0; padding:0; border:none; box-shadow:none;">
+                        <button type="submit" class="create-btn btn-outline" style="margin:0; padding: 6px 12px; color: #ef4444; border-color: #ef4444;" onclick="return confirm('Êtes-vous sûr de vouloir quitter ce challenge ?')">Quitter</button>
+                    </form>
+                </div>
+            </div>
         </div>
-
-    </div>
-
-</section>
+        
+        <div th:if="${challenges == null or challenges.isEmpty()}" class="empty-table-message" style="grid-column: 1 / -1;">
+            Vous ne participez à aucun challenge pour le moment.
+        </div>
+    </section>
+</main>
 
 </body>
 </html>

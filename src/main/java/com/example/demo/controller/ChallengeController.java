@@ -83,7 +83,7 @@ public class ChallengeController {
             return "redirect:/challenges/create";
         }
 
-        challengeService.creerChallenge(
+        Challenge savedChallenge = challengeService.creerChallenge(
                 challenge.getTitre(),
                 challenge.getTypeSport(),
                 challenge.getDateDebut(),
@@ -92,6 +92,7 @@ public class ChallengeController {
                 challenge.getUnite(),
                 challenge.getCible()
         );
+        participationService.rejoindreChallenge(utilisateur, savedChallenge);
 
         redirectAttributes.addFlashAttribute("success", "Challenge créé avec succès !");
         return "redirect:/challenges";
@@ -153,13 +154,15 @@ public class ChallengeController {
         if (challenge == null) {
             return "redirect:/challenges";
         }
-        
-        // 获取参与者排名
+       
         List<ParticipationChallenge> classement = participationService.obtenirClassement(id);
+
+        boolean estInscrit = participationService.estDejaInscrit(utilisateur.getId(), id);
         
         model.addAttribute("challenge", challenge);
         model.addAttribute("classement", classement);
         model.addAttribute("utilisateur", utilisateur);
+        model.addAttribute("estInscrit", estInscrit);
         
         return "detailChallenge";
     }

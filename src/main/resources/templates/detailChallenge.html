@@ -13,9 +13,30 @@
     
     <div class="top-bar section-top-bar">
         <a href="/challenges" class="create-btn btn-outline" style="padding: 6px 12px;"><i class="fa-solid fa-arrow-left"></i> Retour</a>
-        <form th:action="@{/participation/rejoindre/{id}(id=${challenge.id})}" method="post" style="margin: 0; padding: 0; background: transparent; border: none; box-shadow: none; max-width: none;">
-            <button type="submit" class="create-btn" style="margin: 0;">Rejoindre ce Challenge</button>
-        </form>
+        
+        <div style="display: flex; gap: 10px;">
+            
+            <form th:if="${challenge.createur.id == utilisateur.id}" 
+                  th:action="@{/challenges/supprimer/{id}(id=${challenge.id})}" 
+                  method="post" 
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce challenge ?')">
+                <button type="submit" class="create-btn" style="margin: 0; background-color: #ef4444; border-color: #ef4444;">Supprimer le Challenge</button>
+            </form>
+
+            <form th:if="${challenge.createur.id != utilisateur.id and estInscrit}" 
+                  th:action="@{/participation/quitter/{id}(id=${challenge.id})}" 
+                  method="post"
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir quitter ce challenge ? Votre score sera perdu.')">
+                <button type="submit" class="create-btn btn-outline" style="margin: 0; color: #ef4444; border: 1px solid #ef4444; background: white;">Quitter le Challenge</button>
+            </form>
+
+            <form th:if="${challenge.createur.id != utilisateur.id and !estInscrit}" 
+                  th:action="@{/participation/rejoindre/{id}(id=${challenge.id})}" 
+                  method="post">
+                <button type="submit" class="create-btn" style="margin: 0; background-color: #3b82f6; border-color: #3b82f6;">Rejoindre ce Challenge</button>
+            </form>
+            
+        </div>
     </div>
 
     <div class="card card-body content-card">
