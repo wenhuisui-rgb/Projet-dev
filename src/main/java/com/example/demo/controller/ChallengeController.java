@@ -97,6 +97,27 @@ public class ChallengeController {
         return "redirect:/challenges";
     }
 
+    // 在 ChallengeController.java 中添加
+    @PostMapping("/challenges/supprimer/{id}")
+    public String supprimerChallenge(@PathVariable Long id, 
+                                    HttpSession session, 
+                                    RedirectAttributes redirectAttributes) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) return "redirect:/connexion";
+
+        Challenge challenge = challengeService.getChallengeById(id);
+        
+        // 安全校验：只有创造者本人可以删除
+        if (challenge != null && challenge.getCreateur().getId().equals(utilisateur.getId())) {
+            challengeService.supprimerChallenge(id);
+            redirectAttributes.addFlashAttribute("success", "Challenge supprimé avec succès !");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Vous n'avez pas l'autorisation de supprimer ce challenge.");
+        }
+
+        return "redirect:/challenges";
+    }
+
     @GetMapping("/challenge")
     public String myChallenges(@RequestParam(required = false) TypeSport typeSport,
                            HttpSession session, 

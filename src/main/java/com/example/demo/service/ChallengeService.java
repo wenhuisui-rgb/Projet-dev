@@ -6,7 +6,7 @@ import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ChallengeRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,6 +38,13 @@ public class ChallengeService {
         );
 
         return challengeRepository.save(challenge);
+    }
+
+    // 在 ChallengeService.java 中添加
+    @Transactional
+    public void supprimerChallenge(Long id) {
+        // 因为设置了 CascadeType.ALL，删除挑战会自动删除相关的 Participation
+        challengeRepository.deleteById(id);
     }
 
     public List<Challenge> getAllChallenges() {
