@@ -85,7 +85,7 @@
                         
                         <div class="mt-4">
                             <button type="submit" class="btn btn-primary">Enregistrer</button>
-                            <a th:href="@{/activites/{id}(id=${activite.id})}" class="btn btn-secondary">Annuler</a>
+                            <button type="button" class="btn btn-primary" th:onclick="|window.location.href='@{/profil}'|">Annuler</button>
                         </div>
                     </form>
                 </div>

@@ -35,13 +35,12 @@
     <div class="row">
         <div class="col-md-8 mx-auto">
             <div class="card">
-                <div class="card-header">
-                    <h2 class="mb-0">Créer une Activité</h2>
-                </div>
+                
                 <div class="card-body">
                     
                     <form th:action="@{/activites/sauvegarder}" th:object="${activite}" method="post">
                         
+                        <h1 style="margin-bottom: 20px;">Nouvelle Activité</h1>
                         <div class="mb-3">
                             <label for="typeSport" class="form-label">Type de sport *</label>
                             <select th:field="*{typeSport}" id="typeSport" class="form-select" required>
@@ -63,8 +62,7 @@
                         
                         <div class="mb-3">
                             <label for="distance" class="form-label">Distance - km</label>
-                            <input type="number" th:field="*{distance}" id="distance" class="form-control" step="0.01">
-                            <div class="form-text">Optionnel - Pour la course, vélo, natation...</div>
+                            <input type="number" th:field="*{distance}" id="distance" class="form-control" step="0.01" placeholder="Optionnel - Pour la course, vélo, natation...">
                         </div>
                         
                         <div class="mb-3">
@@ -86,7 +84,7 @@
                         
                         <div class="mt-4">
                             <button type="submit" class="btn btn-primary">Enregistrer</button>
-                            <a th:href="@{/dashboard}" class="btn btn-secondary">Annuler</a>
+                            <button type="button" class="btn btn-primary" th:onclick="|window.location.href='@{/profil}'|">Annuler</button>
                         </div>
                     </form>
                 </div>
