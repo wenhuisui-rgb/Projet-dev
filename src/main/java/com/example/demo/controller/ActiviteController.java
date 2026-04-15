@@ -283,44 +283,54 @@ public class ActiviteController {
     }
 
     @PostMapping("/activites/update/{id}")
-    public String updateActivite(@PathVariable Long id,
-                                  @ModelAttribute Activite activiteModifiee,
-                                  HttpSession session,
-                                  RedirectAttributes redirectAttributes) {
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) {
-            return "redirect:/connexion";
-        }
-        
-        Activite existante = activiteService.getActiviteParId(id);
-        if (existante == null || !existante.getUtilisateur().getId().equals(utilisateur.getId())) {
-            redirectAttributes.addFlashAttribute("error", "Impossible de modifier cette activité");
-            return "redirect:/profil"; 
-        }
-
-        boolean isLocationChanged = (activiteModifiee.getLocalisation() != null && 
-                                   !activiteModifiee.getLocalisation().equals(existante.getLocalisation()));
-        
-        if (isLocationChanged && !activiteModifiee.getLocalisation().isEmpty()) {
-            String meteo = meteoService.getMeteoParLocalisation(activiteModifiee.getLocalisation());
-            activiteModifiee.setMeteo(meteo); 
-        } else {
-            activiteModifiee.setMeteo(existante.getMeteo()); 
-        }
-        
-        existante.setTypeSport(activiteModifiee.getTypeSport());
-        existante.setDateActivite(activiteModifiee.getDateActivite());
-        existante.setDuree(activiteModifiee.getDuree());
-        existante.setDistance(activiteModifiee.getDistance());
-        existante.setLocalisation(activiteModifiee.getLocalisation());
-        existante.setEvaluation(activiteModifiee.getEvaluation());
-        existante.setMeteo(activiteModifiee.getMeteo()); // 更新天气
-        
-        activiteService.sauvegarderActivite(existante, utilisateur.getPoids());
-        
-        redirectAttributes.addFlashAttribute("success", "Activité modifiée avec succès !");
-        return "redirect:/profil";
+public String updateActivite(@PathVariable Long id,
+                              @ModelAttribute Activite activiteModifiee,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+    Utilisateur utilisateurSession = (Utilisateur) session.getAttribute("utilisateur");
+    if (utilisateurSession == null) {
+        return "redirect:/connexion";
     }
+    
+    // 1. 关键修复：从数据库重新拉取用户数据，确保能拿到用户的最新体重 (Poids)
+    Utilisateur utilisateur = utilisateurService.findById(utilisateurSession.getId());
+
+    Activite existante = activiteService.getActiviteParId(id);
+    if (existante == null || !existante.getUtilisateur().getId().equals(utilisateur.getId())) {
+        redirectAttributes.addFlashAttribute("error", "Impossible de modifier cette activité");
+        return "redirect:/profil"; 
+    }
+
+    // 处理天气的逻辑保持不变
+    boolean isLocationChanged = (activiteModifiee.getLocalisation() != null && 
+                               !activiteModifiee.getLocalisation().equals(existante.getLocalisation()));
+    if (isLocationChanged && !activiteModifiee.getLocalisation().isEmpty()) {
+        String meteo = meteoService.getMeteoParLocalisation(activiteModifiee.getLocalisation());
+        activiteModifiee.setMeteo(meteo); 
+    } else {
+        activiteModifiee.setMeteo(existante.getMeteo()); 
+    }
+    
+    // 2. 关键修复：加一层非空判断。防止前端表单未提交这些关键字段导致它们变成 null
+    if (activiteModifiee.getTypeSport() != null) {
+        existante.setTypeSport(activiteModifiee.getTypeSport());
+    }
+    if (activiteModifiee.getDuree() != null) {
+        existante.setDuree(activiteModifiee.getDuree());
+    }
+
+    existante.setDateActivite(activiteModifiee.getDateActivite());
+    existante.setDistance(activiteModifiee.getDistance());
+    existante.setLocalisation(activiteModifiee.getLocalisation());
+    existante.setEvaluation(activiteModifiee.getEvaluation());
+    existante.setMeteo(activiteModifiee.getMeteo()); 
+    
+    // 调用 Service 进行保存。Service内部会自动调用 calculerCalories 重新计算并覆盖旧卡路里
+    activiteService.sauvegarderActivite(existante, utilisateur.getPoids());
+    
+    redirectAttributes.addFlashAttribute("success", "Activité modifiée avec succès !");
+    return "redirect:/profil";
+}
 
     @GetMapping("/activites/delete/{id}")
     public String deleteActivite(@PathVariable Long id,
