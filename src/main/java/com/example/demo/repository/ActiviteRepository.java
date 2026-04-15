@@ -1,6 +1,8 @@
 package com.example.demo.repository;
 
 import com.example.demo.model.Activite;
+import com.example.demo.model.Amitie;
+import com.example.demo.model.StatutAmitie;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import org.springframework.data.jpa.repository.JpaRepository;

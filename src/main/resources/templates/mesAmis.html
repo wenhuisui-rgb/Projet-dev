@@ -3,91 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <title>Mes Amis</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
 
-<h1>👥 Mes Amis</h1>
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <a th:href="@{/profil}">
+            <img th:if="${session.utilisateur != null}" th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
+        </a>
+    </div>
+</header>
 
-<!-- ========================= -->
-<!-- RECHERCHE -->
-<!-- ========================= -->
-<form th:action="@{/mesAmis}" method="get">
-    <input type="text" name="search" placeholder="Rechercher...">
-    <button type="submit">Rechercher</button>
-</form>
+<div style="max-width: 800px; margin: 40px auto; padding: 20px;">
 
-<hr>
+    <h1>Mes Amis</h1>
 
-<!-- ========================= -->
-<!-- RESULTATS -->
-<!-- ========================= -->
-<div th:if="${resultats != null}">
+    <form th:action="@{/mesAmis}" method="get">
+        <input type="text" name="search" placeholder="Rechercher...">
+        <button type="submit">Rechercher</button>
+    </form>
 
-    <h2>Résultats</h2>
+    <hr>
 
-    <div th:each="user : ${resultats}">
-
-        <span th:text="${user.pseudo}"></span>
-
-        <!-- ✔ bouton sécurisé -->
-        <div th:if="${demandesEnvoyees != null and demandesEnvoyees.contains(user.id)}">
-            ⏳ Demande envoyée
+    <div th:if="${resultats != null}">
+        <h2>Resultats</h2>
+        <div th:each="user : ${resultats}">
+            <span th:text="${user.pseudo}"></span>
+            <div th:if="${demandesEnvoyees != null and demandesEnvoyees.contains(user.id)}">
+                Demande envoyee
+            </div>
+            <a th:if="${demandesEnvoyees == null or !demandesEnvoyees.contains(user.id)}"
+               th:href="@{'/amities/ajouter/' + ${user.id}}">
+                <button>Ajouter</button>
+            </a>
         </div>
-
-        <a th:if="${demandesEnvoyees == null or !demandesEnvoyees.contains(user.id)}"
-           th:href="@{'/amities/ajouter/' + ${user.id}}">
-            <button>➕ Ajouter</button>
-        </a>
-
     </div>
 
-</div>
+    <hr>
 
-<hr>
+    <h2>Demandes recues</h2>
 
-<!-- ========================= -->
-<!-- DEMANDES RECUES -->
-<!-- ========================= -->
-<h2>📩 Demandes reçues</h2>
-
-<div th:if="${demandesRecues != null and !demandesRecues.isEmpty()}">
-
-    <div th:each="d : ${demandesRecues}">
-
-        <span th:text="${d.utilisateurDemandeur.pseudo}"></span>
-
-        <a th:href="@{'/amities/' + ${d.id} + '/accepter'}">
-            <button>✔ Accepter</button>
-        </a>
-
-        <a th:href="@{'/amities/' + ${d.id} + '/refuser'}">
-            <button>❌ Refuser</button>
-        </a>
-
+    <div th:if="${demandesRecues != null and !demandesRecues.isEmpty()}">
+        <div th:each="d : ${demandesRecues}">
+            <span th:text="${d.utilisateurDemandeur.pseudo}"></span>
+            <a th:href="@{'/amities/' + ${d.id} + '/accepter'}">
+                <button>Accepter</button>
+            </a>
+            <a th:href="@{'/amities/' + ${d.id} + '/refuser'}">
+                <button>Refuser</button>
+            </a>
+        </div>
     </div>
 
-</div>
-
-<div th:if="${demandesRecues == null or demandesRecues.isEmpty()}">
-    <p>Aucune demande en attente</p>
-</div>
-
-<hr>
-
-<!-- ========================= -->
-<!-- AMIS -->
-<!-- ========================= -->
-<h2>Mes amis</h2>
-
-<div th:if="${amis != null and !amis.isEmpty()}">
-    <div th:each="ami : ${amis}">
-        <span th:text="${ami.pseudo}"></span>
+    <div th:if="${demandesRecues == null or demandesRecues.isEmpty()}">
+        <p>Aucune demande en attente</p>
     </div>
-</div>
 
-<div th:if="${amis == null or amis.isEmpty()}">
-    <p>Aucun ami 😢</p>
+    <hr>
+
+    <h2>Mes amis</h2>
+
+    <div th:if="${amis != null and !amis.isEmpty()}">
+        <div th:each="ami : ${amis}">
+            <span th:text="${ami.pseudo}"></span>
+        </div>
+    </div>
+
+    <div th:if="${amis == null or amis.isEmpty()}">
+        <p>Aucun ami</p>
+    </div>
+
 </div>
 
 </body>
