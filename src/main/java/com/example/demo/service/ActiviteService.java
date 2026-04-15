@@ -9,12 +9,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
+import com.example.demo.model.ChartData;
+
 
 @Service
 public class ActiviteService {
@@ -22,11 +24,18 @@ public class ActiviteService {
     @Autowired
     private ActiviteRepository activiteRepository;
 
+    @Autowired
+    private ParticipationChallengeService participationChallengeService;
+
     @Transactional
     public Activite sauvegarderActivite(Activite activite, Float poidsUtilisateur) {
         Float caloriesCalculees = activite.calculerCalories(poidsUtilisateur);
         activite.setCalories(caloriesCalculees);
-        return activiteRepository.save(activite);
+        Activite savedActivite = activiteRepository.save(activite);
+
+        participationChallengeService.actualiserScoresApresActivite(savedActivite);
+        
+        return savedActivite;
     }
 
     public Activite getActiviteParId(Long id) {
@@ -143,7 +152,13 @@ public class ActiviteService {
             Float nouvellesCalories = existante.calculerCalories(poidsUtilisateur);
             existante.setCalories(nouvellesCalories);
             
-            return activiteRepository.save(existante);
+            // 保存运动记录到数据库
+            Activite savedActivite = activiteRepository.save(existante);
+            
+            // 🔥 扣动扳机：触发挑战的自动算分机制
+            participationChallengeService.actualiserScoresApresActivite(savedActivite);
+            
+            return savedActivite;
         }
         return null;
     }
@@ -153,6 +168,8 @@ public class ActiviteService {
         activiteRepository.deleteById(id);
     }
 
+    
+
     public boolean aAtteintObjectifMensuel(Utilisateur utilisateur, Float objectifDistance) {
         if (objectifDistance == null) return false;
         Float distanceMois = getDistanceDuMois(utilisateur);
@@ -160,8 +177,102 @@ public class ActiviteService {
     }
 
     public Page<Activite> getActivitesPaginees(Utilisateur utilisateur, int page, int size) {
-        // 注意：Spring Data JPA 的页码是从 0 开始的 (0 代表第一页)
         Pageable pageable = PageRequest.of(page, size);
         return activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur, pageable);
     }
+
+    public List<ChartData> getChartData(Utilisateur utilisateur, String periode) {
+        List<ChartData> result = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        
+        if ("semaine".equals(periode)) {
+            for (int i = 6; i >= 0; i--) {
+                LocalDateTime day = now.minusDays(i);
+                LocalDateTime start = day.withHour(0).withMinute(0);
+                LocalDateTime end = day.withHour(23).withMinute(59);
+                Integer minutes = activiteRepository.getDureeByPeriod(utilisateur, start, end);
+                result.add(new ChartData(getDayName(i), minutes != null ? minutes : 0));
+            }
+        } else if ("mois".equals(periode)) {
+            int daysInMonth = now.toLocalDate().lengthOfMonth();
+            for (int i = 1; i <= daysInMonth; i++) {
+                LocalDateTime day = LocalDateTime.now().withDayOfMonth(i);
+                LocalDateTime start = day.withHour(0).withMinute(0);
+                LocalDateTime end = day.withHour(23).withMinute(59);
+                Integer minutes = activiteRepository.getDureeByPeriod(utilisateur, start, end);
+                result.add(new ChartData(String.valueOf(i), minutes != null ? minutes : 0));
+            }
+        } else if ("annee".equals(periode)) {
+            for (int i = 1; i <= 12; i++) {
+                LocalDateTime start = LocalDateTime.now().withMonth(i).withDayOfMonth(1).withHour(0).withMinute(0);
+                LocalDateTime end = start.withMonth(i).withDayOfMonth(start.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59);
+                Integer minutes = activiteRepository.getDureeByPeriod(utilisateur, start, end);
+                result.add(new ChartData(getMonthName(i), minutes != null ? minutes : 0));
+            }
+        }
+        
+        return result;
+    }
+
+    private String getDayName(int daysAgo) {
+        LocalDateTime date = LocalDateTime.now().minusDays(daysAgo);
+        return date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.FRENCH);
+    }
+
+    private String getMonthName(int month) {
+        java.time.Month m = java.time.Month.of(month);
+        return m.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.FRENCH);
+    }
+
+    public List<ChartData> getChartDataBySports(Utilisateur utilisateur, String periode, List<TypeSport> sports, String metric) {
+    List<ChartData> result = new ArrayList<>();
+    LocalDateTime now = LocalDateTime.now();
+    
+    if ("semaine".equals(periode)) {
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime day = now.minusDays(i);
+            LocalDateTime start = day.withHour(0).withMinute(0);
+            LocalDateTime end = day.withHour(23).withMinute(59);
+            Integer value;
+            if ("calories".equals(metric)) {
+                Float calories = activiteRepository.getCaloriesByPeriodAndSports(utilisateur, start, end, sports);
+                value = calories != null ? calories.intValue() : 0;
+            } else {
+                value = activiteRepository.getDureeByPeriodAndSports(utilisateur, start, end, sports);
+            }
+            result.add(new ChartData(getDayName(i), value != null ? value : 0));
+        }
+    } else if ("mois".equals(periode)) {
+        int daysInMonth = now.toLocalDate().lengthOfMonth();
+        for (int i = 1; i <= daysInMonth; i++) {
+            LocalDateTime day = now.withDayOfMonth(i);
+            LocalDateTime start = day.withHour(0).withMinute(0);
+            LocalDateTime end = day.withHour(23).withMinute(59);
+            Integer value;
+            if ("calories".equals(metric)) {
+                Float calories = activiteRepository.getCaloriesByPeriodAndSports(utilisateur, start, end, sports);
+                value = calories != null ? calories.intValue() : 0;
+            } else {
+                value = activiteRepository.getDureeByPeriodAndSports(utilisateur, start, end, sports);
+            }
+            result.add(new ChartData(String.valueOf(i), value != null ? value : 0));
+        }
+    } else if ("annee".equals(periode)) {
+        for (int i = 1; i <= 12; i++) {
+            LocalDateTime start = LocalDateTime.now().withMonth(i).withDayOfMonth(1).withHour(0).withMinute(0);
+            LocalDateTime end = start.withMonth(i).withDayOfMonth(start.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59);
+            Integer value;
+            if ("calories".equals(metric)) {
+                Float calories = activiteRepository.getCaloriesByPeriodAndSports(utilisateur, start, end, sports);
+                value = calories != null ? calories.intValue() : 0;
+            } else {
+                value = activiteRepository.getDureeByPeriodAndSports(utilisateur, start, end, sports);
+            }
+            result.add(new ChartData(getMonthName(i), value != null ? value : 0));
+        }
+    }
+    
+    return result;
+}
+
 }

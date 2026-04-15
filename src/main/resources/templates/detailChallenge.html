@@ -24,7 +24,9 @@
                 <line x1="22" y1="12" x2="10" y2="12"/>
             </svg>
         </a>
-        <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+        <a th:href="@{/profil}">
+            <img th:src="@{https://ui-avatars.com/api/(name=${session.utilisateur.pseudo},background='random',size=128)}" class="profile-pic" alt="profile">
+        </a>
     </div>
 </header>
 
@@ -53,14 +55,14 @@
                     </thead>
                     <tbody>
                         <tr th:each="entry,iterStat : ${classement}">
-                            <td> style="padding: 10px;">
+                            <td style="padding: 10px;">
                                 <span th:if="${iterStat.index == 0}">🥇 1er</span>
                                 <span th:if="${iterStat.index == 1}">🥈 2ème</span>
                                 <span th:if="${iterStat.index == 2}">🥉 3ème</span>
                                 <span th:if="${iterStat.index >= 3}" th:text="|${iterStat.count}ème|"></span>
                             </td>
                             <td style="padding: 10px;" th:text="${entry.utilisateur.pseudo}"></td>
-                            <td style="padding: 10px;" th:text="${entry.score} + ' points'"></td>
+                            <td style="padding: 10px;" th:text="${entry.scoreActuel} + ' points'"></td>
                         </tr>
                     </tbody>
                 </table>

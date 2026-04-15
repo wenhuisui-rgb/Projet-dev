@@ -45,6 +45,10 @@ public class ParticipationChallengeController {
             return "redirect:/challenges";
         }
 
+        if (!challenge.estActif()) {
+            throw new RuntimeException("Ce challenge n'est pas actif ou est déjà terminé.");
+        }
+
         try {
             participationService.rejoindreChallenge(utilisateur, challenge);
 

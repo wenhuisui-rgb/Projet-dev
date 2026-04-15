@@ -88,4 +88,21 @@ public interface ActiviteRepository extends JpaRepository<Activite, Long> {
        
        Page<Activite> findByUtilisateurOrderByDateActiviteDesc(Utilisateur utilisateur, Pageable pageable);
 
+       @Query("SELECT COALESCE(SUM(a.duree), 0) FROM Activite a " +
+       "WHERE a.utilisateur = :utilisateur " +
+       "AND a.dateActivite BETWEEN :debut AND :fin " +
+       "AND ((:sports) IS NULL OR a.typeSport IN :sports)")
+       Integer getDureeByPeriodAndSports(@Param("utilisateur") Utilisateur utilisateur,
+                                          @Param("debut") LocalDateTime debut,
+                                          @Param("fin") LocalDateTime fin,
+                                          @Param("sports") List<TypeSport> sports);
+
+       @Query("SELECT COALESCE(SUM(a.calories), 0) FROM Activite a " +
+              "WHERE a.utilisateur = :utilisateur " +
+              "AND a.dateActivite BETWEEN :debut AND :fin " +
+              "AND ((:sports) IS NULL OR a.typeSport IN :sports)")
+       Float getCaloriesByPeriodAndSports(@Param("utilisateur") Utilisateur utilisateur,
+                                          @Param("debut") LocalDateTime debut,
+                                          @Param("fin") LocalDateTime fin,
+                                          @Param("sports") List<TypeSport> sports);
 }
