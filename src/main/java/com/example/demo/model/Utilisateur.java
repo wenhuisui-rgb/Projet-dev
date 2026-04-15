@@ -50,11 +50,12 @@ public class Utilisateur {
     private List<Objectif> objectifs = new ArrayList<>();
 
     // 🔥 Gestion des amitiés
-    @OneToMany(mappedBy = "utilisateurDemandeur")
-    private List<Amitie> demandesEnvoyees = new ArrayList<>();
+    @OneToMany(mappedBy = "utilisateurDemandeur", fetch = FetchType.LAZY)
+    private List<Amitie> demandesEnvoyees;
 
-    @OneToMany(mappedBy = "utilisateurReceveur")
-    private List<Amitie> demandesRecues = new ArrayList<>();
+    // 🔥 demandes reçues
+    @OneToMany(mappedBy = "utilisateurReceveur", fetch = FetchType.LAZY)
+    private List<Amitie> demandesRecues;
 
     @OneToMany(mappedBy = "utilisateur")
     private List<ObtentionBadge> listBadges = new ArrayList<>();
@@ -131,11 +132,19 @@ public class Utilisateur {
     public List<Objectif> getObjectifs() { return objectifs; }
     public void setObjectifs(List<Objectif> objectifs) { this.objectifs = objectifs; }
 
-    public List<Amitie> getDemandesEnvoyees() { return demandesEnvoyees; }
-    public void setDemandesEnvoyees(List<Amitie> demandesEnvoyees) { this.demandesEnvoyees = demandesEnvoyees; }
+    public List<Amitie> getDemandesEnvoyees() {
+        return demandesEnvoyees;
+    }
+        public void setDemandesEnvoyees(List<Amitie> demandesEnvoyees) {
+        this.demandesEnvoyees = demandesEnvoyees;
+    }
 
-    public List<Amitie> getDemandesRecues() { return demandesRecues; }
-    public void setDemandesRecues(List<Amitie> demandesRecues) { this.demandesRecues = demandesRecues; }
+      public List<Amitie> getDemandesRecues() {
+        return demandesRecues;
+    }
+    public void setDemandesRecues(List<Amitie> demandesRecues) {
+        this.demandesRecues = demandesRecues;
+    }
 
     public List<ObtentionBadge> getListBadges() { return listBadges; }
     public void setListBadges(List<ObtentionBadge> listBadges) { this.listBadges = listBadges; }

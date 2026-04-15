@@ -3,91 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <title>Mes Amis</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fb;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 32px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            margin-left: 20px;
+        }
+
+        hr {
+            margin: 25px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        form.search {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #4a90e2;
+            color: white;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        button.danger {
+            background: #e74c3c;
+        }
+
+        button.danger:hover {
+            background: #c0392b;
+        }
+
+        .card {
+            background: white;
+            margin: 10px auto;
+            padding: 15px;
+            width: 60%;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
 
 <h1>👥 Mes Amis</h1>
 
-<!-- ========================= -->
-<!-- RECHERCHE -->
-<!-- ========================= -->
-<form th:action="@{/mesAmis}" method="get">
-    <input type="text" name="search" placeholder="Rechercher...">
-    <button type="submit">Rechercher</button>
+<!-- SEARCH -->
+<form class="search" th:action="@{/mesAmis}" method="get">
+    <input type="text" name="search" placeholder="Rechercher un utilisateur...">
+    <button type="submit">🔍</button>
 </form>
 
 <hr>
 
-<!-- ========================= -->
 <!-- RESULTATS -->
-<!-- ========================= -->
 <div th:if="${resultats != null}">
-
     <h2>Résultats</h2>
 
-    <div th:each="user : ${resultats}">
+    <div th:each="user : ${resultats}" class="card">
 
         <span th:text="${user.pseudo}"></span>
 
-        <!-- ✔ bouton sécurisé -->
-        <div th:if="${demandesEnvoyees != null and demandesEnvoyees.contains(user.id)}">
-            ⏳ Demande envoyée
+        <div class="actions">
+
+            <button th:if="${demandesEnvoyees != null and demandesEnvoyees.contains(user.id)}"
+                    disabled>
+                Demande envoyée
+            </button>
+
+            <a th:if="${demandesEnvoyees == null or !demandesEnvoyees.contains(user.id)}"
+               th:href="@{'/amities/ajouter/' + ${user.id}}">
+                <button>➕ Ajouter</button>
+            </a>
+
         </div>
-
-        <a th:if="${demandesEnvoyees == null or !demandesEnvoyees.contains(user.id)}"
-           th:href="@{'/amities/ajouter/' + ${user.id}}">
-            <button>➕ Ajouter</button>
-        </a>
-
     </div>
-
 </div>
 
 <hr>
 
-<!-- ========================= -->
 <!-- DEMANDES RECUES -->
-<!-- ========================= -->
 <h2>📩 Demandes reçues</h2>
 
 <div th:if="${demandesRecues != null and !demandesRecues.isEmpty()}">
 
-    <div th:each="d : ${demandesRecues}">
+    <div th:each="ami : ${demandesRecues}" class="card">
 
-        <span th:text="${d.utilisateurDemandeur.pseudo}"></span>
+        <span th:text="${ami.utilisateurDemandeur.pseudo}"></span>
 
-        <a th:href="@{'/amities/' + ${d.id} + '/accepter'}">
-            <button>✔ Accepter</button>
-        </a>
+        <div class="actions">
 
-        <a th:href="@{'/amities/' + ${d.id} + '/refuser'}">
-            <button>❌ Refuser</button>
-        </a>
+            <form th:action="@{'/amities/' + ${ami.amitieID} + '/accepter'}"
+                  method="post">
+                <button type="submit">✔</button>
+            </form>
 
+            <form th:action="@{'/amities/' + ${ami.amitieID} + '/refuser'}"
+                  method="post">
+                <button type="submit" class="danger">❌</button>
+            </form>
+
+        </div>
     </div>
 
 </div>
 
 <div th:if="${demandesRecues == null or demandesRecues.isEmpty()}">
-    <p>Aucune demande en attente</p>
+    <p style="text-align:center;">Aucune demande en attente</p>
 </div>
 
 <hr>
 
-<!-- ========================= -->
 <!-- AMIS -->
-<!-- ========================= -->
-<h2>Mes amis</h2>
+<h2>❤️ Mes amis</h2>
 
 <div th:if="${amis != null and !amis.isEmpty()}">
-    <div th:each="ami : ${amis}">
+
+    <div th:each="ami : ${amis}" class="card">
+
         <span th:text="${ami.pseudo}"></span>
+
+        <div class="actions">
+
+            <form th:action="@{'/amities/supprimer/' + ${ami.id}}"
+                  method="post">
+                <button type="submit" class="danger">Supprimer</button>
+            </form>
+
+        </div>
     </div>
+
 </div>
 
 <div th:if="${amis == null or amis.isEmpty()}">
-    <p>Aucun ami 😢</p>
+    <p style="text-align:center;">Tu n'as pas encore d'amis</p>
 </div>
 
 </body>
