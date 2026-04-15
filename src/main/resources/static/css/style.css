@@ -792,10 +792,6 @@ form button:hover {
     color: #dc3545;
     font-size: 0.85rem;
     margin-top: 10px;
-.charts-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
 }
 .charts-row {
     display: flex;
@@ -873,4 +869,3 @@ form button:hover {
 .apply-sport-btn:hover {
     opacity: 0.85;
 }
-    
