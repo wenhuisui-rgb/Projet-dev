@@ -1,13 +1,11 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Amitie;
-import com.example.demo.model.StatutAmitie;
-import com.example.demo.model.Utilisateur;
-import com.example.demo.repository.AmitieRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AmitieService {
@@ -18,121 +16,89 @@ public class AmitieService {
         this.amitieRepository = amitieRepository;
     }
 
-    /**
-     * Statuts qui bloquent toute nouvelle demande
-     */
-    private boolean statutBloquant(StatutAmitie statut) {
-        return statut == StatutAmitie.EN_ATTENTE
-                || statut == StatutAmitie.ACCEPTEE;
-    }
-
-    /**
-     * Envoyer une demande d'amitié
-     */
+    // =========================
+    // ENVOYER DEMANDE
+    // =========================
     public String envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
 
-        if (demandeur == null || receveur == null) {
-            return "Utilisateur introuvable.";
+        if (demandeur.getId().equals(receveur.getId())) {
+            return "SELF";
         }
 
-        var existDirecte = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(demandeur, receveur);
+        Optional<Amitie> existing =
+                amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(
+                        demandeur, receveur);
 
-        if (existDirecte.isPresent()) {
-            Amitie amitie = existDirecte.get();
+        if (existing.isPresent()) {
+            Amitie a = existing.get();
 
-            if (statutBloquant(amitie.getStatut())) {
-                return "Vous avez déjà une demande en attente ou acceptée.";
-            }
+            if (a.getStatut() == StatutAmitie.EN_ATTENTE)
+                return "PENDING";
 
-            
-            amitie.setStatut(StatutAmitie.EN_ATTENTE);
-            amitie.setDateDemande(LocalDate.now());
-            amitieRepository.save(amitie);
+            if (a.getStatut() == StatutAmitie.ACCEPTEE)
+                return "ALREADY_FRIEND";
 
-            return "Nouvelle demande envoyée avec succès !";
+            a.setStatut(StatutAmitie.EN_ATTENTE);
+            amitieRepository.save(a);
+
+            return "SENT_AGAIN";
         }
 
-       
-        var existInverse = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(receveur, demandeur);
-
-        if (existInverse.isPresent()) {
-            Amitie amitieInverse = existInverse.get();
-
-            if (statutBloquant(amitieInverse.getStatut())) {
-                return "Cet utilisateur vous a déjà envoyé une demande en attente ou acceptée.";
-            }
-
-           
-            amitieInverse.setStatut(StatutAmitie.EN_ATTENTE);
-            amitieInverse.setDateDemande(LocalDate.now());
-            amitieRepository.save(amitieInverse);
-
-            return "Nouvelle demande envoyée avec succès !";
-        }
-
-        
         Amitie amitie = new Amitie();
         amitie.setUtilisateurDemandeur(demandeur);
         amitie.setUtilisateurReceveur(receveur);
         amitie.setStatut(StatutAmitie.EN_ATTENTE);
-        amitie.setDateDemande(LocalDate.now());
 
         amitieRepository.save(amitie);
 
-        return "Demande envoyée avec succès !";
+        return "SENT";
     }
 
-    /**
-     * Accepter une demande
-     */
+    // =========================
+    // ACCEPTER
+    // =========================
     public Amitie accepterDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.ACCEPTEE);
         return amitieRepository.save(amitie);
     }
 
-    /**
-     * Refuser une demande
-     */
+    // =========================
+    // REFUSER
+    // =========================
     public Amitie refuserDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.REFUSEE);
         return amitieRepository.save(amitie);
     }
 
-    
-    //Annuler une demande
-    
-    public Amitie annulerDemande(Amitie amitie) {
-        amitie.setStatut(StatutAmitie.ANNULEE);
-        return amitieRepository.save(amitie);
-    }
-
-    
-    //Supprimer une amitié
-    
-    public void rompreAmitie(Amitie amitie) {
-        amitieRepository.delete(amitie);
-    }
-
-    public List<Amitie> getAmities(Utilisateur utilisateur) {
-        return amitieRepository.findByUtilisateurDemandeurOrUtilisateurReceveur(
-                utilisateur,
-                utilisateur
-        );
-    }
-
-   
-    public List<Amitie> getAmitiesAcceptees(Utilisateur utilisateur) {
-        return amitieRepository.findAmitiesByStatutAndUtilisateur(
-                StatutAmitie.ACCEPTEE,
-                utilisateur
-        );
-    }
-
-    
+    // =========================
+    // GET BY ID
+    // =========================
     public Amitie getById(Long id) {
         return amitieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Amitié introuvable"));
+    }
+
+    // =========================
+    // DEMANDES REÇUES
+    // =========================
+    public List<Amitie> getDemandesRecues(Utilisateur user) {
+        return amitieRepository.findByUtilisateurReceveurAndStatut(
+                user,
+                StatutAmitie.EN_ATTENTE
+        );
+    }
+
+    // =========================
+    // DEMANDES ENVOYÉES (IDs)
+    // =========================
+    public List<Long> getDemandesEnvoyeesIds(Utilisateur user) {
+        return amitieRepository
+                .findByUtilisateurDemandeurAndStatut(
+                        user,
+                        StatutAmitie.EN_ATTENTE
+                )
+                .stream()
+                .map(a -> a.getUtilisateurReceveur().getId())
+                .toList();
     }
 }
