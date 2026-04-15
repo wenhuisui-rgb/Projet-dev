@@ -19,28 +19,28 @@ public class ObtentionBadgeController {
     private final BadgeService badgeService;
     private final UtilisateurService utilisateurService;
 
-    public ObtentionBadgeController(ObtentionBadgeService obtentionBadgeService,BadgeService badgeService,UtilisateurService utilisateurService) {
+    public ObtentionBadgeController(ObtentionBadgeService obtentionBadgeService, BadgeService badgeService,
+            UtilisateurService utilisateurService) {
         this.obtentionBadgeService = obtentionBadgeService;
         this.badgeService = badgeService;
         this.utilisateurService = utilisateurService;
     }
 
-    @PostMapping("/attribuer")
-    public ObtentionBadge attribuerBadge(@RequestParam Long utilisateurId,@RequestParam Long badgeId) {
-
-        Utilisateur utilisateur = utilisateurService.findById(utilisateurId);
-        Badge badge = badgeService.getBadgeById(badgeId);
-
-        return obtentionBadgeService.attribuerBadge(utilisateur, badge);
-    }
+    @GetMapping("/tester-ajout")
+public ObtentionBadge testerAjout(@RequestParam Long utilisateurId, @RequestParam Long badgeId) {
+    Utilisateur utilisateur = utilisateurService.findById(utilisateurId);
+    Badge badge = badgeService.getBadgeById(badgeId);
+    return obtentionBadgeService.attribuerBadge(utilisateur, badge);
+}
 
     @PostMapping("/attribuer-condition")
-    public ObtentionBadge attribuerSiCondition(@RequestParam Long utilisateurId, @RequestParam Long badgeId, @RequestParam TypeSport sport, @RequestParam float valeur) {
+    public ObtentionBadge attribuerSiCondition(@RequestParam Long utilisateurId, @RequestParam Long badgeId,
+            @RequestParam TypeSport sport, @RequestParam float valeur) {
 
         Utilisateur utilisateur = utilisateurService.findById(utilisateurId);
         Badge badge = badgeService.getBadgeById(badgeId);
 
-        return obtentionBadgeService.attribuerBadgeSiCondition(badge,utilisateur,sport,valeur);
+        return obtentionBadgeService.attribuerBadgeSiCondition(badge, utilisateur, sport, valeur);
     }
 
     @GetMapping("/utilisateur/{id}")

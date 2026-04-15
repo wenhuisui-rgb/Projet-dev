@@ -26,13 +26,26 @@ public class BadgeService {
         return badgeRepository.save(badge);
     }
 
-
     public List<Badge> listerTousLesBadges() {
         return badgeRepository.findAll();
     }
 
     public Badge getBadgeById(Long id) {
         return badgeRepository.findById(id).orElse(null);
+    }
+
+    public void verifierBadgePourUtilisateur(Utilisateur utilisateur, TypeSport typeSport, float distance) {
+        // On récupère TOUS les badges de la base
+        List<Badge> tousLesBadges = badgeRepository.findAll();
+
+        // on parcourt tous les badges pour trouver ceux qui correspondent au type de sport et dont le seuil est atteint
+       
+        for (Badge badge : tousLesBadges) {
+            if (badge.getTypeSport() == typeSport && distance >= badge.getSeuil()) {
+                //on fait l'attribution du badge à l'utilisateur
+                obtentionBadgeService.attribuerBadge(utilisateur, badge);
+            }
+        }
     }
 
 }

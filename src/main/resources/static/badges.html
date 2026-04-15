@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Palmarès de Badges</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gold: #f1c40f;
+            --success: #27ae60;
+            --locked: #bdc3c7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--dark);
+        }
+
+        header {
+            background-color: var(--dark);
+            color: white;
+            width: 100%;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+        }
+
+        .btn-toggle {
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-toggle.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .badge-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Style pour les badges non débloqués */
+        .badge-card.locked {
+            filter: grayscale(1);
+            opacity: 0.7;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .icon-wrapper {
+            font-size: 60px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1));
+        }
+
+        .badge-name {
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .badge-desc {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            min-height: 45px;
+        }
+
+        .badge-footer {
+            border-top: 1px solid #f1f1f1;
+            padding-top: 15px;
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-unlocked {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-locked {
+            background: var(--locked);
+            color: white;
+        }
+
+        .sport-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.7rem;
+            background: #eee;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #999;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🏆 Mes Trophées</h1>
+        <p class="subtitle">Tes accomplissements personnels débloqués</p>
+    </header>
+
+    <div class="controls">
+        <button id="toggle-btn" class="btn-toggle" onclick="toggleView()">
+            🔍 Voir tous les badges existants
+        </button>
+    </div>
+
+    <div id="badge-grid" class="badge-grid"></div>
+
+    <script>
+        let showAllMode = false;
+        const userId = 1;
+
+        function getIcon(seuil) {
+            if (seuil >= 42) return '👑';
+            if (seuil >= 21) return '🥇';
+            if (seuil >= 10) return '🥈';
+            if (seuil >= 5) return '🥉';
+            return '👟';
+        }
+
+        function toggleView() {
+            showAllMode = !showAllMode;
+            const btn = document.getElementById('toggle-btn');
+            btn.innerText = showAllMode ? "🏆 Voir uniquement mes badges" : "🔍 Voir tous les badges existants";
+            btn.classList.toggle('active');
+            loadBadges();
+        }
+
+        async function loadBadges() {
+            try {
+                const grid = document.getElementById('badge-grid');
+
+                // 1. On récupère les badges déjà obtenus par l'utilisateur
+                const respObtention = await fetch(`/badges/obtention/utilisateur/${userId}`);
+                const obtentions = await respObtention.json();
+                const obtainedBadgeIds = obtentions.map(o => o.badge.id);
+
+                if (showAllMode) {
+                    // 2. Mode "TOUS LES BADGES"
+                    const respAll = await fetch('/api/badges'); // Ton BadgeController
+                    const allBadges = await respAll.json();
+
+                    grid.innerHTML = allBadges.map(badge => {
+                        const isUnlocked = obtainedBadgeIds.includes(badge.id);
+                        return `
+                            <div class="badge-card ${isUnlocked ? '' : 'locked'}">
+                                <span class="sport-tag">${badge.typeSport}</span>
+                                <div class="icon-wrapper">${getIcon(badge.seuil)}</div>
+                                <div class="badge-name">${badge.nom}</div>
+                                <div class="badge-desc">${badge.description}</div>
+                                <div class="badge-footer">
+                                    <div class="badge-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
+                                        ${isUnlocked ? 'DÉBLOQUÉ ✅' : 'VERROUILLÉ 🔒'}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    // 3. Mode "MES BADGES UNIQUEMENT"
+                    if (obtentions.length === 0) {
+                        grid.innerHTML = `<div class="empty-state"><p>Aucun badge débloqué pour le moment.</p></div>`;
+                        return;
+                    }
+
+                    grid.innerHTML = obtentions.map(o => `
+                        <div class="badge-card">
+                            <span class="sport-tag">${o.badge.typeSport}</span>
+                            <div class="icon-wrapper">${getIcon(o.badge.seuil)}</div>
+                            <div class="badge-name">${o.badge.nom}</div>
+                            <div class="badge-desc">${o.badge.description}</div>
+                            <div class="badge-footer">
+                                <div class="badge-status status-unlocked">DÉBLOQUÉ ✅</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+            } catch (error) {
+                console.error("Erreur de chargement :", error);
+                document.getElementById('badge-grid').innerHTML =
+                    "<p style='color:red; text-align:center;'>Erreur lors de la récupération des données.</p>";
+            }
+        }
+
+        loadBadges();
+    </script>
+</body>
+
+</html>
