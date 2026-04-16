@@ -156,6 +156,9 @@ public class ActiviteService {
 
     /**
      * Méthode utilitaire pour vérifier l'existence d'un badge et l'attribuer s'il n'est pas déjà possédé.
+     * @param utilisateur L'utilisateur concerné
+     * @param badgeNom Le nom du badge
+     * @param condition La condition d'obtention
      */
     private void checkAndAwardBadge(Utilisateur utilisateur, String badgeNom, boolean condition) {
         if (condition) {
@@ -176,53 +179,116 @@ public class ActiviteService {
         }
     }
 
+    /**
+     * Récupère une activité par son ID.
+     * @param id L'ID de l'activité
+     * @return L'activité trouvée
+     */
     public Activite getActiviteParId(Long id) {
         return activiteRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Récupère toutes les activités d'un utilisateur.
+     * @param utilisateur L'utilisateur
+     * @return La liste des activités
+     */
     public List<Activite> getActivitesParUtilisateur(Utilisateur utilisateur) {
         return activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur);
     }
 
+    /**
+     * Récupère les dernières activités.
+     * @param utilisateur L'utilisateur
+     * @return La liste des dernières activités
+     */
     public List<Activite> getDernieresActivites(Utilisateur utilisateur) {
         return activiteRepository.findTop5ByUtilisateurOrderByDateActiviteDesc(utilisateur);
     }
 
+    /**
+     * Récupère les activités entre deux dates.
+     * @param utilisateur L'utilisateur
+     * @param debut Date de début
+     * @param fin Date de fin
+     * @return La liste des activités
+     */
     public List<Activite> getActivitesEntreDates(Utilisateur utilisateur, LocalDateTime debut, LocalDateTime fin) {
         return activiteRepository.findByUtilisateurAndDateActiviteBetweenOrderByDateActiviteDesc(utilisateur, debut, fin);
     }
 
+    /**
+     * Récupère les activités de la semaine.
+     * @param utilisateur L'utilisateur
+     * @return La liste des activités
+     */
     public List<Activite> getActivitesDeLaSemaine(Utilisateur utilisateur) {
         LocalDateTime debutSemaine = LocalDateTime.now().minusDays(7);
         return getActivitesEntreDates(utilisateur, debutSemaine, LocalDateTime.now());
     }
 
+    /**
+     * Récupère les activités du mois.
+     * @param utilisateur L'utilisateur
+     * @return La liste des activités
+     */
     public List<Activite> getActivitesDuMois(Utilisateur utilisateur) {
         LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
         return getActivitesEntreDates(utilisateur, debutMois, LocalDateTime.now());
     }
 
+    /**
+     * Récupère les activités par type de sport.
+     * @param utilisateur L'utilisateur
+     * @param typeSport Le sport
+     * @return La liste des activités
+     */
     public List<Activite> getActivitesParType(Utilisateur utilisateur, TypeSport typeSport) {
         return activiteRepository.findByUtilisateurAndTypeSportOrderByDateActiviteDesc(utilisateur, typeSport);
     }
 
+    /**
+     * Récupère la distance totale.
+     * @param utilisateur L'utilisateur
+     * @return La distance totale
+     */
     public Float getDistanceTotale(Utilisateur utilisateur) {
         return activiteRepository.getDistanceTotale(utilisateur);
     }
 
+    /**
+     * Récupère la durée totale.
+     * @param utilisateur L'utilisateur
+     * @return La durée totale
+     */
     public Integer getDureeTotale(Utilisateur utilisateur) {
         return activiteRepository.getDureeTotale(utilisateur);
     }
 
+    /**
+     * Récupère les calories totales.
+     * @param utilisateur L'utilisateur
+     * @return Les calories totales
+     */
     public Float getCaloriesTotales(Utilisateur utilisateur) {
         return activiteRepository.getCaloriesTotales(utilisateur);
     }
 
+    /**
+     * Récupère la distance du mois.
+     * @param utilisateur L'utilisateur
+     * @return La distance
+     */
     public Float getDistanceDuMois(Utilisateur utilisateur) {
         LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
         return activiteRepository.getDistanceByPeriod(utilisateur, debutMois, LocalDateTime.now());
     }
 
+    /**
+     * Récupère le nombre d'activités du mois.
+     * @param utilisateur L'utilisateur
+     * @return Le nombre
+     */
     public Integer getNombreActivitesDuMois(Utilisateur utilisateur) {
         LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
         return (int) activiteRepository.countByUtilisateurAndDateActiviteBetween(utilisateur, debutMois, LocalDateTime.now());
@@ -248,6 +314,11 @@ public class ActiviteService {
         return stats;
     }
 
+    /**
+     * Récupère les stats de la semaine.
+     * @param utilisateur L'utilisateur
+     * @return Map des stats
+     */
     public Map<String, Float> getStatistiquesParSemaine(Utilisateur utilisateur) {
         LocalDateTime debutSemaine = LocalDateTime.now().minusDays(7);
         LocalDateTime fin = LocalDateTime.now();
@@ -265,6 +336,11 @@ public class ActiviteService {
         return statsSemaine;
     }
 
+    /**
+     * Récupère les stats du mois.
+     * @param utilisateur L'utilisateur
+     * @return Map des stats
+     */
     public Map<String, Float> getStatistiquesParMois(Utilisateur utilisateur) {
         LocalDateTime debutMois = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
         LocalDateTime fin = LocalDateTime.now();
@@ -316,11 +392,21 @@ public class ActiviteService {
         return null;
     }
 
+    /**
+     * Supprime une activité.
+     * @param id L'ID de l'activité
+     */
     @Transactional
     public void supprimerActivite(Long id) {
         activiteRepository.deleteById(id);
     }
 
+    /**
+     * Vérifie si l'objectif mensuel est atteint.
+     * @param utilisateur L'utilisateur
+     * @param objectifDistance La distance visée
+     * @return Vrai ou Faux
+     */
     public boolean aAtteintObjectifMensuel(Utilisateur utilisateur, Float objectifDistance) {
         if (objectifDistance == null) return false;
         Float distanceMois = getDistanceDuMois(utilisateur);
@@ -329,6 +415,10 @@ public class ActiviteService {
 
     /**
      * Récupère les activités d'un utilisateur sous forme de page (Pagination).
+     * @param utilisateur L'utilisateur
+     * @param page Le numéro de page
+     * @param size La taille de la page
+     * @return Page d'activités
      */
     public Page<Activite> getActivitesPaginees(Utilisateur utilisateur, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

@@ -136,6 +136,7 @@ public class ActiviteController {
      *
      * @param periode La période ("semaine", "mois", "annee")
      * @param sports  Liste optionnelle des sports sélectionnés pour le filtre
+     * @param session La session HTTP
      * @return Un objet JSON contenant les labels, et les valeurs en minutes et en calories
      */
     @GetMapping("/api/chart-data")
@@ -211,6 +212,8 @@ public class ActiviteController {
 
     /**
      * Utilitaire : Récupère le nom du jour en français par rapport à la date actuelle.
+     * @param daysAgo Le nombre de jours en arrière
+     * @return Le nom du jour
      */
     private String getDayName(int daysAgo) {
         LocalDateTime date = LocalDateTime.now().minusDays(daysAgo);
@@ -220,6 +223,8 @@ public class ActiviteController {
     /**
      * Affiche le formulaire d'enregistrement d'une nouvelle activité sportive.
      *
+     * @param session La session HTTP
+     * @param model Le modèle Thymeleaf
      * @return La vue {@code "createActivite"}
      */
     @GetMapping("/activites/nouvelle")
@@ -239,6 +244,9 @@ public class ActiviteController {
      * Traite la soumission du formulaire pour sauvegarder une nouvelle activité.
      * Fait également appel au service Météo externe si une localisation est renseignée.
      *
+     * @param activite L'activité à sauvegarder
+     * @param session La session HTTP
+     * @param redirectAttributes Les attributs pour les messages flash
      * @return Une redirection vers la page de profil
      */
     @PostMapping("/activites/sauvegarder")
@@ -272,6 +280,9 @@ public class ActiviteController {
      * Affiche les détails complets d'une activité spécifique.
      *
      * @param id L'identifiant de l'activité
+     * @param session La session HTTP
+     * @param model Le modèle Thymeleaf
+     * @param redirectAttributes Les attributs pour les messages flash
      * @return La vue {@code "detailActivite"}
      */
     @GetMapping("/activites/{id}")
@@ -302,6 +313,10 @@ public class ActiviteController {
     /**
      * Affiche le formulaire de modification pour une activité existante.
      *
+     * @param id L'identifiant de l'activité
+     * @param session La session HTTP
+     * @param model Le modèle Thymeleaf
+     * @param redirectAttributes Les attributs pour les messages flash
      * @return La vue {@code "modifierActivite"}
      */
     @GetMapping("/activites/edit/{id}")
@@ -334,6 +349,10 @@ public class ActiviteController {
      * Traite la soumission du formulaire de modification.
      * Assure la mise à jour des calories et le rafraîchissement potentiel des données météorologiques.
      *
+     * @param id L'identifiant de l'activité
+     * @param activiteModifiee L'activité avec les nouvelles données
+     * @param session La session HTTP
+     * @param redirectAttributes Les attributs pour les messages flash
      * @return Une redirection vers la page de profil
      */
     @PostMapping("/activites/update/{id}")
@@ -387,6 +406,9 @@ public class ActiviteController {
     /**
      * Supprime une activité spécifique après vérification des permissions.
      *
+     * @param id L'identifiant de l'activité
+     * @param session La session HTTP
+     * @param redirectAttributes Les attributs pour les messages flash
      * @return Une redirection vers la page de profil
      */
     @GetMapping("/activites/delete/{id}")
@@ -412,6 +434,7 @@ public class ActiviteController {
     /**
      * API REST (AJAX) : Récupère les statistiques globales du dashboard sous forme JSON.
      *
+     * @param session La session HTTP
      * @return Les statistiques agrégées (formatées en JSON par Spring)
      */
     @GetMapping("/api/dashboard/stats")

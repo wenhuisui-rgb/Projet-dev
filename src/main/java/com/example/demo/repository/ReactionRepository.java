@@ -67,10 +67,10 @@ public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     long countByActiviteId(Long activiteId);
 
     /**
-     * Compte le nombre de réactions d'un type spécifique (ex: nombre de LIKES) pour une activité.
+     * Compte le nombre de réactions d'un type spécifique (ex: nombre de KUDOS) pour une activité.
      *
      * @param activiteId L'identifiant de l'activité
-     * @param type       Le type de réaction à compter (ex: {@link TypeReaction#LIKE})
+     * @param type       Le type de réaction à compter (ex: {@link TypeReaction#KUDOS})
      * @return Le nombre de réactions de ce type
      */
     long countByActiviteIdAndType(Long activiteId, TypeReaction type);
