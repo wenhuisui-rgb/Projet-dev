@@ -40,6 +40,7 @@
     <div class="top-bar section-top-bar">
         <h2 class="section-heading">Découvrir les Challenges</h2>
         <a class="create-btn" href="/challenges/create"><i class="fa-solid fa-plus"></i> Créer un challenge</a>
+        <a class="create-btn" href="/challenge" style="margin-left: 10px;"><i class="fa-solid fa-list"></i> Mes Challenges</a>
     </div>
 
     <section class="filter-bar sport-filter-section" style="margin-bottom: 30px;">
@@ -58,7 +59,8 @@
             
             <div class="status-badge-absolute">
                 <span th:if="${joinedChallengeIds != null and joinedChallengeIds.contains(c.id)}" class="badge badge-success"><i class="fa-solid fa-check"></i> Inscrit</span>
-                <span th:unless="${joinedChallengeIds != null and joinedChallengeIds.contains(c.id)}" class="badge badge-warning">Nouveau</span>
+                <span th:if="${c.createur.id == session.utilisateur.id}" class="badge badge-warning" style="margin-left: 5px;">Admin</span>
+                <span th:if="${c.dateFin < T(java.time.LocalDate).now()}" class="badge badge-secondary" style="margin-left: 5px;">Terminé</span>
             </div>
 
             <div class="card-image" style="display: flex; align-items: center; justify-content: center; font-size: 40px;">

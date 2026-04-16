@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Activite;
+import com.example.demo.model.Badge;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ActiviteRepository;
@@ -16,6 +17,11 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.example.demo.model.ChartData;
+import com.example.demo.model.ObtentionBadge;
+import com.example.demo.repository.BadgeRepository;
+import com.example.demo.repository.ObtentionBadgeRepository;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -27,16 +33,114 @@ public class ActiviteService {
     @Autowired
     private ParticipationChallengeService participationChallengeService;
 
+    @Autowired
+    private BadgeRepository badgeRepository;
+
+    @Autowired
+    private ObtentionBadgeRepository obtentionBadgeRepository;
+
     @Transactional
     public Activite sauvegarderActivite(Activite activite, Float poidsUtilisateur) {
         Float caloriesCalculees = activite.calculerCalories(poidsUtilisateur);
         activite.setCalories(caloriesCalculees);
-        Activite savedActivite = activiteRepository.save(activite);
-
-        participationChallengeService.actualiserScoresApresActivite(savedActivite);
+        Activite saved = activiteRepository.save(activite);
         
-        return savedActivite;
+        verifierEtAttribuerBadges(saved.getUtilisateur());
+        
+        return saved;
     }
+
+    private void verifierEtAttribuerBadges(Utilisateur utilisateur) {
+        List<Activite> activites = activiteRepository.findByUtilisateurOrderByDateActiviteDesc(utilisateur);
+        
+        Float totalDistance = activites.stream()
+            .map(Activite::getDistance)
+            .filter(Objects::nonNull)
+            .reduce(0f, Float::sum);
+        
+        int totalActivites = activites.size();
+        
+        int totalMinutes = activites.stream()
+            .map(Activite::getDuree)
+            .filter(Objects::nonNull)
+            .mapToInt(Integer::intValue)
+            .sum();
+        
+        Map<TypeSport, Float> maxDistanceBySport = new HashMap<>();
+        Map<TypeSport, Float> totalDistanceBySport = new HashMap<>();
+        Map<TypeSport, Integer> totalActivitesBySport = new HashMap<>();
+        
+        for (TypeSport sport : TypeSport.values()) {
+            maxDistanceBySport.put(sport, 0f);
+            totalDistanceBySport.put(sport, 0f);
+            totalActivitesBySport.put(sport, 0);
+        }
+        
+        for (Activite a : activites) {
+            if (a.getTypeSport() != null) {
+                TypeSport sport = a.getTypeSport();
+                totalActivitesBySport.put(sport, totalActivitesBySport.get(sport) + 1);
+                
+                if (a.getDistance() != null) {
+                    if (a.getDistance() > maxDistanceBySport.get(sport)) {
+                        maxDistanceBySport.put(sport, a.getDistance());
+                    }
+                    totalDistanceBySport.put(sport, totalDistanceBySport.get(sport) + a.getDistance());
+                }
+            }
+        }
+        
+        checkAndAwardBadge(utilisateur, "PREMIER_PAS", totalActivites >= 1);
+        checkAndAwardBadge(utilisateur, "SPORTIF_10", totalActivites >= 10);
+        checkAndAwardBadge(utilisateur, "SPORTIF_50", totalActivites >= 50);
+        checkAndAwardBadge(utilisateur, "TOTAL_100KM", totalDistance >= 100);
+        checkAndAwardBadge(utilisateur, "TOTAL_500KM", totalDistance >= 500);
+        checkAndAwardBadge(utilisateur, "TOTAL_1000MIN", totalMinutes >= 1000);
+        checkAndAwardBadge(utilisateur, "TOTAL_5000MIN", totalMinutes >= 5000);
+        
+        checkAndAwardBadge(utilisateur, "COURSE_5KM", maxDistanceBySport.get(TypeSport.COURSE) >= 5);
+        checkAndAwardBadge(utilisateur, "COURSE_10KM", maxDistanceBySport.get(TypeSport.COURSE) >= 10);
+        checkAndAwardBadge(utilisateur, "COURSE_SEMI", maxDistanceBySport.get(TypeSport.COURSE) >= 21.1);
+        checkAndAwardBadge(utilisateur, "COURSE_MARATHON", maxDistanceBySport.get(TypeSport.COURSE) >= 42.2);
+        checkAndAwardBadge(utilisateur, "COURSE_100KM", totalDistanceBySport.get(TypeSport.COURSE) >= 100);
+        
+        checkAndAwardBadge(utilisateur, "NATATION_1KM", maxDistanceBySport.get(TypeSport.NATATION) >= 1);
+        checkAndAwardBadge(utilisateur, "NATATION_2KM", maxDistanceBySport.get(TypeSport.NATATION) >= 2);
+        checkAndAwardBadge(utilisateur, "NATATION_5KM", maxDistanceBySport.get(TypeSport.NATATION) >= 5);
+        checkAndAwardBadge(utilisateur, "NATATION_10KM", maxDistanceBySport.get(TypeSport.NATATION) >= 10);
+        
+        checkAndAwardBadge(utilisateur, "VELO_50KM", maxDistanceBySport.get(TypeSport.VELO) >= 50);
+        checkAndAwardBadge(utilisateur, "VELO_100KM", maxDistanceBySport.get(TypeSport.VELO) >= 100);
+        checkAndAwardBadge(utilisateur, "VELO_200KM", maxDistanceBySport.get(TypeSport.VELO) >= 200);
+ 
+        checkAndAwardBadge(utilisateur, "MUSCULATION_10", totalActivitesBySport.get(TypeSport.MUSCULATION) >= 10);
+        checkAndAwardBadge(utilisateur, "MUSCULATION_50", totalActivitesBySport.get(TypeSport.MUSCULATION) >= 50);
+        
+        checkAndAwardBadge(utilisateur, "YOGA_10", totalActivitesBySport.get(TypeSport.YOGA) >= 10);
+        checkAndAwardBadge(utilisateur, "YOGA_50", totalActivitesBySport.get(TypeSport.YOGA) >= 50);
+        
+        checkAndAwardBadge(utilisateur, "RANDONNEE_10KM", maxDistanceBySport.get(TypeSport.RANDONNEE) >= 10);
+        checkAndAwardBadge(utilisateur, "RANDONNEE_20KM", maxDistanceBySport.get(TypeSport.RANDONNEE) >= 20);
+    }
+
+    private void checkAndAwardBadge(Utilisateur utilisateur, String badgeNom, boolean condition) {
+    if (condition) {
+        Optional<Badge> badgeOpt = badgeRepository.findByNom(badgeNom);
+        if (badgeOpt.isPresent()) {
+            Badge badge = badgeOpt.get();
+            boolean dejaObtenu = obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(utilisateur.getId(), badge.getId());
+            if (!dejaObtenu) {
+                ObtentionBadge obtention = new ObtentionBadge();
+                obtention.setUtilisateur(utilisateur);
+                obtention.setBadge(badge);
+                obtention.setDateObtention(LocalDateTime.now());
+                obtentionBadgeRepository.save(obtention);
+                
+                System.out.println("Félicitations ! " + utilisateur.getPseudo() + " a obtenu le badge: " + badgeNom);
+            }
+        }
+    }
+}
 
     public Activite getActiviteParId(Long id) {
         return activiteRepository.findById(id).orElse(null);
@@ -152,10 +256,8 @@ public class ActiviteService {
             Float nouvellesCalories = existante.calculerCalories(poidsUtilisateur);
             existante.setCalories(nouvellesCalories);
             
-            // 保存运动记录到数据库
             Activite savedActivite = activiteRepository.save(existante);
             
-            // 🔥 扣动扳机：触发挑战的自动算分机制
             participationChallengeService.actualiserScoresApresActivite(savedActivite);
             
             return savedActivite;

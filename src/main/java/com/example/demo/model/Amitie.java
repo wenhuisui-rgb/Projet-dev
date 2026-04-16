@@ -10,12 +10,10 @@ public class Amitie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long amitieID;
 
-    // celui qui envoie la demande
     @ManyToOne
     @JoinColumn(name = "demandeur_id")
     private Utilisateur utilisateurDemandeur; 
 
-    // celui qui reçoit la demande
     @ManyToOne
     @JoinColumn(name = "receveur_id")
     private Utilisateur utilisateurReceveur;  
@@ -37,7 +35,6 @@ public class Amitie {
         this.dateDemande = LocalDate.now();
     }
 
-    // Getters / Setters
     public Long getAmitieID() {
         return amitieID;
     }

@@ -132,7 +132,8 @@
         <div style="margin-top: 30px; display: flex; gap: 15px;">
             <a th:href="@{/activites/edit/{id}(id=${activite.id})}" style="color: #3b82f6;">Modifier</a>
             <a th:href="@{/activites/delete/{id}(id=${activite.id})}" onclick="return confirm('Supprimer cette activite ?')" style="color: #ef4444;">Supprimer</a>
-            <a th:href="@{/dashboard}" style="color: #6b7280;">Retour au Dashboard</a>
+            <a th:href="@{/profil}" style="color: #6b7280;">Retour au Profil</a>
+            <a th:href="@{/feed}" style="color: #6b7280;">Retour au Feed</a>
         </div>
     </div>
 </div>

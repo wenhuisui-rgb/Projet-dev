@@ -16,9 +16,6 @@ public class AmitieService {
         this.amitieRepository = amitieRepository;
     }
 
-    // =========================
-    // ENVOYER DEMANDE
-    // =========================
     public String envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
 
         if (demandeur.getId().equals(receveur.getId())) {
@@ -54,33 +51,21 @@ public class AmitieService {
         return "SENT";
     }
 
-    // =========================
-    // ACCEPTER
-    // =========================
     public Amitie accepterDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.ACCEPTEE);
         return amitieRepository.save(amitie);
     }
 
-    // =========================
-    // REFUSER
-    // =========================
     public Amitie refuserDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.REFUSEE);
         return amitieRepository.save(amitie);
     }
 
-    // =========================
-    // GET BY ID
-    // =========================
     public Amitie getById(Long id) {
         return amitieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Amitié introuvable"));
     }
 
-    // =========================
-    // DEMANDES REÇUES
-    // =========================
     public List<Amitie> getDemandesRecues(Utilisateur user) {
         return amitieRepository.findByUtilisateurReceveurAndStatut(
                 user,
@@ -88,9 +73,6 @@ public class AmitieService {
         );
     }
 
-    // =========================
-    // DEMANDES ENVOYÉES (IDs)
-    // =========================
     public List<Long> getDemandesEnvoyeesIds(Utilisateur user) {
         return amitieRepository
                 .findByUtilisateurDemandeurAndStatut(
@@ -100,5 +82,21 @@ public class AmitieService {
                 .stream()
                 .map(a -> a.getUtilisateurReceveur().getId())
                 .toList();
+    }
+
+    public List<Utilisateur> getAmis(Utilisateur utilisateur) {
+        List<Utilisateur> amis = new ArrayList<>();
+        
+        List<Amitie> asDemandeur = amitieRepository.findByUtilisateurDemandeurAndStatut(utilisateur, StatutAmitie.ACCEPTEE);
+        for (Amitie a : asDemandeur) {
+            amis.add(a.getUtilisateurReceveur());
+        }
+        
+        List<Amitie> asReceveur = amitieRepository.findByUtilisateurReceveurAndStatut(utilisateur, StatutAmitie.ACCEPTEE);
+        for (Amitie a : asReceveur) {
+            amis.add(a.getUtilisateurDemandeur());
+        }
+        
+        return amis;
     }
 }
