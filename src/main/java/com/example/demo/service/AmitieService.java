@@ -1,14 +1,18 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Amitie;
-import com.example.demo.model.StatutAmitie;
-import com.example.demo.model.Utilisateur;
-import com.example.demo.repository.AmitieRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
+/**
+ * Service gérant les relations d'amitié entre les utilisateurs.
+ * <p>
+ * Il permet la création de demandes d'amitié, leur acceptation ou refus,
+ * et la récupération de la liste d'amis selon le statut (EN_ATTENTE, ACCEPTEE).
+ */
 @Service
 public class AmitieService {
 
@@ -19,73 +23,54 @@ public class AmitieService {
     }
 
     /**
-     * Statuts qui bloquent toute nouvelle demande
-     */
-    private boolean statutBloquant(StatutAmitie statut) {
-        return statut == StatutAmitie.EN_ATTENTE
-                || statut == StatutAmitie.ACCEPTEE;
-    }
-
-    /**
-     * Envoyer une demande d'amitié
+     * Envoie une demande d'amitié d'un utilisateur à un autre.
+     * Gère les cas où la demande a déjà été envoyée, acceptée ou si l'utilisateur s'ajoute lui-même.
+     *
+     * @param demandeur L'utilisateur qui initie la demande
+     * @param receveur  L'utilisateur qui reçoit la demande
+     * @return Un code sous forme de chaîne de caractères représentant le résultat de l'opération
+     * ("SELF", "PENDING", "ALREADY_FRIEND", "SENT_AGAIN", "SENT")
      */
     public String envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
 
-        if (demandeur == null || receveur == null) {
-            return "Utilisateur introuvable.";
+        if (demandeur.getId().equals(receveur.getId())) {
+            return "SELF";
         }
 
-        var existDirecte = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(demandeur, receveur);
+        Optional<Amitie> existing =
+                amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(
+                        demandeur, receveur);
 
-        if (existDirecte.isPresent()) {
-            Amitie amitie = existDirecte.get();
+        if (existing.isPresent()) {
+            Amitie a = existing.get();
 
-            if (statutBloquant(amitie.getStatut())) {
-                return "Vous avez déjà une demande en attente ou acceptée.";
-            }
+            if (a.getStatut() == StatutAmitie.EN_ATTENTE)
+                return "PENDING";
 
-            
-            amitie.setStatut(StatutAmitie.EN_ATTENTE);
-            amitie.setDateDemande(LocalDate.now());
-            amitieRepository.save(amitie);
+            if (a.getStatut() == StatutAmitie.ACCEPTEE)
+                return "ALREADY_FRIEND";
 
-            return "Nouvelle demande envoyée avec succès !";
+            a.setStatut(StatutAmitie.EN_ATTENTE);
+            amitieRepository.save(a);
+
+            return "SENT_AGAIN";
         }
 
-       
-        var existInverse = amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(receveur, demandeur);
-
-        if (existInverse.isPresent()) {
-            Amitie amitieInverse = existInverse.get();
-
-            if (statutBloquant(amitieInverse.getStatut())) {
-                return "Cet utilisateur vous a déjà envoyé une demande en attente ou acceptée.";
-            }
-
-           
-            amitieInverse.setStatut(StatutAmitie.EN_ATTENTE);
-            amitieInverse.setDateDemande(LocalDate.now());
-            amitieRepository.save(amitieInverse);
-
-            return "Nouvelle demande envoyée avec succès !";
-        }
-
-        
         Amitie amitie = new Amitie();
         amitie.setUtilisateurDemandeur(demandeur);
         amitie.setUtilisateurReceveur(receveur);
         amitie.setStatut(StatutAmitie.EN_ATTENTE);
-        amitie.setDateDemande(LocalDate.now());
 
         amitieRepository.save(amitie);
 
-        return "Demande envoyée avec succès !";
+        return "SENT";
     }
 
     /**
-     * Accepter une demande
+     * Accepte une demande d'amitié en attente.
+     *
+     * @param amitie L'entité amitié concernée
+     * @return L'amitié mise à jour avec le statut ACCEPTEE
      */
     public Amitie accepterDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.ACCEPTEE);
@@ -93,46 +78,78 @@ public class AmitieService {
     }
 
     /**
-     * Refuser une demande
+     * Refuse une demande d'amitié en attente.
+     *
+     * @param amitie L'entité amitié concernée
+     * @return L'amitié mise à jour avec le statut REFUSEE
      */
     public Amitie refuserDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.REFUSEE);
         return amitieRepository.save(amitie);
     }
 
-    
-    //Annuler une demande
-    
-    public Amitie annulerDemande(Amitie amitie) {
-        amitie.setStatut(StatutAmitie.ANNULEE);
-        return amitieRepository.save(amitie);
-    }
-
-    
-    //Supprimer une amitié
-    
-    public void rompreAmitie(Amitie amitie) {
-        amitieRepository.delete(amitie);
-    }
-
-    public List<Amitie> getAmities(Utilisateur utilisateur) {
-        return amitieRepository.findByUtilisateurDemandeurOrUtilisateurReceveur(
-                utilisateur,
-                utilisateur
-        );
-    }
-
-   
-    public List<Amitie> getAmitiesAcceptees(Utilisateur utilisateur) {
-        return amitieRepository.findAmitiesByStatutAndUtilisateur(
-                StatutAmitie.ACCEPTEE,
-                utilisateur
-        );
-    }
-
-    
+    /**
+     * Récupère une entité Amitie par son identifiant.
+     *
+     * @param id L'identifiant de la relation d'amitié
+     * @return L'entité Amitie trouvée
+     * @throws RuntimeException Si l'amitié n'existe pas en base
+     */
     public Amitie getById(Long id) {
         return amitieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Amitié introuvable"));
+    }
+
+    /**
+     * Récupère la liste des demandes d'amitié reçues et en attente pour un utilisateur.
+     *
+     * @param user L'utilisateur receveur
+     * @return Une liste d'amitiés avec le statut EN_ATTENTE
+     */
+    public List<Amitie> getDemandesRecues(Utilisateur user) {
+        return amitieRepository.findByUtilisateurReceveurAndStatut(
+                user,
+                StatutAmitie.EN_ATTENTE
+        );
+    }
+
+    /**
+     * Récupère la liste des ID des utilisateurs à qui une demande a été envoyée et qui est en attente.
+     *
+     * @param user L'utilisateur demandeur
+     * @return Une liste contenant les identifiants des receveurs
+     */
+    public List<Long> getDemandesEnvoyeesIds(Utilisateur user) {
+        return amitieRepository
+                .findByUtilisateurDemandeurAndStatut(
+                        user,
+                        StatutAmitie.EN_ATTENTE
+                )
+                .stream()
+                .map(a -> a.getUtilisateurReceveur().getId())
+                .toList();
+    }
+
+    /**
+     * Récupère la liste complète des amis (statut ACCEPTEE) d'un utilisateur,
+     * qu'il soit à l'origine de la demande ou qu'il l'ait reçue.
+     *
+     * @param utilisateur L'utilisateur concerné
+     * @return Une liste d'entités {@link Utilisateur} représentant ses amis
+     */
+    public List<Utilisateur> getAmis(Utilisateur utilisateur) {
+        List<Utilisateur> amis = new ArrayList<>();
+        
+        List<Amitie> asDemandeur = amitieRepository.findByUtilisateurDemandeurAndStatut(utilisateur, StatutAmitie.ACCEPTEE);
+        for (Amitie a : asDemandeur) {
+            amis.add(a.getUtilisateurReceveur());
+        }
+        
+        List<Amitie> asReceveur = amitieRepository.findByUtilisateurReceveurAndStatut(utilisateur, StatutAmitie.ACCEPTEE);
+        for (Amitie a : asReceveur) {
+            amis.add(a.getUtilisateurDemandeur());
+        }
+        
+        return amis;
     }
 }

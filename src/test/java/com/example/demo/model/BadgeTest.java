@@ -1,67 +1,44 @@
 package com.example.demo.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
+import java.util.ArrayList;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class BadgeTest {
 
     @Test
-    @DisplayName("Création badge complet")
-    void testCreationBadge() {
+    void testBadge() {
+        TypeSport mockTypeSport = mock(TypeSport.class);
+        Badge badge = new Badge("Marathonien", "Courir 42km", mockTypeSport, 42.0f);
+        
+        assertEquals("Marathonien", badge.getNom());
+        assertEquals("Courir 42km", badge.getDescription());
+        assertEquals(mockTypeSport, badge.getTypeSport());
+        assertEquals(42.0f, badge.getSeuil());
 
-        Badge badge = new Badge("Runner 5K", "Courir 5 km");
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5.0f);
+        badge.setId(1L);
+        assertEquals(1L, badge.getId());
 
-        assertAll(
-            () -> assertEquals("Runner 5K", badge.getNom()),
-            () -> assertEquals("Courir 5 km", badge.getDescription()),
-            () -> assertEquals(TypeSport.COURSE, badge.getTypeSport()),
-            () -> assertEquals(5.0f, badge.getSeuil())
-        );
-    }
+        badge.setNom("Sprinter");
+        assertEquals("Sprinter", badge.getNom());
 
-    @Test
-    void testConstructeurSimple() {
-        Badge badge = new Badge("Nom", "Desc");
+        badge.setDescription("100m rapide");
+        assertEquals("100m rapide", badge.getDescription());
 
-        assertEquals("Nom", badge.getNom());
-        assertEquals("Desc", badge.getDescription());
-    }
+        TypeSport newType = mock(TypeSport.class);
+        badge.setTypeSport(newType);
+        assertEquals(newType, badge.getTypeSport());
 
-    @Test
-    void testSetters() {
-        Badge badge = new Badge();
+        badge.setSeuil(10.0f);
+        assertEquals(10.0f, badge.getSeuil());
 
-        badge.setNom("Grimpeur");
-        badge.setDescription("Atteindre 1000m de dénivelé");
+        List<ObtentionBadge> obtentions = new ArrayList<>();
+        badge.setObtentions(obtentions);
+        assertEquals(obtentions, badge.getObtentions());
 
-        assertEquals("Grimpeur", badge.getNom());
-        assertEquals("Atteindre 1000m de dénivelé", badge.getDescription());
-    }
-
-    @Test
-    void testSeuil() {
-        Badge badge = new Badge();
-        badge.setSeuil(10f);
-
-        assertEquals(10f, badge.getSeuil());
-    }
-
-    @Test
-    void testId() {
-        Badge badge = new Badge();
-        badge.setId(10L);
-
-        assertEquals(10L, badge.getId());
-    }
-
-    @Test
-    void testObtentions() {
-        Badge badge = new Badge();
-
-        assertNull(badge.getObtentions());
+        Badge defaultBadge = new Badge("Test", "Test Desc");
+        assertEquals("Test", defaultBadge.getNom());
     }
 }

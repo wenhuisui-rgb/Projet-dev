@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier mon profil</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <a th:href="@{/profil}">
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
+        </a>
+    </div>
+</header>
+
+<div>
+    
+    <form th:action="@{/profil/modifier}" th:object="${utilisateur}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{pseudo}" />
+        <input type="hidden" th:field="*{email}" />
+        <input type="hidden" th:field="*{motDePasse}" />
+        
+        <h2>Modifier mon profil</h2>
+        
+        <div>
+            <label>Sexe</label>
+            <select th:field="*{sexe}">
+                <option th:each="s : ${T(com.example.demo.model.Sexe).values()}" 
+                        th:value="${s}" th:text="${s}"></option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Âge</label>
+            <input type="number" th:field="*{age}">
+        </div>
+        
+        <div>
+            <label>Taille - m<label>
+            <input type="number" th:field="*{taille}" step="0.01">
+        </div>
+        
+        <div>
+            <label>Poids - kg</label>
+            <input type="number" th:field="*{poids}" step="0.1">
+        </div>
+
+        <div>
+            <label>Niveau de pratique</label>
+            <select th:field="*{niveauPratique}">
+                <option th:each="n : ${T(com.example.demo.model.NiveauPratique).values()}" 
+                        th:value="${n}" th:text="${n}"></option>
+            </select>
+        </div>
+
+        <div>
+            <p th:if="${utilisateur.taille != null and utilisateur.poids != null}">
+                Votre IMC est de <strong th:text="${utilisateur.calculerIMC()}"></strong>
+            </p>
+            <p th:unless="${utilisateur.taille != null and utilisateur.poids != null}">
+                Renseignez votre taille et votre poids pour calculer votre IMC.
+            </p>
+        </div>
+        
+        
+
+        <div class="sports-selection mt-4">
+            <label class="form-label mb-2"><strong>Sports préférés (Maximum 4) :</strong></label>
+            
+            <div class="sports-tags-container">
+                <div th:each="sport : ${T(com.example.demo.model.TypeSport).values()}" class="sport-tag-item">
+                    <input type="checkbox" 
+                        th:field="*{preferencesSports}" 
+                        th:value="${sport}" 
+                        th:id="${'sport-' + sport}"
+                        class="sport-checkbox">
+                    <label th:for="${'sport-' + sport}" th:text="${sport}" class="sport-label"></label>
+                </div>
+            </div>
+            
+            <p id="limit-message" class="limit-warning" style="display: none;">Vous avez atteint la limite de 4 sports.</p>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-primary" th:onclick="|window.location.href='@{/profil}'|">Annuler</button>
+        </div>
+
+    </form>
+
+    <hr>
+    
+    <div>
+        <a href="/dashboard">Retour au DashBoard</a>
+        <a href="/deconnexion">Déconnexion</a>
+    </div>
+</div>
+
+</body>
+</html>
+
+<script>
+    const checkboxes = document.querySelectorAll('.sport-checkbox');
+    const limitMessage = document.getElementById('limit-message');
+    const maxAllowed = 4;
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checkedCount = document.querySelectorAll('.sport-checkbox:checked').length;
+            if (checkedCount > maxAllowed) {
+                cb.checked = false;
+                limitMessage.style.display = 'block';
+            } else {
+                limitMessage.style.display = 'none';
+            }
+        });
+    });
+</script>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail du Challenge - FitTrack</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{barNavigation :: navbar}"></div>
+
+<main class="main-container" style="max-width: 900px;">
+    
+    <div class="top-bar section-top-bar">
+        <a href="/challenges" class="create-btn btn-outline" style="padding: 6px 12px;"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+        
+        <div style="display: flex; gap: 10px;">
+            
+            <form th:if="${challenge.createur.id == utilisateur.id}" 
+                  th:action="@{/challenges/supprimer/{id}(id=${challenge.id})}" 
+                  method="post" 
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce challenge ?')">
+                <button type="submit" class="create-btn" style="margin: 0; background-color: #ef4444; border-color: #ef4444;">Supprimer le Challenge</button>
+            </form>
+
+            <form th:if="${challenge.createur.id != utilisateur.id and estInscrit}" 
+                  th:action="@{/participation/quitter/{id}(id=${challenge.id})}" 
+                  method="post"
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir quitter ce challenge ? Votre score sera perdu.')">
+                <button type="submit" class="create-btn btn-outline" style="margin: 0; color: #ef4444; border: 1px solid #ef4444; background: white;">Quitter le Challenge</button>
+            </form>
+
+            <form th:if="${challenge.createur.id != utilisateur.id and !estInscrit}" 
+                  th:action="@{/participation/rejoindre/{id}(id=${challenge.id})}" 
+                  method="post">
+                <button type="submit" class="create-btn" style="margin: 0; background-color: #3b82f6; border-color: #3b82f6;">Rejoindre ce Challenge</button>
+            </form>
+            
+        </div>
+    </div>
+
+    <div class="card card-body content-card">
+        <div class="section-header">
+            <h2 class="section-title" style="font-size: 24px;">🏆 <span th:text="${challenge.titre}"></span></h2>
+        </div>
+        
+        <ul class="custom-list">
+            <li><span class="label">Créé par:</span> <span class="val" th:text="${challenge.createur.pseudo}"></span></li>
+            <li><span class="label">Sport:</span> <span class="val badge badge-success" th:text="${challenge.typeSport}"></span></li>
+            <li><span class="label">Période:</span> <span class="val date-mt-0">Du <strong class="text-dark-semibold" th:text="${challenge.dateDebut}"></strong> au <strong class="text-dark-semibold" th:text="${challenge.dateFin}"></strong></span></li>
+            <li th:if="${challenge.cible != null}">
+                <span class="label">Objectif cible:</span> 
+                <span class="val text-blue-semibold" th:text="${challenge.cible} + ' ' + (${challenge.unite != null ? challenge.unite.code : ''})"></span>
+            </li>
+        </ul>
+
+        <div style="margin-top: 40px;">
+            <div class="section-header">
+                <h3 class="section-title">Top Classement</h3>
+                <a th:href="@{/participation/classement/{id}(id=${challenge.id})}" class="profile-link" style="font-size: 12px;">Voir tout le classement →</a>
+            </div>
+            
+            <div class="table-card" th:if="${classement != null and !classement.isEmpty()}">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Participant</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="entry,iterStat : ${classement}">
+                            <td>
+                                <span class="badge" th:classappend="${iterStat.index == 0 ? 'badge-warning' : (iterStat.index == 1 ? 'badge-success' : 'badge-danger')}" th:if="${iterStat.index < 3}" th:text="${iterStat.index == 0 ? '🥇 1er' : (iterStat.index == 1 ? '🥈 2ème' : '🥉 3ème')}"></span>
+                                <span class="text-dark-medium" th:if="${iterStat.index >= 3}" th:text="|${iterStat.count}ème|"></span>
+                            </td>
+                            <td class="font-semibold" th:text="${entry.utilisateur.pseudo}"></td>
+                            <td class="text-blue-semibold">
+                                <span th:text="${#numbers.formatDecimal(entry.scoreActuel, 1, 1)}"></span>
+                                <span th:text="${challenge.unite != null ? ' ' + challenge.unite.code : ' pts'}"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <p class="type empty-table-message" th:unless="${classement != null and !classement.isEmpty()}">
+                Aucun participant pour le moment. Soyez le premier !
+            </p>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

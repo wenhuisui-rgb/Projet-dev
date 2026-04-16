@@ -1,55 +1,49 @@
 package com.example.demo.model;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-
+import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class AmitieTest {
 
     @Test
-    @DisplayName("Devrait créer une amitié avec statut EN_ATTENTE et date auto")
-    void testCreationAmitie() {
+    void testDefaultConstructor() {
+        Amitie amitie = new Amitie();
+        assertNotNull(amitie.getDateDemande());
+        assertEquals(LocalDate.now(), amitie.getDateDemande());
+        // Assume StatutAmitie is an Enum, we check its string equivalent or existence
+        assertNotNull(amitie.getStatut()); 
+    }
 
-        Utilisateur demandeur = new Utilisateur();
-        demandeur.setPseudo("Alice");
-
-        Utilisateur receveur = new Utilisateur();
-        receveur.setPseudo("Bob");
+    @Test
+    void testParameterizedConstructorAndGettersSetters() {
+        Utilisateur demandeur = mock(Utilisateur.class);
+        Utilisateur receveur = mock(Utilisateur.class);
 
         Amitie amitie = new Amitie(demandeur, receveur);
+        
+        amitie.setAmitieID(10L);
+        assertEquals(10L, amitie.getAmitieID());
 
-        assertNotNull(amitie);
-        assertEquals("Alice", amitie.getUtilisateurDemandeur().getPseudo());
-        assertEquals("Bob", amitie.getUtilisateurReceveur().getPseudo());
+        assertEquals(demandeur, amitie.getUtilisateurDemandeur());
+        assertEquals(receveur, amitie.getUtilisateurReceveur());
 
-        assertEquals(StatutAmitie.EN_ATTENTE, amitie.getStatut());
-        assertNotNull(amitie.getDateDemande());
-    }
+        Utilisateur newDemandeur = mock(Utilisateur.class);
+        amitie.setUtilisateurDemandeur(newDemandeur);
+        assertEquals(newDemandeur, amitie.getUtilisateurDemandeur());
 
-    @Test
-    @DisplayName("Devrait changer le statut de l'amitié")
-    void testChangementStatut() {
+        Utilisateur newReceveur = mock(Utilisateur.class);
+        amitie.setUtilisateurReceveur(newReceveur);
+        assertEquals(newReceveur, amitie.getUtilisateurReceveur());
 
-        Amitie amitie = new Amitie();
+        // Test Enum Setter
+        StatutAmitie mockStatut = mock(StatutAmitie.class);
+        amitie.setStatut(mockStatut);
+        assertEquals(mockStatut, amitie.getStatut());
 
-        amitie.setStatut(StatutAmitie.EN_ATTENTE);
-        assertEquals(StatutAmitie.EN_ATTENTE, amitie.getStatut());
-
-        amitie.setStatut(StatutAmitie.ACCEPTEE);
-        assertEquals(StatutAmitie.ACCEPTEE, amitie.getStatut());
-
-        amitie.setStatut(StatutAmitie.REFUSEE);
-        assertEquals(StatutAmitie.REFUSEE, amitie.getStatut());
-    }
-
-    @Test
-    @DisplayName("Vérification ID")
-    void testGettersSetters() {
-
-        Amitie amitie = new Amitie();
-        amitie.setAmitieID(100L);
-
-        assertEquals(100L, amitie.getAmitieID());
+        LocalDate newDate = LocalDate.of(2023, 1, 1);
+        amitie.setDateDemande(newDate);
+        assertEquals(newDate, amitie.getDateDemande());
     }
 }

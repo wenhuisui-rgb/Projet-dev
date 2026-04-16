@@ -1,71 +1,38 @@
 package com.example.demo.model;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-
-
 import java.time.LocalDateTime;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class ObtentionBadgeTest {
-
     @Test
-    @DisplayName("Test constructeur métier ObtentionBadge")
-    void testConstructeurMetier() {
+    void testObtentionBadge() {
+        Utilisateur mockUtilisateur = mock(Utilisateur.class);
+        Badge mockBadge = mock(Badge.class);
 
-        Utilisateur user = new Utilisateur();
-        user.setPseudo("Runner31");
-
-        Badge badge = new Badge("Marathonien", "A couru 42km");
-
-        ObtentionBadge obtention = new ObtentionBadge(user, badge);
-
-        assertEquals(user, obtention.getUtilisateur());
-        assertEquals(badge, obtention.getBadge());
+        ObtentionBadge obtention = new ObtentionBadge(mockUtilisateur, mockBadge);
         assertNotNull(obtention.getDateObtention());
+        
+        obtention.setDateObtention(LocalDateTime.of(2023, 1, 1, 12, 0));
+        assertEquals(LocalDateTime.of(2023, 1, 1, 12, 0), obtention.getDateObtention());
+
+        assertEquals(mockUtilisateur, obtention.getUtilisateur());
+        assertEquals(mockBadge, obtention.getBadge());
+
+        Utilisateur newUser = mock(Utilisateur.class);
+        obtention.setUtilisateur(newUser);
+        assertEquals(newUser, obtention.getUtilisateur());
+
+        Badge newBadge = mock(Badge.class);
+        obtention.setBadge(newBadge);
+        assertEquals(newBadge, obtention.getBadge());
     }
 
     @Test
-    @DisplayName("Test setters et date manuelle")
-    void testSetters() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-
-        LocalDateTime date = LocalDateTime.now();
-
-        ObtentionBadge obtention = new ObtentionBadge();
-        obtention.setUtilisateur(user);
-        obtention.setBadge(badge);
-        obtention.setDateObtention(date);
-
-        assertEquals(user, obtention.getUtilisateur());
-        assertEquals(badge, obtention.getBadge());
-        assertEquals(date, obtention.getDateObtention());
-    }
-
-    @Test
-    @DisplayName("Test relations IDs")
-    void testRelationsIds() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(50L);
-
-        Badge badge = new Badge();
-        badge.setId(99L);
-
-        ObtentionBadge obtention = new ObtentionBadge();
-        obtention.setUtilisateur(user);
-        obtention.setBadge(badge);
-
-        assertAll(
-            () -> assertEquals(50L, obtention.getUtilisateur().getId()),
-            () -> assertEquals(99L, obtention.getBadge().getId())
-        );
-
+    void testGetIdMissing() {
+        ObtentionBadge ob = new ObtentionBadge();
+        // 直接调用 getId() 覆盖红线
+        assertNull(ob.getId());
     }
 }

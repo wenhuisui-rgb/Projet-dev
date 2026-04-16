@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion - FitTrack</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+    </div>
+    <div class="navbar-right"></div>
+</header>
+
+<div style="max-width: 400px; margin: 80px auto; padding: 20px;">
+    <div style="background: white; border-radius: 16px; padding: 30px; border: 1px solid #e5e7eb;">
+        <h2 style="text-align: center; margin-bottom: 20px;">Connexion</h2>
+        
+        <div th:if="${erreur}" style="color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 8px; margin-bottom: 15px;" th:text="${erreur}"></div>
+        <div th:if="${success}" style="color: #16a34a; background: #dcfce7; padding: 10px; border-radius: 8px; margin-bottom: 15px;" th:text="${success}"></div>
+
+        <form th:action="@{/connexion}" method="post">
+            <div style="margin-bottom: 15px;">
+                <label for="email" style="display: block; font-size: 13px; color: #374151; margin-bottom: 5px;">Email</label>
+                <input type="email" id="email" name="email" required placeholder="nom@exemple.com" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="motDePasse" style="display: block; font-size: 13px; color: #374151; margin-bottom: 5px;">Mot de passe</label>
+                <input type="password" id="motDePasse" name="motDePasse" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            </div>
+            <button type="submit" style="width: 100%; padding: 12px; background: #111827; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 14px;">Se connecter</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 15px;">
+            <p style="font-size: 14px;">Pas encore de compte ? <a href="/inscription" style="color: #3b82f6; text-decoration: none;">S'inscrire</a></p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

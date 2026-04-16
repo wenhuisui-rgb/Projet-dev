@@ -1,14 +1,21 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Amitie;
-import com.example.demo.model.Utilisateur;
-import com.example.demo.service.AmitieService;
-import com.example.demo.service.UtilisateurService;
-import org.springframework.web.bind.annotation.*;
-
+import com.example.demo.model.*;
+import com.example.demo.service.*;
 import java.util.List;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.ui.Model;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@RestController
+/**
+ * Contrôleur gérant les vues et les actions liées au système d'amitié.
+ * <p>
+ * Il intercepte les requêtes web pour envoyer des demandes d'amis, les accepter ou les refuser,
+ * et prépare les données nécessaires pour la vue Thymeleaf correspondante.
+ */
+@Controller
 @RequestMapping("/amities")
 public class AmitieController {
 
@@ -21,83 +28,86 @@ public class AmitieController {
         this.utilisateurService = utilisateurService;
     }
 
-    
-    //Envoyer une demande d'amitié
-     
-    @PostMapping("/demande")
-    public String envoyerDemande(@RequestParam Long demandeurID,
-                                 @RequestParam String pseudoReceveur) {
+    /**
+     * Traite l'envoi d'une demande d'amitié vers un autre utilisateur.
+     *
+     * @param id                 L'identifiant de l'utilisateur à qui on souhaite envoyer la demande
+     * @param session            La session HTTP pour récupérer l'utilisateur connecté
+     * @param redirectAttributes Permet de passer des messages flash ("friendStatus") à la vue après la redirection
+     * @return Une redirection vers la page "/mesAmis" (ou vers "/connexion" si non connecté)
+     */
+    @GetMapping("/ajouter/{id}")
+    public String ajouter(@PathVariable Long id,
+                          HttpSession session,
+                          RedirectAttributes redirectAttributes) {
 
-        // récupération du demandeur via ID
-        Utilisateur demandeur = utilisateurService.findById(demandeurID);
+        Utilisateur sessionUser =
+                (Utilisateur) session.getAttribute("utilisateur");
 
-        // conversion pseudo → utilisateur
-        Utilisateur receveur = utilisateurService.findByPseudo(pseudoReceveur);
-
-        if (demandeur == null || receveur == null) {
-            return "Utilisateur introuvable.";
+        if (sessionUser == null) {
+            return "redirect:/connexion";
         }
 
-        // sécurité : éviter de s'ajouter soi-même
-        if (demandeur.equals(receveur)) {
-            return "Vous ne pouvez pas vous ajouter vous-même.";
+        Utilisateur receveur = utilisateurService.findById(id);
+
+        String result =
+                amitieService.envoyerDemande(sessionUser, receveur);
+
+        redirectAttributes.addFlashAttribute("friendStatus", result);
+
+        return "redirect:/mesAmis";
+    }
+
+    /**
+     * Traite l'acceptation d'une demande d'amitié reçue.
+     *
+     * @param amitieID L'identifiant de la relation d'amitié à accepter
+     * @return Une redirection vers la page "/mesAmis"
+     */
+    @GetMapping("/{amitieID}/accepter")
+    public String accepter(@PathVariable Long amitieID) {
+        Amitie amitie = amitieService.getById(amitieID);
+        amitieService.accepterDemande(amitie);
+        return "redirect:/mesAmis";
+    }
+
+    /**
+     * Traite le refus d'une demande d'amitié reçue.
+     *
+     * @param amitieID L'identifiant de la relation d'amitié à refuser
+     * @return Une redirection vers la page "/mesAmis"
+     */
+    @GetMapping("/{amitieID}/refuser")
+    public String refuser(@PathVariable Long amitieID) {
+        Amitie amitie = amitieService.getById(amitieID);
+        amitieService.refuserDemande(amitie);
+        return "redirect:/mesAmis";
+    }
+
+    /**
+     * Affiche la page principale de gestion des amis.
+     * Injecte dans le modèle la liste des amis validés, les demandes reçues et envoyées.
+     *
+     * @param session La session HTTP actuelle
+     * @param model   Le conteneur de données pour la vue Thymeleaf
+     * @return Le nom de la vue Thymeleaf {@code "mesAmis"}
+     */
+    @GetMapping("/mesAmis")
+    public String mesAmis(HttpSession session, Model model) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) {
+            return "redirect:/connexion";
         }
-
-        return amitieService.envoyerDemande(demandeur, receveur);
-    }
-
-    /**
-     * Accepter une demande
-     */
-    @PutMapping("/{amitieID}/accepter")
-    public Amitie accepterDemande(@PathVariable Long amitieID) {
-        Amitie amitie = amitieService.getById(amitieID);
-        return amitieService.accepterDemande(amitie);
-    }
-
-    /**
-     * Refuser une demande
-     */
-    @PutMapping("/{amitieID}/refuser")
-    public Amitie refuserDemande(@PathVariable Long amitieID) {
-        Amitie amitie = amitieService.getById(amitieID);
-        return amitieService.refuserDemande(amitie);
-    }
-
-    /**
-     * Annuler une demande
-     */
-    @PutMapping("/{amitieID}/annuler")
-    public Amitie annulerDemande(@PathVariable Long amitieID) {
-        Amitie amitie = amitieService.getById(amitieID);
-        return amitieService.annulerDemande(amitie);
-    }
-
-    /**
-     * Rompre une amitié
-     */
-    @DeleteMapping("/{amitieID}")
-    public String rompreAmitie(@PathVariable Long amitieID) {
-        Amitie amitie = amitieService.getById(amitieID);
-        amitieService.rompreAmitie(amitie);
-        return "Amitié supprimée avec succès.";
-    }
-
-    /**
-     * Liste complète des amitiés d’un utilisateur
-     */
-    @GetMapping("/utilisateurs/{id}")
-    public List<Amitie> getAmitieUtilisateur(@PathVariable Long id) {
-        Utilisateur utilisateur = utilisateurService.findById(id);
-        return amitieService.getAmities(utilisateur);
-    }
-
-    /**
-     * Liste des amitiés acceptées
-     */
-    @GetMapping("/utilisateurs/{id}/acceptees")
-    public List<Amitie> getAmitiesAcceptees(@PathVariable Long id) {
-        Utilisateur utilisateur = utilisateurService.findById(id);
-        return amitieService.getAmitiesAcceptees(utilisateur);
+        
+        List<Utilisateur> amis = amitieService.getAmis(utilisateur);
+        model.addAttribute("amis", amis);
+        
+        List<Amitie> demandesRecues = amitieService.getDemandesRecues(utilisateur);
+        model.addAttribute("demandesRecues", demandesRecues);
+        
+        List<Long> demandesEnvoyeesIds = amitieService.getDemandesEnvoyeesIds(utilisateur);
+        model.addAttribute("demandesEnvoyees", demandesEnvoyeesIds);
+        
+        return "mesAmis";
     }
 }

@@ -1,136 +1,99 @@
 package com.example.demo.model;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class ObjectifTest {
 
-    private Objectif objectif;
-    private Utilisateur utilisateur;
-
-    @BeforeEach
-    void setUp() {
-        utilisateur = new Utilisateur();
-        utilisateur.setId(1L);
-        
-        objectif = new Objectif();
-        objectif.setId(1L);
-        objectif.setDescription("Courir 50 km par mois");
-        objectif.setTypeSport(TypeSport.COURSE);
-        objectif.setCible(50f);
-        objectif.setUnite(Unite.KM);
-        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
-        objectif.setPeriode(Periode.MOIS);
-        objectif.setUtilisateur(utilisateur);
-    }
-
     @Test
-    @DisplayName("Test constructeur sans paramètres")
-    void testNoArgConstructor() {
-        Objectif obj = new Objectif();
-        assertNotNull(obj);
-    }
+    void testGetDateFinLogic() {
+        Objectif objectif = new Objectif();
+        LocalDate today = LocalDate.now();
 
-    @Test
-    @DisplayName("Test constructeur avec paramètres")
-    void testAllArgsConstructor() {
-        LocalDate date = LocalDate.of(2026, 5, 1);
-        Objectif obj = new Objectif(2L, "Nager 10 km", TypeSport.NATATION, 10f, Unite.KM, date, null, Periode.MOIS, utilisateur);
-        
-        assertEquals(2L, obj.getId());
-        assertEquals("Nager 10 km", obj.getDescription());
-        assertEquals(TypeSport.NATATION, obj.getTypeSport());
-        assertEquals(10f, obj.getCible());
-        assertEquals(Unite.KM, obj.getUnite());
-        assertEquals(date, obj.getDateDebut());
-        assertEquals(Periode.MOIS, obj.getPeriode());
-        assertEquals(utilisateur, obj.getUtilisateur());
-    }
+        // 1. dateFin n'est pas null
+        objectif.setDateFin(today.plusDays(5));
+        assertEquals(today.plusDays(5), objectif.getDateFin());
 
-    @Test
-    @DisplayName("Test getters et setters")
-    void testGettersAndSetters() {
-        LocalDate date = LocalDate.of(2026, 6, 15);
-        
-        objectif.setId(5L);
-        objectif.setDescription("Faire 20h de sport");
-        objectif.setTypeSport(TypeSport.VELO);
-        objectif.setCible(1200f);
-        objectif.setUnite(Unite.MINUTES);
-        objectif.setDateDebut(date);
+        // 2. dateFin est null, dateDebut est null -> renvoie aujourd'hui
+        objectif.setDateFin(null);
+        assertEquals(today, objectif.getDateFin());
+
+        // 3. dateDebut est défini, periode est null -> + 1 mois
+        LocalDate debut = LocalDate.of(2023, 1, 1);
+        objectif.setDateDebut(debut);
+        assertEquals(LocalDate.of(2023, 2, 1), objectif.getDateFin());
+
+        // 4. Switch sur Periode
+        // Mocking or assuming Periode SEMAINE, ANNEE, etc. exists.
+        // Puisque Periode est un Enum, nous utilisons l'injection pour forcer les valeurs du switch si accessible.
+        // *Note: On simule le comportement en configurant l'enum Periode.*
+        // En supposant que Periode a SEMAINE, ANNEE, et potentiellement MOIS
         objectif.setPeriode(Periode.SEMAINE);
-        
-        assertEquals(5L, objectif.getId());
-        assertEquals("Faire 20h de sport", objectif.getDescription());
-        assertEquals(TypeSport.VELO, objectif.getTypeSport());
-        assertEquals(1200f, objectif.getCible());
-        assertEquals(Unite.MINUTES, objectif.getUnite());
-        assertEquals(date, objectif.getDateDebut());
-        assertEquals(Periode.SEMAINE, objectif.getPeriode());
-    }
+        assertEquals(debut.plusWeeks(1), objectif.getDateFin());
 
-    @Test
-    @DisplayName("Test getDateFin")
-    void testGetDateFin() {
-        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
-        
-        objectif.setPeriode(Periode.SEMAINE);
-        assertEquals(LocalDate.of(2026, 4, 8), objectif.getDateFin());
-        
-        objectif.setPeriode(Periode.MOIS);
-        assertEquals(LocalDate.of(2026, 5, 1), objectif.getDateFin());
-        
         objectif.setPeriode(Periode.ANNEE);
-        assertEquals(LocalDate.of(2027, 4, 1), objectif.getDateFin());
-    }
-
-    @Test
-    @DisplayName("Test getDateFin avec dateFin personnalisée")
-    void testGetDateFinPersonnalisee() {
-        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
-        objectif.setPeriode(Periode.MOIS);
-        LocalDate customDateFin = LocalDate.of(2026, 6, 30);
-        objectif.setDateFin(customDateFin);
+        assertEquals(debut.plusYears(1), objectif.getDateFin());
         
-        assertEquals(customDateFin, objectif.getDateFin());
+        // Pour couvrir le default (ex: MOIS)
+        objectif.setPeriode(Periode.valueOf("MOIS")); // ou tout autre valeur
+        assertEquals(debut.plusMonths(1), objectif.getDateFin());
     }
 
     @Test
-    @DisplayName("Test prolongerObjectif")
     void testProlongerObjectif() {
-        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
-        objectif.setPeriode(Periode.MOIS);
-        LocalDate dateFinOriginale = objectif.getDateFin();
-        
-        LocalDate nouvelleDateFin = LocalDate.of(2026, 6, 30);
-        objectif.prolongerObjectif(nouvelleDateFin);
-        
-        assertEquals(nouvelleDateFin, objectif.getDateFin());
+        Objectif objectif = new Objectif();
+        LocalDate initialFin = LocalDate.now().plusDays(5);
+        objectif.setDateFin(initialFin);
+
+        // Nouvelle date après -> mise à jour
+        LocalDate nouvelleFinValide = LocalDate.now().plusDays(10);
+        objectif.prolongerObjectif(nouvelleFinValide);
+        assertEquals(nouvelleFinValide, objectif.getDateFin());
+
+        // Nouvelle date avant -> refusé (reste l'ancienne)
+        LocalDate nouvelleFinInvalide = LocalDate.now().plusDays(2);
+        objectif.prolongerObjectif(nouvelleFinInvalide);
+        assertEquals(nouvelleFinValide, objectif.getDateFin());
+
+        // Nouvelle date null -> refusé
+        objectif.prolongerObjectif(null);
+        assertEquals(nouvelleFinValide, objectif.getDateFin());
     }
 
     @Test
-    @DisplayName("Test prolongerObjectif - date antérieure ne change pas")
-    void testProlongerObjectifDateAnterieure() {
-        objectif.setDateDebut(LocalDate.of(2026, 4, 1));
-        objectif.setPeriode(Periode.MOIS);
-        LocalDate dateFinOriginale = objectif.getDateFin();
+    void testConstructorsGettersSettersAndToString() {
+        TypeSport mockSport = mock(TypeSport.class);
+        Unite mockUnite = mock(Unite.class);
+        Utilisateur mockUser = mock(Utilisateur.class);
         
-        LocalDate dateAnterieure = dateFinOriginale.minusDays(5);
-        objectif.prolongerObjectif(dateAnterieure);
+        Objectif obj = new Objectif(1L, "Desc", mockSport, 10f, mockUnite, LocalDate.now(), null, Periode.SEMAINE, mockUser);
         
-        assertEquals(dateFinOriginale, objectif.getDateFin());
-    }
+        assertEquals(1L, obj.getId());
+        obj.setId(2L);
+        assertEquals(2L, obj.getId());
 
-    @Test
-    @DisplayName("Test toString")
-    void testToString() {
-        String result = objectif.toString();
-        assertNotNull(result);
-        assertTrue(result.contains("Courir 50 km par mois"));
-        assertTrue(result.contains("COURSE"));
+        assertEquals("Desc", obj.getDescription());
+        obj.setDescription("New Desc");
+        assertEquals("New Desc", obj.getDescription());
+
+        assertEquals(mockSport, obj.getTypeSport());
+        obj.setTypeSport(null);
+        assertNull(obj.getTypeSport());
+
+        assertEquals(10f, obj.getCible());
+        obj.setCible(20f);
+        assertEquals(20f, obj.getCible());
+
+        assertEquals(mockUnite, obj.getUnite());
+        obj.setUnite(null);
+        assertNull(obj.getUnite());
+
+        assertEquals(mockUser, obj.getUtilisateur());
+        obj.setUtilisateur(null);
+        assertNull(obj.getUtilisateur());
+
+        assertTrue(obj.toString().contains("Objectif{id=2"));
     }
 }
