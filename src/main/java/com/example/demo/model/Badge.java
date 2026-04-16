@@ -3,6 +3,7 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
 
 /**
  * Entité représentant un badge (succès/récompense) disponible dans le système.
@@ -10,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * La liaison avec les utilisateurs se fait via {@link ObtentionBadge}.
  */
 @Entity
-public class Badge {
+public class Badge implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
