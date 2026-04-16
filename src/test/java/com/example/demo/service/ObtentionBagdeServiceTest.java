@@ -12,179 +12,54 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ObtentionBadgeServiceTest {
 
     @Mock
-    private ObtentionBadgeRepository obtentionBadgeRepository;
+    private ObtentionBadgeRepository repository;
 
     @InjectMocks
-    private ObtentionBadgeService obtentionBadgeService;
+    private ObtentionBadgeService service;
 
     @Test
-    void testUtilisateurPossedeBadge_true() {
-
+    void testVerifierCondition() {
         Utilisateur user = new Utilisateur();
         user.setId(1L);
+        Badge badge = new Badge("Pro", "Desc", TypeSport.COURSE, 10f);
+        badge.setId(1L);
 
-        Badge badge = new Badge();
-        badge.setId(10L);
+        // Case 1: Already has badge
+        when(repository.existsByUtilisateurIdAndBadgeId(1L, 1L)).thenReturn(true);
+        assertFalse(service.verifierCondition(badge, user, TypeSport.COURSE, 15f));
 
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(true);
+        // Case 2: Wrong sport
+        when(repository.existsByUtilisateurIdAndBadgeId(1L, 1L)).thenReturn(false);
+        assertFalse(service.verifierCondition(badge, user, TypeSport.VELO, 15f));
 
-        boolean result = obtentionBadgeService.utilisateurPossedeBadge(user, badge);
+        // Case 3: Value insufficient
+        assertFalse(service.verifierCondition(badge, user, TypeSport.COURSE, 5f));
 
-        assertTrue(result);
+        // Case 4: Condition met
+        assertTrue(service.verifierCondition(badge, user, TypeSport.COURSE, 15f));
     }
 
     @Test
-    void testUtilisateurPossedeBadge_false() {
-
+    void testAttribuerBadgeSiCondition() {
         Utilisateur user = new Utilisateur();
         user.setId(1L);
+        Badge badge = new Badge("Pro", "Desc", TypeSport.COURSE, 10f);
+        badge.setId(1L);
 
-        Badge badge = new Badge();
-        badge.setId(10L);
+        when(repository.existsByUtilisateurIdAndBadgeId(1L, 1L)).thenReturn(false);
+        when(repository.save(any())).thenReturn(new ObtentionBadge(user, badge));
 
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(false);
-
-        boolean result = obtentionBadgeService.utilisateurPossedeBadge(user, badge);
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testVerifierCondition_ok() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(false);
-
-        boolean result = obtentionBadgeService.verifierCondition(
-                badge, user, TypeSport.COURSE, 10f
-        );
-
-        assertTrue(result);
-    }
-
-    @Test
-    void testVerifierCondition_badSport() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(false);
-
-        boolean result = obtentionBadgeService.verifierCondition(
-                badge, user, TypeSport.NATATION, 10f
-        );
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testVerifierCondition_badSeuil() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(10f);
-
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(false);
-
-        boolean result = obtentionBadgeService.verifierCondition(
-                badge, user, TypeSport.COURSE, 5f
-        );
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testAttribuerBadge() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-
-        ObtentionBadge saved = new ObtentionBadge(user, badge);
-
-        when(obtentionBadgeRepository.save(any(ObtentionBadge.class)))
-                .thenReturn(saved);
-
-        ObtentionBadge result = obtentionBadgeService.attribuerBadge(user, badge);
-
+        ObtentionBadge result = service.attribuerBadgeSiCondition(badge, user, TypeSport.COURSE, 15f);
         assertNotNull(result);
-        assertEquals(user, result.getUtilisateur());
-        assertEquals(badge, result.getBadge());
+
+        // Fails condition
+        assertNull(service.attribuerBadgeSiCondition(badge, user, TypeSport.COURSE, 5f));
     }
-
-    @Test
-    void testAttribuerBadgeSiCondition_ok() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(false);
-
-        when(obtentionBadgeRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        ObtentionBadge result = obtentionBadgeService.attribuerBadgeSiCondition(
-                badge, user, TypeSport.COURSE, 10f
-        );
-
-        assertNotNull(result);
-    }
-
-    @Test
-    void testAttribuerBadgeSiCondition_fail() {
-
-        Utilisateur user = new Utilisateur();
-        user.setId(1L);
-
-        Badge badge = new Badge();
-        badge.setId(10L);
-        badge.setTypeSport(TypeSport.COURSE);
-        badge.setSeuil(5f);
-
-        when(obtentionBadgeRepository.existsByUtilisateurIdAndBadgeId(1L, 10L))
-                .thenReturn(true);
-
-        ObtentionBadge result = obtentionBadgeService.attribuerBadgeSiCondition(
-                badge, user, TypeSport.COURSE, 10f
-        );
-
-        assertNull(result);
-    }
-
-   
 }

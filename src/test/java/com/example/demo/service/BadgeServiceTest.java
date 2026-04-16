@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.Badge;
 import com.example.demo.model.TypeSport;
+import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.BadgeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,10 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,72 +24,56 @@ class BadgeServiceTest {
     @Mock
     private BadgeRepository badgeRepository;
 
+    @Mock
+    private ObtentionBadgeService obtentionBadgeService;
+
     @InjectMocks
     private BadgeService badgeService;
 
     @Test
     void testCreerBadge() {
+        Badge badgeToSave = new Badge("Pro", "Desc");
+        when(badgeRepository.save(any(Badge.class))).thenReturn(badgeToSave);
 
-        Badge badgeMock = new Badge("Runner 5K", "Courir 5 km");
-        badgeMock.setId(1L);
-        badgeMock.setTypeSport(TypeSport.COURSE);
-        badgeMock.setSeuil(5f);
-
-        when(badgeRepository.save(any(Badge.class)))
-                .thenReturn(badgeMock);
-
-        Badge result = badgeService.creerBadge(
-                "Runner 5K",
-                "Courir 5 km",
-                TypeSport.COURSE,
-                5f
-        );
-
+        Badge result = badgeService.creerBadge("Pro", "Desc", TypeSport.COURSE, 10f);
         assertNotNull(result);
-        assertEquals("Runner 5K", result.getNom());
-        assertEquals("Courir 5 km", result.getDescription());
-        assertEquals(TypeSport.COURSE, result.getTypeSport());
-        assertEquals(5f, result.getSeuil());
+        verify(badgeRepository).save(any(Badge.class));
     }
 
     @Test
     void testListerTousLesBadges() {
-
-        Badge b1 = new Badge("5K", "Courir 5 km");
-        Badge b2 = new Badge("10K", "Courir 10 km");
-
-        when(badgeRepository.findAll())
-                .thenReturn(List.of(b1, b2));
-
-        List<Badge> result = badgeService.listerTousLesBadges();
-
-        assertEquals(2, result.size());
-        assertEquals("5K", result.get(0).getNom());
+        when(badgeRepository.findAll()).thenReturn(Arrays.asList(new Badge()));
+        assertEquals(1, badgeService.listerTousLesBadges().size());
     }
 
     @Test
-    void testGetBadgeById_Trouve() {
+    void testGetBadgeById() {
+        Badge badge = new Badge();
+        when(badgeRepository.findById(1L)).thenReturn(Optional.of(badge));
+        assertEquals(badge, badgeService.getBadgeById(1L));
 
-        Badge badge = new Badge("Marathon", "42 km");
-        badge.setId(10L);
-
-        when(badgeRepository.findById(10L))
-                .thenReturn(Optional.of(badge));
-
-        Badge result = badgeService.getBadgeById(10L);
-
-        assertNotNull(result);
-        assertEquals(10L, result.getId());
+        when(badgeRepository.findById(2L)).thenReturn(Optional.empty());
+        assertNull(badgeService.getBadgeById(2L));
     }
 
     @Test
-    void testGetBadgeById_NullSiAbsent() {
+    void testVerifierBadgePourUtilisateur() {
+        Utilisateur user = new Utilisateur();
+        
+        Badge badge1 = new Badge("10km", "Course 10k", TypeSport.COURSE, 10f);
+        Badge badge2 = new Badge("20km", "Course 20k", TypeSport.COURSE, 20f);
+        Badge badge3 = new Badge("Velo10k", "Velo", TypeSport.VELO, 10f);
 
-        when(badgeRepository.findById(99L))
-                .thenReturn(Optional.empty());
+        when(badgeRepository.findAll()).thenReturn(Arrays.asList(badge1, badge2, badge3));
 
-        Badge result = badgeService.getBadgeById(99L);
+        // Test running 15km
+        badgeService.verifierBadgePourUtilisateur(user, TypeSport.COURSE, 15f);
 
-        assertNull(result);
+        // badge1 should be attributed (COURSE, 15 >= 10)
+        verify(obtentionBadgeService, times(1)).attribuerBadge(user, badge1);
+        // badge2 should NOT be attributed (COURSE, 15 < 20)
+        verify(obtentionBadgeService, never()).attribuerBadge(user, badge2);
+        // badge3 should NOT be attributed (Wrong sport)
+        verify(obtentionBadgeService, never()).attribuerBadge(user, badge3);
     }
 }

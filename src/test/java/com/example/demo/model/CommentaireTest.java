@@ -206,4 +206,16 @@ class CommentaireTest {
         assertTrue(result.contains("Super performance !"));
         assertTrue(result.contains(String.valueOf(commentaire.getId())));
     }
+
+    @Test
+    void testCommentaireEqualsNullId() {
+        Commentaire cNullId = new Commentaire(); // id 是 null
+        
+        Commentaire cWithId = new Commentaire();
+        cWithId.setId(1L); // id 是 1
+
+        // 触发 this.id == null 的分支短路（覆盖黄线）
+        assertNotEquals(cNullId, cWithId);
+        assertNotEquals(cWithId, cNullId);
+    }
 }

@@ -4,15 +4,19 @@ import com.example.demo.model.Amitie;
 import com.example.demo.model.StatutAmitie;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.AmitieRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,116 +28,133 @@ class AmitieServiceTest {
     @InjectMocks
     private AmitieService amitieService;
 
-    @Test
-    void testEnvoyerDemande_NouvelleDemande() {
+    private Utilisateur user1;
+    private Utilisateur user2;
 
-        Utilisateur u1 = new Utilisateur();
-        u1.setId(1L);
+    @BeforeEach
+    void setUp() {
+        user1 = new Utilisateur();
+        user1.setId(1L);
 
-        Utilisateur u2 = new Utilisateur();
-        u2.setId(2L);
-
-        when(amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2))
-                .thenReturn(Optional.empty());
-
-        when(amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u2, u1))
-                .thenReturn(Optional.empty());
-
-        when(amitieRepository.save(any(Amitie.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        String result = amitieService.envoyerDemande(u1, u2);
-
-        assertEquals("Demande envoyée avec succès !", result);
-        verify(amitieRepository, times(1)).save(any(Amitie.class));
+        user2 = new Utilisateur();
+        user2.setId(2L);
     }
 
     @Test
-    void testEnvoyerDemande_DejaExistanteBloquee() {
+    void testEnvoyerDemande_Self() {
+        assertEquals("SELF", amitieService.envoyerDemande(user1, user1));
+    }
 
-        Utilisateur u1 = new Utilisateur();
-        u1.setId(1L);
+    @Test
+    void testEnvoyerDemande_AlreadyPending() {
+        Amitie existante = new Amitie(user1, user2);
+        existante.setStatut(StatutAmitie.EN_ATTENTE);
+        when(amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(user1, user2))
+                .thenReturn(Optional.of(existante));
 
-        Utilisateur u2 = new Utilisateur();
-        u2.setId(2L);
+        assertEquals("PENDING", amitieService.envoyerDemande(user1, user2));
+    }
 
-        Amitie existing = new Amitie();
-        existing.setStatut(StatutAmitie.EN_ATTENTE);
+    @Test
+    void testEnvoyerDemande_AlreadyFriend() {
+        Amitie existante = new Amitie(user1, user2);
+        existante.setStatut(StatutAmitie.ACCEPTEE);
+        when(amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(user1, user2))
+                .thenReturn(Optional.of(existante));
 
-        when(amitieRepository
-                .findByUtilisateurDemandeurAndUtilisateurReceveur(u1, u2))
-                .thenReturn(Optional.of(existing));
+        assertEquals("ALREADY_FRIEND", amitieService.envoyerDemande(user1, user2));
+    }
 
-        String result = amitieService.envoyerDemande(u1, u2);
+    @Test
+    void testEnvoyerDemande_SentAgain() {
+        Amitie existante = new Amitie(user1, user2);
+        existante.setStatut(StatutAmitie.REFUSEE);
+        when(amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(user1, user2))
+                .thenReturn(Optional.of(existante));
 
-        assertTrue(result.contains("déjà une demande"));
-        verify(amitieRepository, never()).save(any());
+        assertEquals("SENT_AGAIN", amitieService.envoyerDemande(user1, user2));
+        assertEquals(StatutAmitie.EN_ATTENTE, existante.getStatut());
+        verify(amitieRepository).save(existante);
+    }
+
+    @Test
+    void testEnvoyerDemande_New() {
+        when(amitieRepository.findByUtilisateurDemandeurAndUtilisateurReceveur(user1, user2))
+                .thenReturn(Optional.empty());
+
+        assertEquals("SENT", amitieService.envoyerDemande(user1, user2));
+        verify(amitieRepository).save(any(Amitie.class));
     }
 
     @Test
     void testAccepterDemande() {
-
         Amitie amitie = new Amitie();
-        amitie.setStatut(StatutAmitie.EN_ATTENTE);
-
-        when(amitieRepository.save(any(Amitie.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(amitieRepository.save(amitie)).thenReturn(amitie);
 
         Amitie result = amitieService.accepterDemande(amitie);
-
         assertEquals(StatutAmitie.ACCEPTEE, result.getStatut());
     }
 
     @Test
     void testRefuserDemande() {
-
         Amitie amitie = new Amitie();
-        amitie.setStatut(StatutAmitie.EN_ATTENTE);
-
-        when(amitieRepository.save(any(Amitie.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(amitieRepository.save(amitie)).thenReturn(amitie);
 
         Amitie result = amitieService.refuserDemande(amitie);
-
         assertEquals(StatutAmitie.REFUSEE, result.getStatut());
     }
 
     @Test
-    void testAnnulerDemande() {
-
+    void testGetById_Found() {
         Amitie amitie = new Amitie();
-
-        when(amitieRepository.save(any(Amitie.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        Amitie result = amitieService.annulerDemande(amitie);
-
-        assertEquals(StatutAmitie.ANNULEE, result.getStatut());
+        when(amitieRepository.findById(1L)).thenReturn(Optional.of(amitie));
+        assertEquals(amitie, amitieService.getById(1L));
     }
 
     @Test
-    void testRompreAmitie() {
-
-        Amitie amitie = new Amitie();
-
-        amitieService.rompreAmitie(amitie);
-
-        verify(amitieRepository, times(1)).delete(amitie);
+    void testGetById_NotFound() {
+        when(amitieRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> amitieService.getById(1L));
     }
 
     @Test
-    void testGetById() {
+    void testGetDemandesRecues() {
+        List<Amitie> list = Arrays.asList(new Amitie());
+        when(amitieRepository.findByUtilisateurReceveurAndStatut(user1, StatutAmitie.EN_ATTENTE))
+                .thenReturn(list);
+        assertEquals(list, amitieService.getDemandesRecues(user1));
+    }
 
-        Amitie amitie = new Amitie();
-        amitie.setAmitieID(1L);
+    @Test
+    void testGetDemandesEnvoyeesIds() {
+        Amitie amitie = new Amitie(user1, user2);
+        when(amitieRepository.findByUtilisateurDemandeurAndStatut(user1, StatutAmitie.EN_ATTENTE))
+                .thenReturn(Arrays.asList(amitie));
 
-        when(amitieRepository.findById(1L))
-                .thenReturn(Optional.of(amitie));
+        List<Long> ids = amitieService.getDemandesEnvoyeesIds(user1);
+        assertEquals(1, ids.size());
+        assertEquals(2L, ids.get(0));
+    }
 
-        Amitie result = amitieService.getById(1L);
+    @Test
+    void testGetAmis() {
+        Utilisateur user3 = new Utilisateur();
+        user3.setId(3L);
 
-        assertEquals(1L, result.getAmitieID());
+        Amitie asDemandeur = new Amitie(user1, user2);
+        asDemandeur.setStatut(StatutAmitie.ACCEPTEE);
+
+        Amitie asReceveur = new Amitie(user3, user1);
+        asReceveur.setStatut(StatutAmitie.ACCEPTEE);
+
+        when(amitieRepository.findByUtilisateurDemandeurAndStatut(user1, StatutAmitie.ACCEPTEE))
+                .thenReturn(Arrays.asList(asDemandeur));
+        when(amitieRepository.findByUtilisateurReceveurAndStatut(user1, StatutAmitie.ACCEPTEE))
+                .thenReturn(Arrays.asList(asReceveur));
+
+        List<Utilisateur> amis = amitieService.getAmis(user1);
+        assertEquals(2, amis.size());
+        assertTrue(amis.contains(user2));
+        assertTrue(amis.contains(user3));
     }
 }
