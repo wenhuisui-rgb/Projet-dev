@@ -62,4 +62,12 @@ class ObtentionBadgeServiceTest {
         // Fails condition
         assertNull(service.attribuerBadgeSiCondition(badge, user, TypeSport.COURSE, 5f));
     }
+
+    @Test
+    void testGetBadgesUtilisateur() {
+        Utilisateur user = new Utilisateur();
+        user.setId(1L);
+        service.getBadgesUtilisateur(user);
+        verify(repository).findByUtilisateurId(1L);
+    }
 }

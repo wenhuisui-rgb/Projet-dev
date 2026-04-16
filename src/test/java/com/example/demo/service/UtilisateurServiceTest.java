@@ -110,4 +110,10 @@ class UtilisateurServiceTest {
                 .thenReturn(Arrays.asList(new Utilisateur()));
         assertEquals(1, utilisateurService.rechercherParPseudo("jo", 1L).size());
     }
+
+    @Test
+    void testObtenirListeAmis() {
+        assertNull(utilisateurService.obtenirListeAmis(1L));
+    }
+
 }

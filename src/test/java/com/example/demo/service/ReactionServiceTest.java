@@ -76,4 +76,42 @@ class ReactionServiceTest {
         assertFalse(activite.getReactions().contains(existing));
         verify(reactionRepository).delete(existing);
     }
+
+    @Test
+    void testSupprimerReaction_NotFound() {
+        Utilisateur auteur = new Utilisateur();
+        Activite activite = new Activite();
+        // 模拟没找到记录
+        when(reactionRepository.findByAuteurAndActivite(auteur, activite)).thenReturn(Optional.empty());
+        
+        reactionService.supprimerReaction(auteur, activite);
+        
+        // 验证绝对没有调用 delete 方法
+        verify(reactionRepository, never()).delete(any());
+    }
+
+    @Test
+    void testDelegationMethods() {
+        Activite activite = new Activite();
+        Utilisateur auteur = new Utilisateur();
+
+        // 挨个调用那些被遗忘的单行查询方法
+        reactionService.getReactionsParActivite(activite);
+        verify(reactionRepository).findByActiviteOrderByDateReactionDesc(activite);
+
+        reactionService.getReactionsParActiviteId(1L);
+        verify(reactionRepository).findByActiviteId(1L);
+
+        reactionService.getReactionByAuteurEtActivite(auteur, activite);
+        verify(reactionRepository).findByAuteurAndActivite(auteur, activite);
+
+        reactionService.aDejaReagi(auteur, activite);
+        verify(reactionRepository).existsByAuteurAndActivite(auteur, activite);
+
+        reactionService.getNombreReactionsParActivite(1L);
+        verify(reactionRepository).countByActiviteId(1L);
+
+        reactionService.getNombreReactionsParType(1L, TypeReaction.BRAVO);
+        verify(reactionRepository).countByActiviteIdAndType(1L, TypeReaction.BRAVO);
+    }
 }

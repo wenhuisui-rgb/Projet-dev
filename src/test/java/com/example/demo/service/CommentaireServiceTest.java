@@ -98,4 +98,19 @@ class CommentaireServiceTest {
         when(commentaireRepository.findById(2L)).thenReturn(Optional.empty());
         assertNull(commentaireService.modifierCommentaire(2L, "New"));
     }
+
+    @Test
+    void testSupprimerCommentaire_NullCases() {
+        // 分支1: 找不到评论 (commentaire == null)
+        when(commentaireRepository.findById(99L)).thenReturn(Optional.empty());
+        commentaireService.supprimerCommentaire(99L);
+        verify(commentaireRepository).deleteById(99L); // 依然会执行 deleteById
+
+        // 分支2: 找到评论，但 activite 为 null (commentaire.getActivite() == null)
+        Commentaire c = new Commentaire();
+        c.setActivite(null);
+        when(commentaireRepository.findById(100L)).thenReturn(Optional.of(c));
+        commentaireService.supprimerCommentaire(100L);
+        verify(commentaireRepository).deleteById(100L);
+    }
 }

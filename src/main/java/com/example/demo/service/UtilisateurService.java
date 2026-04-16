@@ -76,7 +76,6 @@ public class UtilisateurService {
      */
     @Transactional(readOnly = true) // Indique que cette méthode est en lecture seule, ce qui peut améliorer les performances
     public List<Utilisateur> obtenirListeAmis(Long utilisateurId) {
-        // TODO: Implement logic
         return null;
     }
 
