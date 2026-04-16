@@ -16,6 +16,9 @@ import java.util.*;
 @Controller
 public class UtilisateurController {
 
+    // Sonar Fix: 提取重复使用的魔法字符串为常量
+    private static final String ATTR_UTILISATEUR = "utilisateur";
+
     @Autowired
     private UtilisateurService utilisateurService;
 
@@ -28,9 +31,6 @@ public class UtilisateurController {
     @Autowired
     private AmitieService amitieService;
 
-    // =========================
-    // 🔐 CONNEXION
-    // =========================
     @GetMapping("/connexion")
     public String pageConnexion() {
         return "connexion";
@@ -45,7 +45,7 @@ public class UtilisateurController {
         Utilisateur utilisateur = utilisateurService.authentifier(email, motDePasse);
 
         if (utilisateur != null) {
-            session.setAttribute("utilisateur", utilisateur);
+            session.setAttribute(ATTR_UTILISATEUR, utilisateur);
             return "redirect:/profil";
         }
 
@@ -53,12 +53,9 @@ public class UtilisateurController {
         return "connexion";
     }
 
-    // =========================
-    // 📝 INSCRIPTION
-    // =========================
     @GetMapping("/inscription")
     public String pageInscription(Model model) {
-        model.addAttribute("utilisateur", new Utilisateur());
+        model.addAttribute(ATTR_UTILISATEUR, new Utilisateur());
         return "inscription";
     }
 
@@ -83,18 +80,12 @@ public class UtilisateurController {
         return "redirect:/connexion";
     }
 
-    // =========================
-    // 🚪 DECONNEXION
-    // =========================
     @GetMapping("/deconnexion")
     public String deconnexion(HttpSession session) {
         session.invalidate();
         return "redirect:/connexion";
     }
 
-    // =========================
-    // 👤 PROFIL
-    // =========================
     @Transactional(readOnly = true)
     @GetMapping("/profil")
     public String afficherProfil(@RequestParam(required = false) Long userId,
@@ -102,18 +93,13 @@ public class UtilisateurController {
                                  HttpSession session,
                                  Model model) {
 
-        Utilisateur currentUser =
-                (Utilisateur) session.getAttribute("utilisateur");
+        Utilisateur currentUser = (Utilisateur) session.getAttribute(ATTR_UTILISATEUR);
 
         if (currentUser == null) {
             return "redirect:/connexion";
         }
 
-        Utilisateur profilUser;
-
-        boolean isOwner = (userId == null || userId.equals(currentUser.getId()));
-
-        profilUser = isOwner
+        Utilisateur profilUser = (userId == null || userId.equals(currentUser.getId()))
                 ? utilisateurService.findById(currentUser.getId())
                 : utilisateurService.findById(userId);
 
@@ -122,41 +108,33 @@ public class UtilisateurController {
         }
 
         Map<Long, Float> progressions = new HashMap<>();
-
         if (profilUser.getObjectifs() != null) {
             for (Objectif obj : profilUser.getObjectifs()) {
-                Float progression =
-                        objectifService.getPourcentageObjectif(obj, profilUser);
+                Float progression = objectifService.getPourcentageObjectif(obj, profilUser);
                 progressions.put(obj.getId(), progression);
             }
         }
 
-        Page<Activite> activitePage =
-                activiteService.getActivitesPaginees(profilUser, page, 10);
+        Page<Activite> activitePage = activiteService.getActivitesPaginees(profilUser, page, 10);
 
-        model.addAttribute("utilisateur", profilUser);
+        model.addAttribute(ATTR_UTILISATEUR, profilUser);
         model.addAttribute("objectifProgressions", progressions);
-        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("isOwner", (userId == null || userId.equals(currentUser.getId())));
         model.addAttribute("activitePage", activitePage);
 
         return "profil";
     }
 
-    // =========================
-    // ✏️ MODIFIER PROFIL
-    // =========================
     @GetMapping("/profil/modifier")
     public String modifierProfilPage(HttpSession session, Model model) {
 
-        Utilisateur user =
-                (Utilisateur) session.getAttribute("utilisateur");
+        Utilisateur user = (Utilisateur) session.getAttribute(ATTR_UTILISATEUR);
 
         if (user == null) {
             return "redirect:/connexion";
         }
 
-        model.addAttribute("utilisateur",
-                utilisateurService.findById(user.getId()));
+        model.addAttribute(ATTR_UTILISATEUR, utilisateurService.findById(user.getId()));
 
         return "modifierProfil";
     }
@@ -166,15 +144,13 @@ public class UtilisateurController {
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {
 
-        Utilisateur currentUser =
-                (Utilisateur) session.getAttribute("utilisateur");
+        Utilisateur currentUser = (Utilisateur) session.getAttribute(ATTR_UTILISATEUR);
 
         if (currentUser == null) {
             return "redirect:/connexion";
         }
 
-        Utilisateur dbUser =
-                utilisateurService.findById(currentUser.getId());
+        Utilisateur dbUser = utilisateurService.findById(currentUser.getId());
 
         List<TypeSport> sports = utilisateurModifie.getPreferencesSports();
         if (sports == null) sports = new ArrayList<>();
@@ -195,45 +171,31 @@ public class UtilisateurController {
 
         utilisateurService.updateUtilisateur(dbUser);
 
-        session.setAttribute("utilisateur", dbUser);
+        session.setAttribute(ATTR_UTILISATEUR, dbUser);
 
         redirectAttributes.addFlashAttribute("success", "Profil mis à jour");
         return "redirect:/profil";
     }
 
-    // =========================
-    // 👥 MES AMIS (FINAL PROPRE)
-    // =========================
     @GetMapping("/mesAmis")
     public String mesAmis(@RequestParam(required = false) String search,
                           HttpSession session,
                           Model model) {
 
-        Utilisateur sessionUser =
-                (Utilisateur) session.getAttribute("utilisateur");
+        Utilisateur sessionUser = (Utilisateur) session.getAttribute(ATTR_UTILISATEUR);
 
         if (sessionUser == null) {
             return "redirect:/connexion";
         }
 
-        Utilisateur user =
-                utilisateurService.findById(sessionUser.getId());
+        Utilisateur user = utilisateurService.findById(sessionUser.getId());
 
-        // ❤️ amis
         model.addAttribute("amis", user.getAmis());
+        model.addAttribute("demandesEnvoyees", amitieService.getDemandesEnvoyeesIds(user));
+        model.addAttribute("demandesRecues", amitieService.getDemandesRecues(user));
 
-        // ⏳ demandes envoyées (bouton dynamique)
-        model.addAttribute("demandesEnvoyees",
-                amitieService.getDemandesEnvoyeesIds(user));
-
-        // 📩 demandes reçues
-        model.addAttribute("demandesRecues",
-                amitieService.getDemandesRecues(user));
-
-        // 🔍 recherche utilisateurs
         if (search != null && !search.isEmpty()) {
-            model.addAttribute("resultats",
-                    utilisateurService.rechercherParPseudo(search, user.getId()));
+            model.addAttribute("resultats", utilisateurService.rechercherParPseudo(search, user.getId()));
         }
 
         return "mesAmis";

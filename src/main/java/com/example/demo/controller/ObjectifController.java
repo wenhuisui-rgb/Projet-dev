@@ -13,12 +13,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 
+/**
+ * Contrôleur gérant les vues et les formulaires liés aux objectifs personnels.
+ * <p>
+ * Gère la création, l'édition, la suppression et la visualisation détaillée (progression)
+ * des objectifs fixés par un utilisateur.
+ */
 @Controller
 public class ObjectifController {
 
     @Autowired
     private ObjectifService objectifService;
 
+    /**
+     * Affiche le formulaire de création d'un nouvel objectif.
+     *
+     * @return La vue {@code "createObjectif"}
+     */
     @GetMapping("/objectifs/nouveau")
     public String nouveauObjectif(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
@@ -32,6 +43,11 @@ public class ObjectifController {
         return "createObjectif";
     }
 
+    /**
+     * Traite la soumission du formulaire pour enregistrer un nouvel objectif.
+     *
+     * @return Une redirection vers la page de profil
+     */
     @PostMapping("/objectifs/sauvegarder")
     public String sauvegarderObjectif(@ModelAttribute Objectif objectif,
                                        HttpSession session,
@@ -50,6 +66,11 @@ public class ObjectifController {
         return "redirect:/profil";
     }
 
+    /**
+     * Affiche la page de détails d'un objectif, incluant le calcul de sa progression actuelle.
+     *
+     * @return La vue {@code "detailObjectif"}
+     */
     @GetMapping("/objectifs/{id}")
     public String detailObjectif(@PathVariable Long id,
                                   HttpSession session,
@@ -79,7 +100,12 @@ public class ObjectifController {
         return "detailObjectif";
     }
 
-    // 渲染修改目标的页面
+    /**
+     * Affiche la page de modification d'un objectif existant.
+     * Réutilise le même template Thymeleaf que pour la création.
+     *
+     * @return La vue {@code "createObjectif"} pré-remplie
+     */
     @GetMapping("/objectifs/modifier/{id}")
     public String editerObjectifPage(@PathVariable Long id, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
@@ -94,11 +120,15 @@ public class ObjectifController {
         model.addAttribute("objectif", objectif);
         model.addAttribute("typesSport", TypeSport.values());
         model.addAttribute("periodes", Periode.values());
-        // 注意：你可以复用 "createObjectif.html" 模板，只需在前端稍微根据是否有 id 调整文字
+        
         return "createObjectif"; 
     }
 
-    // 接收修改表单并保存
+    /**
+     * Traite la soumission du formulaire de modification d'objectif.
+     *
+     * @return Une redirection vers la page de profil
+     */
     @PostMapping("/objectifs/modifier/{id}")
     public String updateObjectifSave(@PathVariable Long id, 
                                      @ModelAttribute Objectif objectifModifie, 
@@ -117,6 +147,11 @@ public class ObjectifController {
         return "redirect:/profil";
     }
 
+    /**
+     * Traite la suppression d'un objectif.
+     *
+     * @return Une redirection vers la page de profil
+     */
     @GetMapping("/objectifs/delete/{id}")
     public String deleteObjectif(@PathVariable Long id,
                                   HttpSession session,

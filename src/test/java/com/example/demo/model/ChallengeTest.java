@@ -1,59 +1,87 @@
 package com.example.demo.model;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
-
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
-public class ChallengeTest {
-
-    private Challenge challenge;
-    private Utilisateur createur;
-
-    @BeforeEach
-    void setUp() {
-        createur = new Utilisateur();
-        createur.setId(1L);
-        challenge = new Challenge("Defi RUN", TypeSport.COURSE, LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(10), createur);
-    }
+class ChallengeTest {
 
     @Test
-    @DisplayName("Le challenge doit être actif si la date du jour est entre début et fin")
-    void testEstActif_Succes() {
+    void testConstructorsAndGettersSetters() {
+        TypeSport mockTypeSport = mock(TypeSport.class);
+        Utilisateur mockCreateur = mock(Utilisateur.class);
+        Unite mockUnite = mock(Unite.class);
+
+        Challenge challenge = new Challenge("100k", mockTypeSport, LocalDate.now(), LocalDate.now().plusDays(10), mockCreateur, mockUnite, 100f);
         
-        challenge.setDateDebut(LocalDate.now().minusDays(1)); // Hier
-        challenge.setDateFin(LocalDate.now().plusDays(1)); // Demain
+        challenge.setId(1L);
+        assertEquals(1L, challenge.getId());
 
-        assertTrue(challenge.estActif(), "Le challenge devrait être actif");
+        assertEquals("100k", challenge.getTitre());
+        challenge.setTitre("50k");
+        assertEquals("50k", challenge.getTitre());
+
+        challenge.setTypeSport(mockTypeSport);
+        assertEquals(mockTypeSport, challenge.getTypeSport());
+
+        challenge.setCreateur(mockCreateur);
+        assertEquals(mockCreateur, challenge.getCreateur());
+
+        challenge.setUnite(mockUnite);
+        assertEquals(mockUnite, challenge.getUnite());
+
+        challenge.setCible(200f);
+        assertEquals(200f, challenge.getCible());
+
+        StatutChallenge mockStatut = mock(StatutChallenge.class);
+        challenge.setStatut(mockStatut);
+        assertEquals(mockStatut, challenge.getStatut());
+
+        List<ParticipationChallenge> participations = new ArrayList<>();
+        challenge.setParticipations(participations);
+        assertEquals(participations, challenge.getParticipations());
     }
 
     @Test
-    @DisplayName("Test de création d'un challenge avec une date de début passée")
-    void testEstActif_Future() {
-        challenge.setDateDebut(LocalDate.now().plusDays(1));
-        challenge.setDateFin(LocalDate.now().plusDays(5));
+    void testEstActif() {
+        Challenge challenge = new Challenge();
+        LocalDate today = LocalDate.now();
 
-        assertFalse(challenge.estActif(), "Le challenge ne devrait pas être actif (commence demain)");
+        // Cas 1: Challenge en cours (Start = today, End = tomorrow)
+        challenge.setDateDebut(today);
+        challenge.setDateFin(today.plusDays(1));
+        assertTrue(challenge.estActif());
+
+        // Cas 2: Challenge pas encore commencé (Start = tomorrow)
+        challenge.setDateDebut(today.plusDays(1));
+        challenge.setDateFin(today.plusDays(5));
+        assertFalse(challenge.estActif());
+
+        // Cas 3: Challenge terminé (End = yesterday)
+        challenge.setDateDebut(today.minusDays(5));
+        challenge.setDateFin(today.minusDays(1));
+        assertFalse(challenge.estActif());
+
+        // Cas 4: Même jour
+        challenge.setDateDebut(today);
+        challenge.setDateFin(today);
+        assertTrue(challenge.estActif());
     }
 
     @Test
-    @DisplayName("Le challenge doit être inactif s'il est déjà terminé")
-    void testEstActif_Passe() {
-        challenge.setDateDebut(LocalDate.now().minusDays(10));
-        challenge.setDateFin(LocalDate.now().minusDays(1));
-
-        assertFalse(challenge.estActif(), "Le challenge ne devrait plus être actif (fini hier)");
+    void testGetDatesMissing() {
+        Challenge challenge = new Challenge();
+        LocalDate debut = LocalDate.now();
+        LocalDate fin = LocalDate.now().plusDays(5);
+        
+        challenge.setDateDebut(debut);
+        challenge.setDateFin(fin);
+        
+        // 调用这两个被遗漏的 Getter
+        assertEquals(debut, challenge.getDateDebut());
+        assertEquals(fin, challenge.getDateFin());
     }
-
-    @Test
-    @DisplayName("getters et setters du challenge")
-    void testGettersSetters() {
-        assertEquals("Defi RUN", challenge.getTitre());
-        assertEquals(TypeSport.COURSE, challenge.getTypeSport());
-        assertEquals(createur, challenge.getCreateur());
-    }
-
 }

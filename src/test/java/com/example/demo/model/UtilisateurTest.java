@@ -2,9 +2,12 @@ package com.example.demo.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class UtilisateurTest {
 
@@ -13,212 +16,122 @@ class UtilisateurTest {
     @BeforeEach
     void setUp() {
         utilisateur = new Utilisateur();
-        utilisateur.setId(1L);
-        utilisateur.setPseudo("john_doe");
-        utilisateur.setEmail("john@example.com");
-        utilisateur.setMotDePasse("password123");
-        utilisateur.setSexe(Sexe.HOMME);
-        utilisateur.setAge(25);
-        utilisateur.setTaille(1.75f);
-        utilisateur.setPoids(70f);
-        utilisateur.setNiveauPratique(NiveauPratique.INTERMEDIAIRE);
-        
+    }
+
+    // Sonar Fix: 拆分为基本属性测试
+    @Test
+    void testConstructorsAndBasicFields() {
         List<TypeSport> preferences = new ArrayList<>();
         preferences.add(TypeSport.COURSE);
-        preferences.add(TypeSport.VELO);
-        utilisateur.setPreferencesSports(preferences);
+        List<ObtentionBadge> badges = new ArrayList<>();
+        
+        Utilisateur userFull = new Utilisateur(1L, "john_doe", "john@test.com", "password123", 
+                Sexe.HOMME, 25, 1.80f, 75.0f, NiveauPratique.INTERMEDIAIRE, preferences, badges);
+
+        assertEquals(1L, userFull.getId());
+        assertEquals("john_doe", userFull.getPseudo());
+        assertEquals("john@test.com", userFull.getEmail());
+        assertEquals(Sexe.HOMME, userFull.getSexe());
+        assertEquals(25, userFull.getAge());
+        assertEquals(1.80f, userFull.getTaille());
+        assertEquals(75.0f, userFull.getPoids());
+        assertEquals(NiveauPratique.INTERMEDIAIRE, userFull.getNiveauPratique());
+
+        utilisateur.setId(2L);
+        assertEquals(2L, utilisateur.getId());
+        utilisateur.setPseudo("jane_doe");
+        assertEquals("jane_doe", utilisateur.getPseudo());
+        utilisateur.setObjectifPersonnel("Perdre du poids");
+        assertEquals("Perdre du poids", utilisateur.getObjectifPersonnel());
     }
 
+    // Sonar Fix: 拆分为集合属性测试，避免单个测试断言过多
     @Test
-    void testNoArgConstructor() {
-        Utilisateur user = new Utilisateur();
-        assertNotNull(user);
-    }
+    void testCollectionFields() {
+        utilisateur.setPreferencesSports(new ArrayList<>());
+        assertNotNull(utilisateur.getPreferencesSports());
 
-    @Test
-    void testGettersAndSetters() {
-        assertEquals(1L, utilisateur.getId());
-        assertEquals("john_doe", utilisateur.getPseudo());
-        assertEquals("john@example.com", utilisateur.getEmail());
-        assertEquals("password123", utilisateur.getMotDePasse());
-        assertEquals(Sexe.HOMME, utilisateur.getSexe());
-        assertEquals(25, utilisateur.getAge());
-        assertEquals(1.75f, utilisateur.getTaille());
-        assertEquals(70f, utilisateur.getPoids());
-        assertEquals(NiveauPratique.INTERMEDIAIRE, utilisateur.getNiveauPratique());
-        assertEquals(2, utilisateur.getPreferencesSports().size());
+        utilisateur.setActivites(new ArrayList<>());
+        assertNotNull(utilisateur.getActivites());
+
+        utilisateur.setObjectifs(new ArrayList<>());
+        assertNotNull(utilisateur.getObjectifs());
+
+        utilisateur.setDemandesEnvoyees(new ArrayList<>());
+        assertNotNull(utilisateur.getDemandesEnvoyees());
+
+        utilisateur.setDemandesRecues(new ArrayList<>());
+        assertNotNull(utilisateur.getDemandesRecues());
+
+        utilisateur.setListBadges(new ArrayList<>());
+        assertNotNull(utilisateur.getListBadges());
+
+        utilisateur.setChallengesCrees(new ArrayList<>());
+        assertNotNull(utilisateur.getChallengesCrees());
+
+        utilisateur.setParticipationsChallenge(new ArrayList<>());
+        assertNotNull(utilisateur.getParticipationsChallenge());
+
+        utilisateur.setCommentaires(new ArrayList<>());
+        assertNotNull(utilisateur.getCommentaires());
+
+        utilisateur.setReactions(new ArrayList<>());
+        assertNotNull(utilisateur.getReactions());
     }
 
     @Test
     void testCalculerIMC() {
-        Float imc = utilisateur.calculerIMC();
-        assertNotNull(imc);
-        assertEquals(22.86f, imc, 0.01);
-    }
+        utilisateur.setTaille(2.0f);
+        utilisateur.setPoids(80.0f);
+        assertEquals(20.0f, utilisateur.calculerIMC(), 0.01f);
 
-    @Test
-    void testCalculerIMCNull() {
         utilisateur.setTaille(null);
-        Float imc = utilisateur.calculerIMC();
-        assertNull(imc);
-    }
+        assertNull(utilisateur.calculerIMC());
 
-    @Test
-    void testObjectifPersonnel() {
-        utilisateur.setObjectifPersonnel("Courir 50 km par mois");
-        assertEquals("Courir 50 km par mois", utilisateur.getObjectifPersonnel());
-    }
+        utilisateur.setTaille(1.8f);
+        utilisateur.setPoids(null);
+        assertNull(utilisateur.calculerIMC());
 
-    @Test
-    void testPreferencesSports() {
-        List<TypeSport> sports = utilisateur.getPreferencesSports();
-        assertTrue(sports.contains(TypeSport.COURSE));
-        assertTrue(sports.contains(TypeSport.VELO));
-    }
-
-    @Test
-    void testToString() {
-        String result = utilisateur.toString();
-        assertNotNull(result);
-    }
-
-    @Test
-    void testAllArgsConstructor() {
-        List<TypeSport> sports = new ArrayList<>();
-        sports.add(TypeSport.COURSE);
-        List<ObtentionBadge> badges = new ArrayList<>();
+        utilisateur.setTaille(0f);
+        utilisateur.setPoids(70.0f);
+        assertNull(utilisateur.calculerIMC());
         
-        Utilisateur user = new Utilisateur(2L, "jane_doe", "jane@example.com", "pass123", 
-                                        Sexe.FEMME, 30, 1.65f, 60f, 
-                                        NiveauPratique.EXPERT, sports, badges);
-        
-        assertEquals(2L, user.getId());
-        assertEquals("jane_doe", user.getPseudo());
-        assertEquals("jane@example.com", user.getEmail());
-        assertEquals("pass123", user.getMotDePasse());
-        assertEquals(Sexe.FEMME, user.getSexe());
-        assertEquals(30, user.getAge());
-        assertEquals(1.65f, user.getTaille());
-        assertEquals(60f, user.getPoids());
-        assertEquals(NiveauPratique.EXPERT, user.getNiveauPratique());
-        assertEquals(1, user.getPreferencesSports().size());
-        assertNotNull(user.getListBadges());
+        utilisateur.setTaille(-1.5f);
+        assertNull(utilisateur.calculerIMC());
     }
 
     @Test
-    void testGetSetListBadges() {
-        List<ObtentionBadge> badges = new ArrayList<>();
-        ObtentionBadge badge1 = new ObtentionBadge();
-        ObtentionBadge badge2 = new ObtentionBadge();
-        badges.add(badge1);
-        badges.add(badge2);
-        
-        utilisateur.setListBadges(badges);
-        assertNotNull(utilisateur.getListBadges());
-        assertEquals(2, utilisateur.getListBadges().size());
-    }
+    void testGetAmis() {
+        Amitie amitieEnvoyeeAcceptee = mock(Amitie.class);
+        when(amitieEnvoyeeAcceptee.getStatut()).thenReturn(StatutAmitie.ACCEPTEE);
+        Utilisateur ami1 = mock(Utilisateur.class);
+        when(amitieEnvoyeeAcceptee.getUtilisateurReceveur()).thenReturn(ami1);
 
-    @Test
-    void testGetSetActivites() {
-        List<Activite> activites = new ArrayList<>();
-        Activite a1 = new Activite();
-        Activite a2 = new Activite();
-        activites.add(a1);
-        activites.add(a2);
-        
-        utilisateur.setActivites(activites);
-        assertNotNull(utilisateur.getActivites());
-        assertEquals(2, utilisateur.getActivites().size());
-    }
+        Amitie amitieEnvoyeeEnAttente = mock(Amitie.class);
+        when(amitieEnvoyeeEnAttente.getStatut()).thenReturn(StatutAmitie.EN_ATTENTE);
 
-    @Test
-    void testGetSetObjectifs() {
-        List<Objectif> objectifs = new ArrayList<>();
-        Objectif o1 = new Objectif();
-        Objectif o2 = new Objectif();
-        objectifs.add(o1);
-        objectifs.add(o2);
-        
-        utilisateur.setObjectifs(objectifs);
-        assertNotNull(utilisateur.getObjectifs());
-        assertEquals(2, utilisateur.getObjectifs().size());
-    }
+        List<Amitie> envoyees = new ArrayList<>();
+        envoyees.add(amitieEnvoyeeAcceptee);
+        envoyees.add(amitieEnvoyeeEnAttente);
+        utilisateur.setDemandesEnvoyees(envoyees);
 
-    @Test
-    void testGetSetDemandesEnvoyees() {
-        List<Amitie> demandes = new ArrayList<>();
-        Amitie a1 = new Amitie();
-        Amitie a2 = new Amitie();
-        demandes.add(a1);
-        demandes.add(a2);
-        
-        utilisateur.setDemandesEnvoyees(demandes);
-        assertNotNull(utilisateur.getDemandesEnvoyees());
-        assertEquals(2, utilisateur.getDemandesEnvoyees().size());
-    }
+        Amitie amitieRecueAcceptee = mock(Amitie.class);
+        when(amitieRecueAcceptee.getStatut()).thenReturn(StatutAmitie.ACCEPTEE);
+        Utilisateur ami2 = mock(Utilisateur.class);
+        when(amitieRecueAcceptee.getUtilisateurDemandeur()).thenReturn(ami2);
 
-    @Test
-    void testGetSetDemandesRecues() {
-        List<Amitie> demandes = new ArrayList<>();
-        Amitie a1 = new Amitie();
-        Amitie a2 = new Amitie();
-        demandes.add(a1);
-        demandes.add(a2);
-        
-        utilisateur.setDemandesRecues(demandes);
-        assertNotNull(utilisateur.getDemandesRecues());
-        assertEquals(2, utilisateur.getDemandesRecues().size());
-    }
+        Amitie amitieRecueRefusee = mock(Amitie.class);
+        when(amitieRecueRefusee.getStatut()).thenReturn(StatutAmitie.REFUSEE);
 
-    @Test
-    void testGetSetParticipationsChallenge() {
-        List<ParticipationChallenge> participations = new ArrayList<>();
-        ParticipationChallenge p1 = new ParticipationChallenge();
-        ParticipationChallenge p2 = new ParticipationChallenge();
-        participations.add(p1);
-        participations.add(p2);
-        
-        utilisateur.setParticipationsChallenge(participations);
-        assertNotNull(utilisateur.getParticipationsChallenge());
-        assertEquals(2, utilisateur.getParticipationsChallenge().size());
-    }
+        List<Amitie> recues = new ArrayList<>();
+        recues.add(amitieRecueAcceptee);
+        recues.add(amitieRecueRefusee);
+        utilisateur.setDemandesRecues(recues);
 
-    @Test
-    void testGetSetCommentaires() {
-        List<Commentaire> commentaires = new ArrayList<>();
-        Commentaire c1 = new Commentaire();
-        Commentaire c2 = new Commentaire();
-        commentaires.add(c1);
-        commentaires.add(c2);
-        
-        utilisateur.setCommentaires(commentaires);
-        assertNotNull(utilisateur.getCommentaires());
-        assertEquals(2, utilisateur.getCommentaires().size());
-    }
+        List<Utilisateur> amis = utilisateur.getAmis();
 
-    @Test
-    void testGetSetReactions() {
-        List<Reaction> reactions = new ArrayList<>();
-        Reaction r1 = new Reaction();
-        Reaction r2 = new Reaction();
-        reactions.add(r1);
-        reactions.add(r2);
-        
-        utilisateur.setReactions(reactions);
-        assertNotNull(utilisateur.getReactions());
-        assertEquals(2, utilisateur.getReactions().size());
-    }
-
-    @Test
-    void testGetSetChallengesCrees() {
-        List<Challenge> challenges = new ArrayList<>();
-        Challenge c1 = new Challenge();
-        Challenge c2 = new Challenge();
-        challenges.add(c1);
-        challenges.add(c2);
-        
-        utilisateur.setChallengesCrees(challenges);
-        assertNotNull(utilisateur.getChallengesCrees());
-        assertEquals(2, utilisateur.getChallengesCrees().size());
+        assertEquals(2, amis.size());
+        assertTrue(amis.contains(ami1));
+        assertTrue(amis.contains(ami2));
     }
 }

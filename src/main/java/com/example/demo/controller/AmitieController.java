@@ -9,6 +9,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Contrôleur gérant les vues et les actions liées au système d'amitié.
+ * <p>
+ * Il intercepte les requêtes web pour envoyer des demandes d'amis, les accepter ou les refuser,
+ * et prépare les données nécessaires pour la vue Thymeleaf correspondante.
+ */
 @Controller
 @RequestMapping("/amities")
 public class AmitieController {
@@ -22,6 +28,14 @@ public class AmitieController {
         this.utilisateurService = utilisateurService;
     }
 
+    /**
+     * Traite l'envoi d'une demande d'amitié vers un autre utilisateur.
+     *
+     * @param id                 L'identifiant de l'utilisateur à qui on souhaite envoyer la demande
+     * @param session            La session HTTP pour récupérer l'utilisateur connecté
+     * @param redirectAttributes Permet de passer des messages flash ("friendStatus") à la vue après la redirection
+     * @return Une redirection vers la page "/mesAmis" (ou vers "/connexion" si non connecté)
+     */
     @GetMapping("/ajouter/{id}")
     public String ajouter(@PathVariable Long id,
                           HttpSession session,
@@ -44,6 +58,12 @@ public class AmitieController {
         return "redirect:/mesAmis";
     }
 
+    /**
+     * Traite l'acceptation d'une demande d'amitié reçue.
+     *
+     * @param amitieID L'identifiant de la relation d'amitié à accepter
+     * @return Une redirection vers la page "/mesAmis"
+     */
     @GetMapping("/{amitieID}/accepter")
     public String accepter(@PathVariable Long amitieID) {
         Amitie amitie = amitieService.getById(amitieID);
@@ -51,6 +71,12 @@ public class AmitieController {
         return "redirect:/mesAmis";
     }
 
+    /**
+     * Traite le refus d'une demande d'amitié reçue.
+     *
+     * @param amitieID L'identifiant de la relation d'amitié à refuser
+     * @return Une redirection vers la page "/mesAmis"
+     */
     @GetMapping("/{amitieID}/refuser")
     public String refuser(@PathVariable Long amitieID) {
         Amitie amitie = amitieService.getById(amitieID);
@@ -58,6 +84,14 @@ public class AmitieController {
         return "redirect:/mesAmis";
     }
 
+    /**
+     * Affiche la page principale de gestion des amis.
+     * Injecte dans le modèle la liste des amis validés, les demandes reçues et envoyées.
+     *
+     * @param session La session HTTP actuelle
+     * @param model   Le conteneur de données pour la vue Thymeleaf
+     * @return Le nom de la vue Thymeleaf {@code "mesAmis"}
+     */
     @GetMapping("/mesAmis")
     public String mesAmis(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");

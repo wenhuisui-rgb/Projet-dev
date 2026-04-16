@@ -13,6 +13,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Contrôleur gérant les actions d'inscription et de désinscription aux défis (Challenges),
+ * ainsi que l'affichage des classements.
+ */
 @Controller
 @RequestMapping("/participation")
 public class ParticipationChallengeController {
@@ -23,9 +27,14 @@ public class ParticipationChallengeController {
     @Autowired
     private ChallengeService challengeService;
 
-    /* =========================
-       JOIN CHALLENGE
-    ========================== */
+    /**
+     * Permet à l'utilisateur courant de rejoindre un challenge actif.
+     *
+     * @param challengeId        L'identifiant du challenge à rejoindre
+     * @param session            La session HTTP
+     * @param redirectAttributes Messages flash pour la vue
+     * @return Une redirection vers la page de la liste des challenges ({@code "/challenges"})
+     */
     @PostMapping("/rejoindre/{challengeId}")
     public String rejoindreChallenge(@PathVariable Long challengeId,
                                      HttpSession session,
@@ -51,12 +60,9 @@ public class ParticipationChallengeController {
 
         try {
             participationService.rejoindreChallenge(utilisateur, challenge);
-
             redirectAttributes.addFlashAttribute("success",
                     "Vous avez rejoint le challenge !");
-
         } catch (RuntimeException e) {
-
             redirectAttributes.addFlashAttribute("error",
                     e.getMessage());
         }
@@ -64,9 +70,12 @@ public class ParticipationChallengeController {
         return "redirect:/challenges";
     }
 
-    /* =========================
-       QUIT CHALLENGE
-    ========================== */
+    /**
+     * Permet à l'utilisateur courant de quitter un challenge auquel il était inscrit.
+     *
+     * @param challengeId        L'identifiant du challenge
+     * @return Une redirection vers la page de la liste des challenges ({@code "/challenges"})
+     */
     @PostMapping("/quitter/{challengeId}")
     public String quitterChallenge(@PathVariable Long challengeId,
                                    HttpSession session,
@@ -94,9 +103,14 @@ public class ParticipationChallengeController {
         return "redirect:/challenges";
     }
 
-    /* =========================
-       CLASSEMENT
-    ========================== */
+    /**
+     * Affiche la page du classement (Leaderboard) pour un challenge spécifique.
+     * Injecte les données du challenge et la liste triée des participants dans le modèle.
+     *
+     * @param id    L'identifiant du challenge
+     * @param model Le modèle Thymeleaf
+     * @return La vue {@code "detailParticipationChallenge"} (ou {@code "classement"} en cas d'erreur)
+     */
     @GetMapping("/classement/{id}")
     public String voirClassement(@PathVariable Long id,
                                  Model model,
@@ -116,9 +130,7 @@ public class ParticipationChallengeController {
         }
 
         model.addAttribute("challenge", challenge);
-
-        model.addAttribute("classement",
-                participationService.obtenirClassement(id));
+        model.addAttribute("classement", participationService.obtenirClassement(id));
 
         return "detailParticipationChallenge";
     }

@@ -21,6 +21,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import com.example.demo.model.ChartData;
 
+/**
+ * Contrôleur principal gérant le tableau de bord (Dashboard) et le cycle de vie des activités sportives.
+ * <p>
+ * Ce contrôleur s'occupe de l'affichage des statistiques globales, de la préparation des données 
+ * pour les graphiques (via des routes MVC et REST), ainsi que de la création, modification 
+ * et suppression des enregistrements d'activités.
+ */
 @Controller
 public class ActiviteController {
 
@@ -36,6 +43,16 @@ public class ActiviteController {
     @Autowired
     private MeteoService meteoService;
 
+    /**
+     * Affiche le tableau de bord principal de l'utilisateur.
+     * Injecte une grande quantité de données agrégées dans le modèle pour générer les KPI, 
+     * les listes d'activités récentes, l'état d'avancement des objectifs et les données du graphique par défaut.
+     *
+     * @param periode La période de temps pour le graphique ("semaine", "mois", "annee")
+     * @param session La session HTTP contenant l'utilisateur connecté
+     * @param model   Le conteneur de données pour la vue
+     * @return La vue Thymeleaf {@code "dashboard"}
+     */
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(required = false, defaultValue = "semaine") String periode,
                             HttpSession session, Model model) {
@@ -44,6 +61,7 @@ public class ActiviteController {
             return "redirect:/connexion";
         }
 
+        // Rechargement depuis la base pour garantir la fraîcheur des données
         utilisateur = utilisateurService.findById(utilisateur.getId());
         model.addAttribute("utilisateur", utilisateur);
         model.addAttribute("activites", activiteService.getActivitesParUtilisateur(utilisateur));
@@ -63,19 +81,18 @@ public class ActiviteController {
         }
         model.addAttribute("tempsParSport", tempsParSport);
         
-        // 添加图表数据 - 即使没有数据也給空列表
+        // Préparation des données initiales pour le composant graphique (Chart.js ou autre)
         List<String> chartLabels = new ArrayList<>();
         List<Integer> chartValues = new ArrayList<>();
         
         if (utilisateur.getActivites() != null && !utilisateur.getActivites().isEmpty()) {
-            // 有活动时才计算图表数据
             List<ChartData> chartData = activiteService.getChartData(utilisateur, periode);
             for (ChartData data : chartData) {
                 chartLabels.add(data.getLabel());
                 chartValues.add(data.getValue());
             }
         } else {
-            // 没有活动时给默认的7天数据（都是0）
+            // Remplissage par défaut (0) si l'utilisateur n'a aucune activité
             for (int i = 6; i >= 0; i--) {
                 chartLabels.add(getDayName(i));
                 chartValues.add(0);
@@ -85,6 +102,7 @@ public class ActiviteController {
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartValues", chartValues);
         
+        // Calcul de la progression des objectifs
         Map<Long, Float> objectifProgressions = new HashMap<>();
         if (utilisateur.getObjectifs() != null) {
             for (Objectif obj : utilisateur.getObjectifs()) {
@@ -110,9 +128,17 @@ public class ActiviteController {
         model.addAttribute("objectifs", objectifsAvecProgression);
 
         return "dashboard";
-
     }
 
+    /**
+     * API REST (AJAX) : Récupère les données actualisées pour les graphiques du tableau de bord.
+     * Permet au frontend de rafraîchir dynamiquement les courbes (ex: filtrer par sport ou par période).
+     *
+     * @param periode La période ("semaine", "mois", "annee")
+     * @param sports  Liste optionnelle des sports sélectionnés pour le filtre
+     * @param session La session HTTP
+     * @return Un objet JSON contenant les labels, et les valeurs en minutes et en calories
+     */
     @GetMapping("/api/chart-data")
     @ResponseBody
     public Map<String, Object> getChartData(@RequestParam String periode,
@@ -123,7 +149,6 @@ public class ActiviteController {
             return null;
         }
         
-        // 重新加载用户，确保所有懒加载集合可用
         utilisateur = utilisateurService.findById(utilisateur.getId());
         
         Map<String, Object> result = new HashMap<>();
@@ -136,7 +161,7 @@ public class ActiviteController {
                     try {
                         sportTypes.add(TypeSport.valueOf(s));
                     } catch (IllegalArgumentException e) {
-                        // 忽略无效值
+                        // Ignorer les valeurs invalides envoyées par le client
                     }
                 }
             }
@@ -165,7 +190,7 @@ public class ActiviteController {
             for (Objectif obj : utilisateur.getObjectifs()) {
                 if (sportTypes != null && !sportTypes.isEmpty()) {
                     if (obj.getTypeSport() != null && !sportTypes.contains(obj.getTypeSport())) {
-                        continue;
+                        continue; // Exclure l'objectif si le filtre de sport ne correspond pas
                     }
                 }
                 Map<String, Object> objMap = new HashMap<>();
@@ -185,12 +210,23 @@ public class ActiviteController {
         return result;
     }
 
+    /**
+     * Utilitaire : Récupère le nom du jour en français par rapport à la date actuelle.
+     * @param daysAgo Le nombre de jours en arrière
+     * @return Le nom du jour
+     */
     private String getDayName(int daysAgo) {
         LocalDateTime date = LocalDateTime.now().minusDays(daysAgo);
         return date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.FRENCH);
     }
 
-
+    /**
+     * Affiche le formulaire d'enregistrement d'une nouvelle activité sportive.
+     *
+     * @param session La session HTTP
+     * @param model Le modèle Thymeleaf
+     * @return La vue {@code "createActivite"}
+     */
     @GetMapping("/activites/nouvelle")
     public String nouvelleActivite(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
@@ -199,12 +235,20 @@ public class ActiviteController {
         }
         
         model.addAttribute("utilisateur", utilisateur);
-
         model.addAttribute("activite", new Activite());
         model.addAttribute("typesSport", TypeSport.values());
         return "createActivite";
     }
 
+    /**
+     * Traite la soumission du formulaire pour sauvegarder une nouvelle activité.
+     * Fait également appel au service Météo externe si une localisation est renseignée.
+     *
+     * @param activite L'activité à sauvegarder
+     * @param session La session HTTP
+     * @param redirectAttributes Les attributs pour les messages flash
+     * @return Une redirection vers la page de profil
+     */
     @PostMapping("/activites/sauvegarder")
     public String sauvegarderActivite(@ModelAttribute Activite activite,
                                        HttpSession session,
@@ -220,6 +264,7 @@ public class ActiviteController {
         
         activite.setUtilisateur(utilisateur);
         
+        // Appel à l'API tierce (Open-Meteo) pour récupérer la météo locale
         if (activite.getLocalisation() != null && !activite.getLocalisation().isEmpty()) {
             String meteo = meteoService.getMeteoParLocalisation(activite.getLocalisation());
             activite.setMeteo(meteo);
@@ -231,6 +276,15 @@ public class ActiviteController {
         return "redirect:/profil";
     }
 
+    /**
+     * Affiche les détails complets d'une activité spécifique.
+     *
+     * @param id L'identifiant de l'activité
+     * @param session La session HTTP
+     * @param model Le modèle Thymeleaf
+     * @param redirectAttributes Les attributs pour les messages flash
+     * @return La vue {@code "detailActivite"}
+     */
     @GetMapping("/activites/{id}")
     public String detailActivite(@PathVariable Long id, 
                                   HttpSession session, 
@@ -256,6 +310,15 @@ public class ActiviteController {
         return "detailActivite";
     }
 
+    /**
+     * Affiche le formulaire de modification pour une activité existante.
+     *
+     * @param id L'identifiant de l'activité
+     * @param session La session HTTP
+     * @param model Le modèle Thymeleaf
+     * @param redirectAttributes Les attributs pour les messages flash
+     * @return La vue {@code "modifierActivite"}
+     */
     @GetMapping("/activites/edit/{id}")
     public String editActivite(@PathVariable Long id,
                                 HttpSession session,
@@ -282,56 +345,72 @@ public class ActiviteController {
         return "modifierActivite";
     }
 
+    /**
+     * Traite la soumission du formulaire de modification.
+     * Assure la mise à jour des calories et le rafraîchissement potentiel des données météorologiques.
+     *
+     * @param id L'identifiant de l'activité
+     * @param activiteModifiee L'activité avec les nouvelles données
+     * @param session La session HTTP
+     * @param redirectAttributes Les attributs pour les messages flash
+     * @return Une redirection vers la page de profil
+     */
     @PostMapping("/activites/update/{id}")
-public String updateActivite(@PathVariable Long id,
-                              @ModelAttribute Activite activiteModifiee,
-                              HttpSession session,
-                              RedirectAttributes redirectAttributes) {
-    Utilisateur utilisateurSession = (Utilisateur) session.getAttribute("utilisateur");
-    if (utilisateurSession == null) {
-        return "redirect:/connexion";
-    }
-    
-    // 1. 关键修复：从数据库重新拉取用户数据，确保能拿到用户的最新体重 (Poids)
-    Utilisateur utilisateur = utilisateurService.findById(utilisateurSession.getId());
+    public String updateActivite(@PathVariable Long id,
+                                  @ModelAttribute Activite activiteModifiee,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
+        Utilisateur utilisateurSession = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateurSession == null) {
+            return "redirect:/connexion";
+        }
+        
+        Utilisateur utilisateur = utilisateurService.findById(utilisateurSession.getId());
 
-    Activite existante = activiteService.getActiviteParId(id);
-    if (existante == null || !existante.getUtilisateur().getId().equals(utilisateur.getId())) {
-        redirectAttributes.addFlashAttribute("error", "Impossible de modifier cette activité");
-        return "redirect:/profil"; 
+        Activite existante = activiteService.getActiviteParId(id);
+        if (existante == null || !existante.getUtilisateur().getId().equals(utilisateur.getId())) {
+            redirectAttributes.addFlashAttribute("error", "Impossible de modifier cette activité");
+            return "redirect:/profil"; 
+        }
+
+        // Met à jour la météo uniquement si la localisation a été changée par l'utilisateur
+        boolean isLocationChanged = (activiteModifiee.getLocalisation() != null && 
+                                   !activiteModifiee.getLocalisation().equals(existante.getLocalisation()));
+        if (isLocationChanged && !activiteModifiee.getLocalisation().isEmpty()) {
+            String meteo = meteoService.getMeteoParLocalisation(activiteModifiee.getLocalisation());
+            activiteModifiee.setMeteo(meteo); 
+        } else {
+            activiteModifiee.setMeteo(existante.getMeteo()); 
+        }
+        
+        if (activiteModifiee.getTypeSport() != null) {
+            existante.setTypeSport(activiteModifiee.getTypeSport());
+        }
+        if (activiteModifiee.getDuree() != null) {
+            existante.setDuree(activiteModifiee.getDuree());
+        }
+
+        existante.setDateActivite(activiteModifiee.getDateActivite());
+        existante.setDistance(activiteModifiee.getDistance());
+        existante.setLocalisation(activiteModifiee.getLocalisation());
+        existante.setEvaluation(activiteModifiee.getEvaluation());
+        existante.setMeteo(activiteModifiee.getMeteo()); 
+        
+        // La sauvegarde déclenchera le recalcul automatique des calories brûlées
+        activiteService.sauvegarderActivite(existante, utilisateur.getPoids());
+        
+        redirectAttributes.addFlashAttribute("success", "Activité modifiée avec succès !");
+        return "redirect:/profil";
     }
 
-    // 处理天气的逻辑保持不变
-    boolean isLocationChanged = (activiteModifiee.getLocalisation() != null && 
-                               !activiteModifiee.getLocalisation().equals(existante.getLocalisation()));
-    if (isLocationChanged && !activiteModifiee.getLocalisation().isEmpty()) {
-        String meteo = meteoService.getMeteoParLocalisation(activiteModifiee.getLocalisation());
-        activiteModifiee.setMeteo(meteo); 
-    } else {
-        activiteModifiee.setMeteo(existante.getMeteo()); 
-    }
-    
-    // 2. 关键修复：加一层非空判断。防止前端表单未提交这些关键字段导致它们变成 null
-    if (activiteModifiee.getTypeSport() != null) {
-        existante.setTypeSport(activiteModifiee.getTypeSport());
-    }
-    if (activiteModifiee.getDuree() != null) {
-        existante.setDuree(activiteModifiee.getDuree());
-    }
-
-    existante.setDateActivite(activiteModifiee.getDateActivite());
-    existante.setDistance(activiteModifiee.getDistance());
-    existante.setLocalisation(activiteModifiee.getLocalisation());
-    existante.setEvaluation(activiteModifiee.getEvaluation());
-    existante.setMeteo(activiteModifiee.getMeteo()); 
-    
-    // 调用 Service 进行保存。Service内部会自动调用 calculerCalories 重新计算并覆盖旧卡路里
-    activiteService.sauvegarderActivite(existante, utilisateur.getPoids());
-    
-    redirectAttributes.addFlashAttribute("success", "Activité modifiée avec succès !");
-    return "redirect:/profil";
-}
-
+    /**
+     * Supprime une activité spécifique après vérification des permissions.
+     *
+     * @param id L'identifiant de l'activité
+     * @param session La session HTTP
+     * @param redirectAttributes Les attributs pour les messages flash
+     * @return Une redirection vers la page de profil
+     */
     @GetMapping("/activites/delete/{id}")
     public String deleteActivite(@PathVariable Long id,
                                   HttpSession session,
@@ -352,6 +431,12 @@ public String updateActivite(@PathVariable Long id,
         return "redirect:/profil";
     }
 
+    /**
+     * API REST (AJAX) : Récupère les statistiques globales du dashboard sous forme JSON.
+     *
+     * @param session La session HTTP
+     * @return Les statistiques agrégées (formatées en JSON par Spring)
+     */
     @GetMapping("/api/dashboard/stats")
     @ResponseBody
     public Object getDashboardStats(HttpSession session) {

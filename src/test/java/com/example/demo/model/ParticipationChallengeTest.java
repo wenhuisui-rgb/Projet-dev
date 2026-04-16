@@ -1,52 +1,41 @@
 package com.example.demo.model;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
-public class ParticipationChallengeTest {
+class ParticipationChallengeTest {
+    @Test
+    void testParticipationChallenge() {
+        Utilisateur mockUser = mock(Utilisateur.class);
+        Challenge mockChallenge = mock(Challenge.class);
+        
+        ParticipationChallenge pc = new ParticipationChallenge(mockUser, mockChallenge);
+        
+        assertNotNull(pc.getDateInscription());
+        assertEquals(0f, pc.getScoreActuel());
+        assertEquals(mockUser, pc.getUtilisateur());
+        assertEquals(mockChallenge, pc.getChallenge());
 
-    private Utilisateur utilisateur;
-    private Challenge challenge;
-    private ParticipationChallenge participation;
+        pc.mettreAJourScore(15.5f);
+        assertEquals(15.5f, pc.getScoreActuel());
 
-    @BeforeEach
-    void setUp() {
-        utilisateur = new Utilisateur();
-        challenge = new Challenge();
+        pc.setDateInscription(null);
+        assertNull(pc.getDateInscription());
 
-        participation = new ParticipationChallenge(utilisateur, challenge);
+        Utilisateur newUser = mock(Utilisateur.class);
+        pc.setUtilisateur(newUser);
+        assertEquals(newUser, pc.getUtilisateur());
+
+        Challenge newChallenge = mock(Challenge.class);
+        pc.setChallenge(newChallenge);
+        assertEquals(newChallenge, pc.getChallenge());
     }
 
     @Test
-    @DisplayName("Test de création d'une participation à un challenge")
-    void testCreationParticipation() {
-        assertNotNull(participation.getDateInscription(), "La date d'inscription ne devrait pas être nulle");
-        assertEquals(0, participation.getScoreActuel(), "Le score initial devrait être 0");
-        assertEquals(utilisateur, participation.getUtilisateur(), "L'utilisateur associé devrait être correct");
-        assertEquals(challenge, participation.getChallenge(), "Le challenge associé devrait être correct");
+    void testGetIdMissing() {
+        ParticipationChallenge pc = new ParticipationChallenge();
+        // 直接调用 getId() 覆盖红线
+        assertNull(pc.getId());
     }
-
-    @Test
-    @DisplayName("Mise à jour du score : Le nouveau score doit être correctement enregistré")
-    void testMettreAJourScore() {
-        float nouveauScore = 150.5f;
-        participation.mettreAJourScore(nouveauScore);
-
-        assertEquals(nouveauScore, participation.getScoreActuel(), "Le score doit être mis à jour à 150.5");
-    }
-
-    @Test
-    @DisplayName("Test des getters et setters de ParticipationChallenge")
-    void testGettersSetters() {
-        LocalDate dateTest = LocalDate.now();
-        participation.setDateInscription(dateTest.atStartOfDay());
-        participation.setScoreActuel(75.0f);
-
-        assertEquals(dateTest.atStartOfDay(), participation.getDateInscription(), "La date d'inscription doit être mise à jour");
-        assertEquals(75.0f, participation.getScoreActuel(), "Le score actuel doit être mis à jour à 75.0");
-    }
-
 }

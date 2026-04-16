@@ -8,6 +8,9 @@ import com.example.demo.model.Badge;
 import com.example.demo.model.TypeSport;
 import com.example.demo.repository.BadgeRepository;
 
+/**
+ * Classe principale lançant l'application Spring Boot.
+ */
 @SpringBootApplication
 public class DemoApplication {
 
@@ -15,9 +18,16 @@ public class DemoApplication {
         SpringApplication.run(DemoApplication.class, args);
     }
 
-	/* 
-		ajouter badges - ne toucher pas !!!!!!!!!!!!!!!!!!!! 
-	*/
+    /**
+     * Séquence d'initialisation exécutée automatiquement au démarrage de l'application.
+     * <p>
+     * Ce composant {@link CommandLineRunner} vérifie si la base de données contient déjà
+     * des badges. Si elle est vide, il peuple la base avec le dictionnaire complet 
+     * des badges disponibles sur la plateforme.
+     *
+     * @param repository Le repository permettant d'accéder à la table des badges
+     * @return Le runner exécuté par Spring Boot
+     */
     @Bean
     public CommandLineRunner initBadges(BadgeRepository repository) {
         return args -> {
@@ -26,6 +36,7 @@ public class DemoApplication {
                 return;
             }
             
+            // Badges globaux
             repository.save(new Badge("PREMIER_PAS", "Première activité", null, 1));
             repository.save(new Badge("SPORTIF_10", "10 activités", null, 10));
             repository.save(new Badge("SPORTIF_50", "50 activités", null, 50));
@@ -34,6 +45,7 @@ public class DemoApplication {
             repository.save(new Badge("TOTAL_1000MIN", "1000 minutes de sport", null, 1000));
             repository.save(new Badge("TOTAL_5000MIN", "5000 minutes de sport", null, 5000));
             
+            // Badges par sport (Course, Natation, Vélo, etc.)
             repository.save(new Badge("COURSE_5KM", "5 km en une course", TypeSport.COURSE, 5));
             repository.save(new Badge("COURSE_10KM", "10 km en une course", TypeSport.COURSE, 10));
             repository.save(new Badge("COURSE_SEMI", "Semi-marathon (21.1 km)", TypeSport.COURSE, 21.1f));

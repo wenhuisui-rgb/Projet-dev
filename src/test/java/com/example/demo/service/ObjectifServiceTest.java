@@ -1,13 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Objectif;
-import com.example.demo.model.Periode;
 import com.example.demo.model.TypeSport;
 import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ActiviteRepository;
 import com.example.demo.repository.ObjectifRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,9 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +20,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ObjectifServiceTest {
+class ObjectifServiceTest {
 
     @Mock
     private ObjectifRepository objectifRepository;
@@ -36,229 +31,210 @@ public class ObjectifServiceTest {
     @InjectMocks
     private ObjectifService objectifService;
 
-    private Utilisateur utilisateur;
-    private Objectif objectif1;
-    private Objectif objectif2;
+    @Test
+    void testCreerObjectif() {
+        Objectif obj = new Objectif();
+        Utilisateur user = new Utilisateur();
+        when(objectifRepository.save(obj)).thenReturn(obj);
 
-    @BeforeEach
-    void setUp() {
-        utilisateur = new Utilisateur();
-        utilisateur.setId(1L);
-        utilisateur.setPseudo("Dupont");
-
-        objectif1 = new Objectif();
-        objectif1.setId(1L);
-        objectif1.setDescription("Courir 50km");
-        objectif1.setTypeSport(TypeSport.COURSE);
-        objectif1.setCible(50f);
-        objectif1.setUnite(Unite.KM);
-        objectif1.setPeriode(Periode.MOIS);
-        objectif1.setDateDebut(LocalDate.now().minusMonths(1));
-        objectif1.setDateFin(LocalDate.now());
-        objectif1.setUtilisateur(utilisateur);
-
-        objectif2 = new Objectif();
-        objectif2.setId(2L);
-        objectif2.setDescription("Velo 500km");
-        objectif2.setTypeSport(TypeSport.VELO);
-        objectif2.setCible(500f);
-        objectif2.setUnite(Unite.KM);
-        objectif2.setPeriode(Periode.ANNEE);
-        objectif2.setDateDebut(LocalDate.now().minusMonths(3));
-        objectif2.setDateFin(LocalDate.now());
-        objectif2.setUtilisateur(utilisateur);
+        Objectif saved = objectifService.creerObjectif(obj, user);
+        assertEquals(user, saved.getUtilisateur());
+        verify(objectifRepository).save(obj);
     }
 
     @Test
-    void creerObjectif_ShouldSetUtilisateurAndSave() {
-        when(objectifRepository.save(any(Objectif.class))).thenReturn(objectif1);
-        
-        Objectif result = objectifService.creerObjectif(objectif1, utilisateur);
-        
-        assertNotNull(result);
-        assertEquals(utilisateur, result.getUtilisateur());
-        verify(objectifRepository).save(objectif1);
+    void testUpdateObjectif() {
+        Objectif existant = new Objectif();
+        existant.setId(1L);
+        existant.setDescription("Old");
+
+        Objectif modifie = new Objectif();
+        modifie.setDescription("New");
+        modifie.setUnite(Unite.KM);
+
+        when(objectifRepository.findById(1L)).thenReturn(Optional.of(existant));
+        when(objectifRepository.save(existant)).thenReturn(existant);
+
+        Objectif result = objectifService.updateObjectif(1L, modifie);
+        assertEquals("New", result.getDescription());
+        assertEquals(Unite.KM, result.getUnite());
+
+        assertNull(objectifService.updateObjectif(2L, modifie));
     }
 
     @Test
-    void getObjectifsParUtilisateur_ShouldReturnList() {
-        List<Objectif> objectifs = Arrays.asList(objectif1, objectif2);
-        when(objectifRepository.findByUtilisateur(utilisateur)).thenReturn(objectifs);
-        
-        List<Objectif> result = objectifService.getObjectifsParUtilisateur(utilisateur);
-        
-        assertEquals(2, result.size());
-        verify(objectifRepository).findByUtilisateur(utilisateur);
+    void testGetProgressionObjectif_KM() {
+        Objectif obj = new Objectif();
+        obj.setUnite(Unite.KM);
+        obj.setDateDebut(LocalDate.now());
+        obj.setDateFin(LocalDate.now().plusDays(5));
+        Utilisateur user = new Utilisateur();
+
+        when(activiteRepository.getDistanceByPeriod(eq(user), any(), any())).thenReturn(15.5f);
+
+        Float progression = objectifService.getProgressionObjectif(obj, user);
+        assertEquals(15.5f, progression);
     }
 
     @Test
-    void getObjectifParId_WhenExists_ShouldReturnObjectif() {
-        when(objectifRepository.findById(1L)).thenReturn(Optional.of(objectif1));
-        
-        Objectif result = objectifService.getObjectifParId(1L);
-        
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Courir 50km", result.getDescription());
+    void testGetProgressionObjectif_MinutesWithSport() {
+        Objectif obj = new Objectif();
+        obj.setUnite(Unite.MINUTES);
+        obj.setTypeSport(TypeSport.COURSE);
+        // Null dateDebut -> should test the minusMonths(1) branch
+        obj.setDateDebut(null); 
+        obj.setDateFin(LocalDate.now());
+        Utilisateur user = new Utilisateur();
+
+        when(activiteRepository.getDureeBySportAndPeriod(eq(user), eq(TypeSport.COURSE), any(), any())).thenReturn(120);
+
+        Float progression = objectifService.getProgressionObjectif(obj, user);
+        assertEquals(120f, progression);
     }
 
     @Test
-    void getObjectifParId_WhenNotExists_ShouldReturnNull() {
-        when(objectifRepository.findById(99L)).thenReturn(Optional.empty());
-        
-        Objectif result = objectifService.getObjectifParId(99L);
-        
-        assertNull(result);
+    void testGetPourcentageObjectifEtIsAtteint() {
+        Objectif obj = new Objectif();
+        obj.setUnite(Unite.KCAL);
+        obj.setCible(1000f);
+        obj.setDateDebut(LocalDate.now());
+        obj.setDateFin(LocalDate.now());
+        Utilisateur user = new Utilisateur();
+
+        when(activiteRepository.getCaloriesByPeriod(eq(user), any(), any())).thenReturn(500f);
+
+        assertEquals(50f, objectifService.getPourcentageObjectif(obj, user));
+        assertFalse(objectifService.isObjectifAtteint(obj, user));
+
+        // Test objective zero or null
+        obj.setCible(0f);
+        assertEquals(0f, objectifService.getPourcentageObjectif(obj, user));
     }
 
     @Test
-    void updateObjectif_WhenExists_ShouldUpdateAndReturn() {
-        Objectif updatedInfo = new Objectif();
-        updatedInfo.setDescription("Nouvel objectif");
-        updatedInfo.setTypeSport(TypeSport.NATATION);
-        updatedInfo.setCible(100f);
-        updatedInfo.setUnite(Unite.MINUTES);
-        updatedInfo.setPeriode(Periode.SEMAINE);
-        
-        when(objectifRepository.findById(1L)).thenReturn(Optional.of(objectif1));
-        when(objectifRepository.save(any(Objectif.class))).thenReturn(objectif1);
-        
-        Objectif result = objectifService.updateObjectif(1L, updatedInfo);
-        
-        assertNotNull(result);
-        verify(objectifRepository).save(objectif1);
-    }
+    void testGetObjectifsParUtilisateurEtSupprimer() {
+        Utilisateur user = new Utilisateur();
+        objectifService.getObjectifsParUtilisateur(user);
+        verify(objectifRepository).findByUtilisateur(user);
 
-    @Test
-    void updateObjectif_WhenNotExists_ShouldReturnNull() {
-        when(objectifRepository.findById(99L)).thenReturn(Optional.empty());
-        
-        Objectif result = objectifService.updateObjectif(99L, objectif1);
-        
-        assertNull(result);
-        verify(objectifRepository, never()).save(any());
-    }
-
-    @Test
-    void supprimerObjectif_ShouldDeleteById() {
         objectifService.supprimerObjectif(1L);
-        
         verify(objectifRepository).deleteById(1L);
     }
 
     @Test
-    void getProgressionObjectif_ForKmWithSport_ShouldReturnDistance() {
-        when(objectifRepository.findById(1L)).thenReturn(Optional.of(objectif1));
-        when(activiteRepository.getDistanceBySportAndPeriod(any(), any(), any(), any()))
-            .thenReturn(30.0f);
-        
-        Float result = objectifService.getProgressionObjectif(objectif1, utilisateur);
-        
-        assertEquals(30.0f, result);
+    void testGetProgressionObjectif_KM_NoSport() {
+        Objectif obj = new Objectif();
+        obj.setUnite(Unite.KM);
+        obj.setTypeSport(null); // 覆盖 typeSport == null 的分支
+        obj.setDateDebut(LocalDate.now()); // 同时覆盖 getDateDebut() != null 的分支
+        obj.setDateFin(LocalDate.now());
+        Utilisateur user = new Utilisateur();
+
+        when(activiteRepository.getDistanceByPeriod(eq(user), any(), any())).thenReturn(20.0f);
+        assertEquals(20.0f, objectifService.getProgressionObjectif(obj, user));
     }
 
     @Test
-    void getProgressionObjectif_ForKmWithoutSport_ShouldReturnDistance() {
-        objectif1.setTypeSport(null);
-        when(activiteRepository.getDistanceByPeriod(any(), any(), any()))
-            .thenReturn(40.0f);
-        
-        Float result = objectifService.getProgressionObjectif(objectif1, utilisateur);
-        
-        assertEquals(40.0f, result);
+    void testGetProgressionObjectif_Minutes_NoSport_NullDuree() {
+        Objectif obj = new Objectif();
+        obj.setUnite(Unite.MINUTES);
+        obj.setTypeSport(null); // 覆盖 typeSport == null 的分支
+        obj.setDateDebut(LocalDate.now());
+        obj.setDateFin(LocalDate.now());
+        Utilisateur user = new Utilisateur();
+
+        // 模拟查出来的时长是 null，触发 (duree != null) ? duree.floatValue() : 0f; 的备用分支
+        when(activiteRepository.getDureeByPeriod(eq(user), any(), any())).thenReturn(null);
+        assertEquals(0f, objectifService.getProgressionObjectif(obj, user));
     }
 
     @Test
-    void getProgressionObjectif_ForMinutesWithSport_ShouldReturnDuree() {
-        objectif1.setUnite(Unite.MINUTES);
-        when(activiteRepository.getDureeBySportAndPeriod(any(), any(), any(), any()))
-            .thenReturn(120);
+    void testGetProgressionObjectif_Kcal_BothBranches() {
+        Utilisateur user = new Utilisateur();
         
-        Float result = objectifService.getProgressionObjectif(objectif1, utilisateur);
-        
-        assertEquals(120.0f, result);
+        // 分支 1: KCAL 且有运动类型
+        Objectif objSport = new Objectif();
+        objSport.setUnite(Unite.KCAL);
+        objSport.setTypeSport(TypeSport.VELO);
+        objSport.setDateDebut(LocalDate.now());
+        objSport.setDateFin(LocalDate.now());
+        when(activiteRepository.getCaloriesBySportAndPeriod(eq(user), eq(TypeSport.VELO), any(), any())).thenReturn(300f);
+        assertEquals(300f, objectifService.getProgressionObjectif(objSport, user));
+
+        // 分支 2: KCAL 且没有运动类型
+        Objectif objNoSport = new Objectif();
+        objNoSport.setUnite(Unite.KCAL);
+        objNoSport.setTypeSport(null);
+        objNoSport.setDateDebut(LocalDate.now());
+        objNoSport.setDateFin(LocalDate.now());
+        when(activiteRepository.getCaloriesByPeriod(eq(user), any(), any())).thenReturn(500f);
+        assertEquals(500f, objectifService.getProgressionObjectif(objNoSport, user));
     }
 
     @Test
-    void getProgressionObjectif_ForMinutesWithoutSport_ShouldReturnDuree() {
-        objectif1.setUnite(Unite.MINUTES);
-        objectif1.setTypeSport(null);
-        when(activiteRepository.getDureeByPeriod(any(), any(), any()))
-            .thenReturn(180);
-        
-        Float result = objectifService.getProgressionObjectif(objectif1, utilisateur);
-        
-        assertEquals(180.0f, result);
+    void testGetProgressionObjectif_UniteNull() {
+        Objectif obj = new Objectif();
+        obj.setUnite(null);
+        obj.setDateDebut(LocalDate.now());
+        obj.setDateFin(LocalDate.now());
+        Utilisateur user = new Utilisateur();
+        assertEquals(0f, objectifService.getProgressionObjectif(obj, user));
     }
 
     @Test
-    void getProgressionObjectif_ForKcalWithSport_ShouldReturnCalories() {
-        objectif1.setUnite(Unite.KCAL);
-        when(activiteRepository.getCaloriesBySportAndPeriod(any(), any(), any(), any()))
-            .thenReturn(1000.0f);
+    void testGetPourcentageObjectif_NullCible_And_IsAtteintTrue() {
+        Objectif obj = new Objectif();
+        obj.setUnite(Unite.KM);
+        obj.setCible(null); // 覆盖 getCible() == null 的黄色分支
+        obj.setDateDebut(LocalDate.now());
+        obj.setDateFin(LocalDate.now());
+        Utilisateur user = new Utilisateur();
         
-        Float result = objectifService.getProgressionObjectif(objectif1, utilisateur);
-        
-        assertEquals(1000.0f, result);
+        assertEquals(0f, objectifService.getPourcentageObjectif(obj, user));
+
+        // 测试 isObjectifAtteint 成功的分支 (之前只测了失败的)
+        obj.setCible(10f);
+        when(activiteRepository.getDistanceByPeriod(eq(user), any(), any())).thenReturn(15f);
+        assertTrue(objectifService.isObjectifAtteint(obj, user));
     }
 
     @Test
-    void getProgressionObjectif_ForKcalWithoutSport_ShouldReturnCalories() {
-        objectif1.setUnite(Unite.KCAL);
-        objectif1.setTypeSport(null);
-        when(activiteRepository.getCaloriesByPeriod(any(), any(), any()))
-            .thenReturn(800.0f);
-        
-        Float result = objectifService.getProgressionObjectif(objectif1, utilisateur);
-        
-        assertEquals(800.0f, result);
-    }
+    void testGetProgressionObjectif_FullBranches() {
+        Utilisateur user = new Utilisateur();
 
-    @Test
-    void getPourcentageObjectif_ShouldCalculatePercentage() {
-        when(activiteRepository.getDistanceBySportAndPeriod(any(), any(), any(), any()))
-            .thenReturn(25.0f);
-        
-        Float result = objectifService.getPourcentageObjectif(objectif1, utilisateur);
-        
-        assertEquals(50.0f, result);
-    }
+        // 分支 1: KM 且指定了运动类型
+        Objectif objKm = new Objectif();
+        objKm.setUnite(Unite.KM);
+        objKm.setTypeSport(TypeSport.COURSE);
+        objKm.setDateDebut(LocalDate.now());
+        objKm.setDateFin(LocalDate.now());
+        when(activiteRepository.getDistanceBySportAndPeriod(eq(user), eq(TypeSport.COURSE), any(), any())).thenReturn(10f);
+        assertEquals(10f, objectifService.getProgressionObjectif(objKm, user));
 
-    @Test
-    void getPourcentageObjectif_WhenCibleIsNull_ShouldReturnZero() {
-        objectif1.setCible(null);
-        
-        Float result = objectifService.getPourcentageObjectif(objectif1, utilisateur);
-        
-        assertEquals(0f, result);
-    }
+        // 分支 2: MINUTES 且指定了运动类型
+        Objectif objMin = new Objectif();
+        objMin.setUnite(Unite.MINUTES);
+        objMin.setTypeSport(TypeSport.COURSE);
+        objMin.setDateDebut(LocalDate.now());
+        objMin.setDateFin(LocalDate.now());
+        when(activiteRepository.getDureeBySportAndPeriod(eq(user), eq(TypeSport.COURSE), any(), any())).thenReturn(60);
+        assertEquals(60f, objectifService.getProgressionObjectif(objMin, user));
 
-    @Test
-    void getPourcentageObjectif_WhenCibleIsZero_ShouldReturnZero() {
-        objectif1.setCible(0f);
-        
-        Float result = objectifService.getPourcentageObjectif(objectif1, utilisateur);
-        
-        assertEquals(0f, result);
-    }
+        // 分支 3: KCAL 且指定了运动类型
+        Objectif objKcal = new Objectif();
+        objKcal.setUnite(Unite.KCAL);
+        objKcal.setTypeSport(TypeSport.COURSE);
+        objKcal.setDateDebut(LocalDate.now());
+        objKcal.setDateFin(LocalDate.now());
+        when(activiteRepository.getCaloriesBySportAndPeriod(eq(user), eq(TypeSport.COURSE), any(), any())).thenReturn(500f);
+        assertEquals(500f, objectifService.getProgressionObjectif(objKcal, user));
 
-    @Test
-    void isObjectifAtteint_WhenProgressionGreaterOrEqual_ShouldReturnTrue() {
-        when(activiteRepository.getDistanceBySportAndPeriod(any(), any(), any(), any()))
-            .thenReturn(50.0f);
-        
-        Boolean result = objectifService.isObjectifAtteint(objectif1, utilisateur);
-        
-        assertTrue(result);
-    }
-
-    @Test
-    void isObjectifAtteint_WhenProgressionLessThanCible_ShouldReturnFalse() {
-        when(activiteRepository.getDistanceBySportAndPeriod(any(), any(), any(), any()))
-            .thenReturn(30.0f);
-        
-        Boolean result = objectifService.isObjectifAtteint(objectif1, utilisateur);
-        
-        assertFalse(result);
+        // 分支 4: 强制让数据库返回 null，触发最后的 resultat != null ? resultat : 0f 的兜底 (false) 分支
+        Objectif objKcalNoSport = new Objectif();
+        objKcalNoSport.setUnite(Unite.KCAL);
+        objKcalNoSport.setDateDebut(LocalDate.now());
+        objKcalNoSport.setDateFin(LocalDate.now());
+        when(activiteRepository.getCaloriesByPeriod(eq(user), any(), any())).thenReturn(null);
+        assertEquals(0f, objectifService.getProgressionObjectif(objKcalNoSport, user));
     }
 }
