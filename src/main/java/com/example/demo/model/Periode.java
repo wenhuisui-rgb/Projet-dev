@@ -1,5 +1,8 @@
 package com.example.demo.model;
 
+/**
+ * Énumération représentant la périodicité ou la récurrence d'un objectif.
+ */
 public enum Periode {
     SEMAINE("Semaine"),
     MOIS("Mois"),

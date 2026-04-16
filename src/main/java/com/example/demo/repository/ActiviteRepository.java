@@ -14,22 +14,51 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+/**
+ * Interface de repository pour l'entité {@link Activite}.
+ * <p>
+ * Gère l'accès aux données des activités sportives enregistrées par les utilisateurs.
+ * Contient de nombreuses requêtes d'agrégation personnalisées (sommes) pour alimenter
+ * les statistiques et les graphiques du tableau de bord.
+ */
 @Repository
 public interface ActiviteRepository extends JpaRepository<Activite, Long> {
 
+       /**
+        * Récupère toutes les activités d'un utilisateur, de la plus récente à la plus ancienne.
+        */
        List<Activite> findByUtilisateurOrderByDateActiviteDesc(Utilisateur utilisateur);
 
+       /**
+        * Récupère les activités d'un utilisateur sur une période précise, triées par date décroissante.
+        */
        List<Activite> findByUtilisateurAndDateActiviteBetweenOrderByDateActiviteDesc(
               Utilisateur utilisateur, LocalDateTime debut, LocalDateTime fin);
 
+       /**
+        * Filtre les activités d'un utilisateur par type de sport, triées par date décroissante.
+        */
        List<Activite> findByUtilisateurAndTypeSportOrderByDateActiviteDesc(
               Utilisateur utilisateur, TypeSport typeSport);
 
+       /**
+        * Récupère uniquement les 5 dernières activités d'un utilisateur (utile pour un aperçu rapide).
+        */
        List<Activite> findTop5ByUtilisateurOrderByDateActiviteDesc(Utilisateur utilisateur);
 
+       /**
+        * Compte le nombre total d'activités enregistrées par un utilisateur.
+        */
        long countByUtilisateur(Utilisateur utilisateur);
 
+       /**
+        * Compte le nombre d'activités enregistrées par un utilisateur sur une période précise.
+        */
        long countByUtilisateurAndDateActiviteBetween(Utilisateur utilisateur, LocalDateTime debut, LocalDateTime fin);
+
+       // =========================================================================================
+       // REQUÊTES D'AGRÉGATION GLOBALEMENT (COALESCE évite de retourner null si aucune donnée)
+       // =========================================================================================
 
        @Query("SELECT COALESCE(SUM(a.distance), 0) FROM Activite a WHERE a.utilisateur = :utilisateur")
        Float getDistanceTotale(@Param("utilisateur") Utilisateur utilisateur);
@@ -39,6 +68,10 @@ public interface ActiviteRepository extends JpaRepository<Activite, Long> {
 
        @Query("SELECT COALESCE(SUM(a.calories), 0) FROM Activite a WHERE a.utilisateur = :utilisateur")
        Float getCaloriesTotales(@Param("utilisateur") Utilisateur utilisateur);
+
+       // =========================================================================================
+       // REQUÊTES D'AGRÉGATION PAR PÉRIODE ET/OU PAR SPORT UNIQUE
+       // =========================================================================================
 
        @Query("SELECT COALESCE(SUM(a.distance), 0) FROM Activite a " +
               "WHERE a.utilisateur = :utilisateur " +
@@ -88,8 +121,23 @@ public interface ActiviteRepository extends JpaRepository<Activite, Long> {
                                    @Param("debut") LocalDateTime debut,
                                    @Param("fin") LocalDateTime fin);
        
+       /**
+        * Récupère les activités d'un utilisateur sous forme paginée (pour optimiser le chargement des listes longues).
+        *
+        * @param utilisateur L'utilisateur concerné
+        * @param pageable    Les paramètres de pagination (numéro de page, taille de la page)
+        * @return Une page contenant la liste des activités
+        */
        Page<Activite> findByUtilisateurOrderByDateActiviteDesc(Utilisateur utilisateur, Pageable pageable);
 
+       // =========================================================================================
+       // REQUÊTES D'AGRÉGATION MULTI-SPORTS (Utilisation de la clause IN)
+       // =========================================================================================
+
+       /**
+        * Calcule la durée totale des activités d'un utilisateur sur une période, filtrée par une liste de sports.
+        * Si la liste de sports est nulle, inclut tous les sports.
+        */
        @Query("SELECT COALESCE(SUM(a.duree), 0) FROM Activite a " +
        "WHERE a.utilisateur = :utilisateur " +
        "AND a.dateActivite BETWEEN :debut AND :fin " +
@@ -99,6 +147,10 @@ public interface ActiviteRepository extends JpaRepository<Activite, Long> {
                                           @Param("fin") LocalDateTime fin,
                                           @Param("sports") List<TypeSport> sports);
 
+       /**
+        * Calcule les calories totales brûlées par un utilisateur sur une période, filtrées par une liste de sports.
+        * Si la liste de sports est nulle, inclut tous les sports.
+        */
        @Query("SELECT COALESCE(SUM(a.calories), 0) FROM Activite a " +
               "WHERE a.utilisateur = :utilisateur " +
               "AND a.dateActivite BETWEEN :debut AND :fin " +
