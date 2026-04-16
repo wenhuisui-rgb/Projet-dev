@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +12,7 @@ import java.time.LocalDateTime;
  * tout au long du défi pour établir le classement (Leaderboard).
  */
 @Entity
-public class ParticipationChallenge {
+public class ParticipationChallenge implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -8,7 +10,7 @@ import java.time.LocalDate;
  * Elle fait le lien entre le demandeur et le receveur.
  */
 @Entity
-public class Amitie {
+public class Amitie implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

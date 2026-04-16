@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -11,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * a débloqué une récompense spécifique.
  */
 @Entity
-public class ObtentionBadge {
+public class ObtentionBadge implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

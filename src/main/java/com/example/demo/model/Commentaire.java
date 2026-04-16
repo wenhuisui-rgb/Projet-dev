@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -9,7 +11,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "commentaires")
-public class Commentaire {
+public class Commentaire implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

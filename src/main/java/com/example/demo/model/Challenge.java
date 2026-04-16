@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,7 @@ import java.util.List;
  * Les utilisateurs peuvent s'y inscrire via l'entité {@link ParticipationChallenge}.
  */
 @Entity
-public class Challenge {
+public class Challenge implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

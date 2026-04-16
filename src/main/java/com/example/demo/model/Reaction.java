@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "reactions", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"auteur_id", "activite_id"})
 })
-public class Reaction {
+public class Reaction implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
