@@ -4,6 +4,143 @@
     <meta charset="UTF-8">
     <title>Mes Amis</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .friend-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .friend-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .friend-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .friend-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .friend-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .request-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        .request-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .request-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .request-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .btn-accept {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        .btn-accept:hover {
+            opacity: 0.85;
+        }
+        .btn-refuse {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: opacity 0.2s;
+        }
+        .btn-refuse:hover {
+            opacity: 0.85;
+        }
+        .btn-add {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: opacity 0.2s;
+        }
+        .btn-add:hover {
+            opacity: 0.85;
+        }
+        .status-pending {
+            color: #f59e0b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .search-container {
+            margin-bottom: 25px;
+        }
+        .search-input {
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: 1px solid #e5e7eb;
+            width: 250px;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #3b82f6;
+        }
+        .search-btn {
+            padding: 10px 20px;
+            background: #111827;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 15px 0;
+            color: #111827;
+        }
+        .empty-text {
+            color: #6b7280;
+            text-align: center;
+            padding: 30px;
+        }
+    </style>
 </head>
 <body>
 
@@ -30,63 +167,67 @@
     </div>
 </header>
 
-<div style="max-width: 800px; margin: 40px auto; padding: 20px;">
+<div style="max-width: 700px; margin: 40px auto; padding: 20px;">
 
     <h1>Mes Amis</h1>
 
-    <form th:action="@{/mesAmis}" method="get">
-        <input type="text" name="search" placeholder="Rechercher...">
-        <button type="submit">Rechercher</button>
-    </form>
+    <div class="search-container">
+        <form th:action="@{/mesAmis}" method="get" style="display: flex; gap: 10px;">
+            <input type="text" name="search" class="search-input" placeholder="Rechercher un utilisateur...">
+            <button type="submit" class="search-btn">Rechercher</button>
+        </form>
+    </div>
 
-    <hr>
-
-    <div th:if="${resultats != null}">
-        <h2>Resultats</h2>
-        <div th:each="user : ${resultats}">
-            <span th:text="${user.pseudo}"></span>
+    <div th:if="${resultats != null and !resultats.isEmpty()}">
+        <div class="section-title">Resultats de recherche</div>
+        <div th:each="user : ${resultats}" style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 12px 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${user.pseudo} + '&background=random&size=64'}" style="width: 40px; height: 40px; border-radius: 50%;">
+                <span style="font-weight: 500;" th:text="${user.pseudo}"></span>
+            </div>
             <div th:if="${demandesEnvoyees != null and demandesEnvoyees.contains(user.id)}">
-                Demande envoyee
+                <span class="status-pending">Demande envoyee</span>
             </div>
             <a th:if="${demandesEnvoyees == null or !demandesEnvoyees.contains(user.id)}"
                th:href="@{'/amities/ajouter/' + ${user.id}}">
-                <button>Ajouter</button>
+                <button class="btn-add">Ajouter</button>
             </a>
         </div>
     </div>
 
-    <hr>
-
-    <h2>Demandes recues</h2>
-
+    <div class="section-title">Demandes recues</div>
     <div th:if="${demandesRecues != null and !demandesRecues.isEmpty()}">
-        <div th:each="d : ${demandesRecues}">
-            <span th:text="${d.utilisateurDemandeur.pseudo}"></span>
-            <a th:href="@{'/amities/' + ${d.id} + '/accepter'}">
-                <button>Accepter</button>
-            </a>
-            <a th:href="@{'/amities/' + ${d.id} + '/refuser'}">
-                <button>Refuser</button>
-            </a>
+        <div th:each="d : ${demandesRecues}" class="request-card">
+            <div class="request-info">
+                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${d.utilisateurDemandeur.pseudo} + '&background=random&size=64'}" class="request-avatar">
+                <span class="request-name" th:text="${d.utilisateurDemandeur.pseudo}"></span>
+            </div>
+            <div>
+                <a th:href="@{'/amities/' + ${d.amitieID} + '/accepter'}">
+                    <button class="btn-accept">Accepter</button>
+                </a>
+                <a th:href="@{'/amities/' + ${d.amitieID} + '/refuser'}">
+                    <button class="btn-refuse">Refuser</button>
+                </a>
+            </div>
         </div>
     </div>
-
     <div th:if="${demandesRecues == null or demandesRecues.isEmpty()}">
-        <p>Aucune demande en attente</p>
+        <p class="empty-text">Aucune demande en attente</p>
     </div>
 
-    <hr>
-
-    <h2>Mes amis</h2>
-
+    <div class="section-title">Mes amis</div>
     <div th:if="${amis != null and !amis.isEmpty()}">
-        <div th:each="ami : ${amis}">
-            <span th:text="${ami.pseudo}"></span>
+        <div th:each="ami : ${amis}" class="friend-card" th:onclick="'location.href=\'/profil?userId=' + ${ami.id} + '\''">
+            <div class="friend-info">
+                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${ami.pseudo} + '&background=random&size=64'}" class="friend-avatar">
+                <span class="friend-name" th:text="${ami.pseudo}"></span>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #9ca3af;"></i>
         </div>
     </div>
-
     <div th:if="${amis == null or amis.isEmpty()}">
-        <p>Aucun ami</p>
+        <p class="empty-text">Aucun ami pour le moment</p>
     </div>
 
 </div>

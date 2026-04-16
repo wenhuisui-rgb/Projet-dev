@@ -44,16 +44,16 @@ public class AmitieController {
         return "redirect:/mesAmis";
     }
 
-    @GetMapping("/{id}/accepter")
-    public String accepter(@PathVariable Long id) {
-        Amitie amitie = amitieService.getById(id);
+    @GetMapping("/{amitieID}/accepter")
+    public String accepter(@PathVariable Long amitieID) {
+        Amitie amitie = amitieService.getById(amitieID);
         amitieService.accepterDemande(amitie);
         return "redirect:/mesAmis";
     }
 
-    @GetMapping("/{id}/refuser")
-    public String refuser(@PathVariable Long id) {
-        Amitie amitie = amitieService.getById(id);
+    @GetMapping("/{amitieID}/refuser")
+    public String refuser(@PathVariable Long amitieID) {
+        Amitie amitie = amitieService.getById(amitieID);
         amitieService.refuserDemande(amitie);
         return "redirect:/mesAmis";
     }
