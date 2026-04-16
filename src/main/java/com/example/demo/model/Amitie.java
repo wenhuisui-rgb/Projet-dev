@@ -10,12 +10,13 @@ public class Amitie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long amitieID;
 
-    // 🔥 FIX IMPORTANT (évite LazyInitializationException)
-    @ManyToOne(fetch = FetchType.EAGER)
+    // celui qui envoie la demande
+    @ManyToOne
     @JoinColumn(name = "demandeur_id")
     private Utilisateur utilisateurDemandeur;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    // celui qui reçoit la demande
+    @ManyToOne
     @JoinColumn(name = "receveur_id")
     private Utilisateur utilisateurReceveur;
 

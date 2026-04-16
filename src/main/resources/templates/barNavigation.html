@@ -1,43 +1,27 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>FitTrack</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-
+<html xmlns:th="http://www.thymeleaf.org">
 <body>
-
-<header class="navbar">
-  <div class="navbar-left">
-    <div class="logo">FitTrack</div>
-    <nav class="nav-links">
-      <a href="/dashboard">Dashboard</a>
-      <a href="/feed">Feed</a>
-      <a href="/challenges">Challenges</a>
-    </nav>
-  </div>
-
-  <div class="navbar-right">
-    <a href="/deconnexion" class="logout" title="Déconnexion">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="22" height="22"
-           viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
-        <polyline points="17 16 22 12 17 8"/>
-        <line x1="22" y1="12" x2="10" y2="12"/>
-      </svg>
-    </a>
-      <a th:href="@{/profil}">
-        <img th:src="@{https://ui-avatars.com/api/(name=${session.utilisateur.pseudo},background='random',size=128)}" class="profile-pic" alt="profile">
-      </a>
-  </div>
+<header th:fragment="navbar" class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Déconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <a th:href="@{/profil}">
+            <img th:if="${session.utilisateur != null}" th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
+        </a>
+    </div>
 </header>
-
 </body>
 </html>

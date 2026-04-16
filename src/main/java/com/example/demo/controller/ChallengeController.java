@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Controller
 public class ChallengeController {
@@ -34,17 +35,23 @@ public class ChallengeController {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
         if (utilisateur == null) return "redirect:/connexion";
 
-        model.addAttribute("challenges",
-                typeSport != null
-                        ? challengeService.findByTypeSport(typeSport)
-                        : challengeService.getAllChallenges()
-        );
+        List<Challenge> allChallenges = (typeSport != null) 
+            ? challengeService.findByTypeSport(typeSport) 
+            : challengeService.getAllChallenges();
 
+        // 🔥 新增：获取当前用户参加的所有挑战 ID
+        List<Challenge> userJoined = challengeService.findChallengesByUser(utilisateur);
+        Set<Long> joinedChallengeIds = userJoined.stream()
+                .map(Challenge::getId)
+                .collect(Collectors.toSet());
+
+        model.addAttribute("challenges", allChallenges);
+        model.addAttribute("joinedChallengeIds", joinedChallengeIds); // 传给前端
         model.addAttribute("types", TypeSport.values());
         model.addAttribute("selectedType", typeSport);
         model.addAttribute("utilisateur", utilisateur);
 
-        return "challenges";
+    return "challenges";
     }
 
     @GetMapping("/challenges/create")
@@ -76,7 +83,7 @@ public class ChallengeController {
             return "redirect:/challenges/create";
         }
 
-        challengeService.creerChallenge(
+        Challenge savedChallenge = challengeService.creerChallenge(
                 challenge.getTitre(),
                 challenge.getTypeSport(),
                 challenge.getDateDebut(),
@@ -85,8 +92,30 @@ public class ChallengeController {
                 challenge.getUnite(),
                 challenge.getCible()
         );
+        participationService.rejoindreChallenge(utilisateur, savedChallenge);
 
         redirectAttributes.addFlashAttribute("success", "Challenge créé avec succès !");
+        return "redirect:/challenges";
+    }
+
+    // 在 ChallengeController.java 中添加
+    @PostMapping("/challenges/supprimer/{id}")
+    public String supprimerChallenge(@PathVariable Long id, 
+                                    HttpSession session, 
+                                    RedirectAttributes redirectAttributes) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) return "redirect:/connexion";
+
+        Challenge challenge = challengeService.getChallengeById(id);
+        
+        // 安全校验：只有创造者本人可以删除
+        if (challenge != null && challenge.getCreateur().getId().equals(utilisateur.getId())) {
+            challengeService.supprimerChallenge(id);
+            redirectAttributes.addFlashAttribute("success", "Challenge supprimé avec succès !");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Vous n'avez pas l'autorisation de supprimer ce challenge.");
+        }
+
         return "redirect:/challenges";
     }
 
@@ -125,13 +154,15 @@ public class ChallengeController {
         if (challenge == null) {
             return "redirect:/challenges";
         }
-        
-        // 获取参与者排名
+       
         List<ParticipationChallenge> classement = participationService.obtenirClassement(id);
+
+        boolean estInscrit = participationService.estDejaInscrit(utilisateur.getId(), id);
         
         model.addAttribute("challenge", challenge);
         model.addAttribute("classement", classement);
         model.addAttribute("utilisateur", utilisateur);
+        model.addAttribute("estInscrit", estInscrit);
         
         return "detailChallenge";
     }
