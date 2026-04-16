@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ObjectifFormDTO;
 import com.example.demo.model.Objectif;
 import com.example.demo.model.Periode;
 import com.example.demo.model.TypeSport;
@@ -33,33 +34,36 @@ public class ObjectifController {
     @GetMapping("/objectifs/nouveau")
     public String nouveauObjectif(HttpSession session, Model model) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) {
-            return "redirect:/connexion";
-        }
+        if (utilisateur == null) return "redirect:/connexion";
 
-        model.addAttribute("objectif", new Objectif());
+        // Sonar Fix: Envoyer DTO
+        model.addAttribute("objectif", new ObjectifFormDTO());
         model.addAttribute("typesSport", TypeSport.values());
         model.addAttribute("periodes", Periode.values());
         return "createObjectif";
     }
 
-    /**
-     * Traite la soumission du formulaire pour enregistrer un nouvel objectif.
-     *
-     * @return Une redirection vers la page de profil
-     */
     @PostMapping("/objectifs/sauvegarder")
-    public String sauvegarderObjectif(@ModelAttribute Objectif objectif,
+    public String sauvegarderObjectif(@ModelAttribute("objectif") ObjectifFormDTO dto, // Sonar Fix
                                        HttpSession session,
                                        RedirectAttributes redirectAttributes) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) {
-            return "redirect:/connexion";
-        }
+        if (utilisateur == null) return "redirect:/connexion";
 
-        if (objectif.getDateDebut() == null) {
+        // Sonar Fix: Mapping DTO -> Entity
+        Objectif objectif = new Objectif();
+        objectif.setDescription(dto.getDescription());
+        objectif.setCible(dto.getCible());
+        objectif.setUnite(dto.getUnite());
+        objectif.setPeriode(dto.getPeriode());
+        objectif.setTypeSport(dto.getTypeSport());
+        
+        if (dto.getDateDebut() == null) {
             objectif.setDateDebut(LocalDate.now());
+        } else {
+            objectif.setDateDebut(dto.getDateDebut());
         }
+        objectif.setDateFin(dto.getDateFin());
 
         objectifService.creerObjectif(objectif, utilisateur);
         redirectAttributes.addFlashAttribute("success", "Objectif créé avec succès !");
@@ -117,21 +121,26 @@ public class ObjectifController {
             return "redirect:/profil";
         }
 
-        model.addAttribute("objectif", objectif);
+        // Sonar Fix: Mapping Entity -> DTO pour affichage
+        ObjectifFormDTO dto = new ObjectifFormDTO();
+        dto.setDescription(objectif.getDescription());
+        dto.setCible(objectif.getCible());
+        dto.setUnite(objectif.getUnite());
+        dto.setPeriode(objectif.getPeriode());
+        dto.setTypeSport(objectif.getTypeSport());
+        dto.setDateDebut(objectif.getDateDebut());
+        dto.setDateFin(objectif.getDateFin());
+
+        model.addAttribute("objectif", dto);
         model.addAttribute("typesSport", TypeSport.values());
         model.addAttribute("periodes", Periode.values());
         
         return "createObjectif"; 
     }
 
-    /**
-     * Traite la soumission du formulaire de modification d'objectif.
-     *
-     * @return Une redirection vers la page de profil
-     */
     @PostMapping("/objectifs/modifier/{id}")
     public String updateObjectifSave(@PathVariable Long id, 
-                                     @ModelAttribute Objectif objectifModifie, 
+                                     @ModelAttribute("objectif") ObjectifFormDTO dto, // Sonar Fix
                                      HttpSession session, 
                                      RedirectAttributes redirectAttributes) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
@@ -139,6 +148,17 @@ public class ObjectifController {
 
         Objectif existant = objectifService.getObjectifParId(id);
         if (existant != null && existant.getUtilisateur().getId().equals(utilisateur.getId())) {
+            
+            // Sonar Fix: Update manuel et sécurisé de l'Entity
+            Objectif objectifModifie = new Objectif();
+            objectifModifie.setDescription(dto.getDescription());
+            objectifModifie.setCible(dto.getCible());
+            objectifModifie.setUnite(dto.getUnite());
+            objectifModifie.setPeriode(dto.getPeriode());
+            objectifModifie.setTypeSport(dto.getTypeSport());
+            objectifModifie.setDateDebut(dto.getDateDebut());
+            objectifModifie.setDateFin(dto.getDateFin());
+            
             objectifService.updateObjectif(id, objectifModifie);
             redirectAttributes.addFlashAttribute("success", "Objectif mis à jour avec succès !");
         } else {

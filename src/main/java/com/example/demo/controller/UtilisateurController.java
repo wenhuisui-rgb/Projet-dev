@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.UtilisateurFormDTO;
 import com.example.demo.model.*;
 import com.example.demo.service.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -55,26 +56,33 @@ public class UtilisateurController {
 
     @GetMapping("/inscription")
     public String pageInscription(Model model) {
-        model.addAttribute(ATTR_UTILISATEUR, new Utilisateur());
+        // 使用 DTO 替代 Entity 传给前端
+        model.addAttribute(ATTR_UTILISATEUR, new UtilisateurFormDTO());
         return "inscription";
     }
 
     @PostMapping("/inscription")
-    public String inscrire(@ModelAttribute Utilisateur utilisateur,
+    public String inscrire(@ModelAttribute UtilisateurFormDTO dto, // Sonar Fix: 使用 DTO
                            RedirectAttributes redirectAttributes,
                            Model model) {
 
-        if (utilisateurService.emailExiste(utilisateur.getEmail())) {
+        if (utilisateurService.emailExiste(dto.getEmail())) {
             model.addAttribute("erreur", "Cet email est déjà utilisé.");
             return "inscription";
         }
 
-        if (utilisateurService.pseudoExiste(utilisateur.getPseudo())) {
+        if (utilisateurService.pseudoExiste(dto.getPseudo())) {
             model.addAttribute("erreur", "Ce pseudo est déjà pris.");
             return "inscription";
         }
 
-        utilisateurService.inscrireUtilisateur(utilisateur);
+        // 核心安全操作：把 DTO 的安全数据，手动转移到真正的 Entity 里
+        Utilisateur nouvelUtilisateur = new Utilisateur();
+        nouvelUtilisateur.setPseudo(dto.getPseudo());
+        nouvelUtilisateur.setEmail(dto.getEmail());
+        nouvelUtilisateur.setMotDePasse(dto.getMotDePasse());
+
+        utilisateurService.inscrireUtilisateur(nouvelUtilisateur);
 
         redirectAttributes.addFlashAttribute("success", "Inscription réussie !");
         return "redirect:/connexion";
@@ -127,50 +135,60 @@ public class UtilisateurController {
 
     @GetMapping("/profil/modifier")
     public String modifierProfilPage(HttpSession session, Model model) {
-
         Utilisateur user = (Utilisateur) session.getAttribute(ATTR_UTILISATEUR);
-
         if (user == null) {
             return "redirect:/connexion";
         }
 
-        model.addAttribute(ATTR_UTILISATEUR, utilisateurService.findById(user.getId()));
+        Utilisateur dbUser = utilisateurService.findById(user.getId());
+        
+        // 提取数据库数据放到 DTO 里给前端展示
+        UtilisateurFormDTO dto = new UtilisateurFormDTO();
+        dto.setPseudo(dbUser.getPseudo());
+        dto.setEmail(dbUser.getEmail());
+        dto.setSexe(dbUser.getSexe());
+        dto.setAge(dbUser.getAge());
+        dto.setTaille(dbUser.getTaille());
+        dto.setPoids(dbUser.getPoids());
+        dto.setNiveauPratique(dbUser.getNiveauPratique());
+        dto.setPreferencesSports(dbUser.getPreferencesSports());
+
+        model.addAttribute(ATTR_UTILISATEUR, dto);
 
         return "modifierProfil";
     }
 
     @PostMapping("/profil/modifier")
-    public String modifierProfil(@ModelAttribute Utilisateur utilisateurModifie,
+    public String modifierProfil(@ModelAttribute UtilisateurFormDTO dto, // Sonar Fix: 使用 DTO
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {
 
         Utilisateur currentUser = (Utilisateur) session.getAttribute(ATTR_UTILISATEUR);
-
         if (currentUser == null) {
             return "redirect:/connexion";
         }
 
         Utilisateur dbUser = utilisateurService.findById(currentUser.getId());
 
-        List<TypeSport> sports = utilisateurModifie.getPreferencesSports();
-        if (sports == null) sports = new ArrayList<>();
+        List<TypeSport> sports = dto.getPreferencesSports();
+        if (sports == null) sports = new java.util.ArrayList<>();
 
         if (sports.size() > 4) {
             redirectAttributes.addFlashAttribute("erreur", "Max 4 sports");
             return "redirect:/profil/modifier";
         }
 
-        dbUser.setPseudo(utilisateurModifie.getPseudo());
-        dbUser.setEmail(utilisateurModifie.getEmail());
-        dbUser.setSexe(utilisateurModifie.getSexe());
-        dbUser.setAge(utilisateurModifie.getAge());
-        dbUser.setTaille(utilisateurModifie.getTaille());
-        dbUser.setPoids(utilisateurModifie.getPoids());
-        dbUser.setNiveauPratique(utilisateurModifie.getNiveauPratique());
+        // 把前端传来的安全数据更新到 Entity 中
+        dbUser.setPseudo(dto.getPseudo());
+        dbUser.setEmail(dto.getEmail());
+        dbUser.setSexe(dto.getSexe());
+        dbUser.setAge(dto.getAge());
+        dbUser.setTaille(dto.getTaille());
+        dbUser.setPoids(dto.getPoids());
+        dbUser.setNiveauPratique(dto.getNiveauPratique());
         dbUser.setPreferencesSports(sports);
 
         utilisateurService.updateUtilisateur(dbUser);
-
         session.setAttribute(ATTR_UTILISATEUR, dbUser);
 
         redirectAttributes.addFlashAttribute("success", "Profil mis à jour");

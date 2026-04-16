@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ChallengeFormDTO;
 import com.example.demo.model.Challenge;
 import com.example.demo.model.ParticipationChallenge;
 import com.example.demo.model.TypeSport;
@@ -76,11 +77,11 @@ public class ChallengeController {
      */
     @GetMapping("/challenges/create")
     public String createPage(HttpSession session, Model model) {
-
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
         if (utilisateur == null) return "redirect:/connexion";
 
-        model.addAttribute("challenge", new Challenge());
+        // Sonar Fix: Envoyer le DTO
+        model.addAttribute("challenge", new ChallengeFormDTO());
         model.addAttribute("types", TypeSport.values());
         model.addAttribute("unites", Unite.values());
         model.addAttribute("utilisateur", utilisateur);
@@ -88,35 +89,30 @@ public class ChallengeController {
         return "createChallenge";
     }
 
-    /**
-     * Traite la soumission du formulaire de création de challenge.
-     * Inscrit automatiquement le créateur au challenge nouvellement créé.
-     *
-     * @return Une redirection vers {@code "/challenges"} en cas de succès, ou vers la page de création en cas d'erreur de date.
-     */
     @PostMapping("/challenges/creer")
-    public String creerChallenge(@ModelAttribute("challenge") Challenge challenge,
+    public String creerChallenge(@ModelAttribute("challenge") ChallengeFormDTO dto, // Sonar Fix: Utiliser DTO
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {
 
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
         if (utilisateur == null) return "redirect:/connexion";
 
-        if (challenge.getDateDebut().isBefore(LocalDate.now())
-                || challenge.getDateFin().isBefore(challenge.getDateDebut())) {
+        if (dto.getDateDebut().isBefore(LocalDate.now())
+                || dto.getDateFin().isBefore(dto.getDateDebut())) {
 
             redirectAttributes.addFlashAttribute("error", "Les dates du challenge sont invalides.");
             return "redirect:/challenges/create";
         }
 
+        // Utilisation des données sécurisées du DTO
         Challenge savedChallenge = challengeService.creerChallenge(
-                challenge.getTitre(),
-                challenge.getTypeSport(),
-                challenge.getDateDebut(),
-                challenge.getDateFin(),
+                dto.getTitre(),
+                dto.getTypeSport(),
+                dto.getDateDebut(),
+                dto.getDateFin(),
                 utilisateur,
-                challenge.getUnite(),
-                challenge.getCible()
+                dto.getUnite(),
+                dto.getCible()
         );
         participationService.rejoindreChallenge(utilisateur, savedChallenge);
 

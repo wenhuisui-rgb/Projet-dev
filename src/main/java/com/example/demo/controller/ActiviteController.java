@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.example.demo.model.ChartData;
+import com.example.demo.dto.ActiviteFormDTO;
 
 /**
  * Contrôleur principal gérant le tableau de bord (Dashboard) et le cycle de vie des activités sportives.
@@ -235,7 +236,8 @@ public class ActiviteController {
         }
         
         model.addAttribute("utilisateur", utilisateur);
-        model.addAttribute("activite", new Activite());
+        // Sonar Fix: Envoyer un DTO à la vue au lieu de l'Entity
+        model.addAttribute("activite", new ActiviteFormDTO());
         model.addAttribute("typesSport", TypeSport.values());
         return "createActivite";
     }
@@ -250,7 +252,7 @@ public class ActiviteController {
      * @return Une redirection vers la page de profil
      */
     @PostMapping("/activites/sauvegarder")
-    public String sauvegarderActivite(@ModelAttribute Activite activite,
+    public String sauvegarderActivite(@ModelAttribute("activite") ActiviteFormDTO dto, // Sonar Fix: Utiliser DTO
                                        HttpSession session,
                                        RedirectAttributes redirectAttributes) {
         Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
@@ -258,8 +260,18 @@ public class ActiviteController {
             return "redirect:/connexion";
         }
         
-        if (activite.getDateActivite() == null) {
+        // Sonar Fix: Mapping manuel du DTO vers l'Entity
+        Activite activite = new Activite();
+        activite.setTypeSport(dto.getTypeSport());
+        activite.setDuree(dto.getDuree());
+        activite.setDistance(dto.getDistance());
+        activite.setLocalisation(dto.getLocalisation());
+        activite.setEvaluation(dto.getEvaluation());
+        
+        if (dto.getDateActivite() == null) {
             activite.setDateActivite(LocalDateTime.now());
+        } else {
+            activite.setDateActivite(dto.getDateActivite());
         }
         
         activite.setUtilisateur(utilisateur);
@@ -312,12 +324,6 @@ public class ActiviteController {
 
     /**
      * Affiche le formulaire de modification pour une activité existante.
-     *
-     * @param id L'identifiant de l'activité
-     * @param session La session HTTP
-     * @param model Le modèle Thymeleaf
-     * @param redirectAttributes Les attributs pour les messages flash
-     * @return La vue {@code "modifierActivite"}
      */
     @GetMapping("/activites/edit/{id}")
     public String editActivite(@PathVariable Long id,
@@ -339,25 +345,29 @@ public class ActiviteController {
             redirectAttributes.addFlashAttribute("error", "Vous n'avez pas accès à cette activité");
             return "redirect:/profil";
         }
+        
         model.addAttribute("utilisateur", utilisateur);
-        model.addAttribute("activite", activite);
+        
+        // Sonar Fix: Convertir l'Entity en DTO pour l'affichage dans le formulaire
+        ActiviteFormDTO dto = new ActiviteFormDTO();
+        dto.setTypeSport(activite.getTypeSport());
+        dto.setDuree(activite.getDuree());
+        dto.setDistance(activite.getDistance());
+        dto.setLocalisation(activite.getLocalisation());
+        dto.setEvaluation(activite.getEvaluation());
+        dto.setDateActivite(activite.getDateActivite());
+        
+        model.addAttribute("activite", dto);
         model.addAttribute("typesSport", TypeSport.values());
         return "modifierActivite";
     }
 
     /**
      * Traite la soumission du formulaire de modification.
-     * Assure la mise à jour des calories et le rafraîchissement potentiel des données météorologiques.
-     *
-     * @param id L'identifiant de l'activité
-     * @param activiteModifiee L'activité avec les nouvelles données
-     * @param session La session HTTP
-     * @param redirectAttributes Les attributs pour les messages flash
-     * @return Une redirection vers la page de profil
      */
     @PostMapping("/activites/update/{id}")
     public String updateActivite(@PathVariable Long id,
-                                  @ModelAttribute Activite activiteModifiee,
+                                  @ModelAttribute("activite") ActiviteFormDTO dto, // Sonar Fix: Utiliser DTO
                                   HttpSession session,
                                   RedirectAttributes redirectAttributes) {
         Utilisateur utilisateurSession = (Utilisateur) session.getAttribute("utilisateur");
@@ -374,27 +384,25 @@ public class ActiviteController {
         }
 
         // Met à jour la météo uniquement si la localisation a été changée par l'utilisateur
-        boolean isLocationChanged = (activiteModifiee.getLocalisation() != null && 
-                                   !activiteModifiee.getLocalisation().equals(existante.getLocalisation()));
-        if (isLocationChanged && !activiteModifiee.getLocalisation().isEmpty()) {
-            String meteo = meteoService.getMeteoParLocalisation(activiteModifiee.getLocalisation());
-            activiteModifiee.setMeteo(meteo); 
-        } else {
-            activiteModifiee.setMeteo(existante.getMeteo()); 
+        boolean isLocationChanged = (dto.getLocalisation() != null && 
+                                   !dto.getLocalisation().equals(existante.getLocalisation()));
+        if (isLocationChanged && !dto.getLocalisation().isEmpty()) {
+            String meteo = meteoService.getMeteoParLocalisation(dto.getLocalisation());
+            existante.setMeteo(meteo); 
         }
         
-        if (activiteModifiee.getTypeSport() != null) {
-            existante.setTypeSport(activiteModifiee.getTypeSport());
+        // Sonar Fix: Mapping manuel sécurisé du DTO vers l'Entity existante
+        if (dto.getTypeSport() != null) {
+            existante.setTypeSport(dto.getTypeSport());
         }
-        if (activiteModifiee.getDuree() != null) {
-            existante.setDuree(activiteModifiee.getDuree());
+        if (dto.getDuree() != null) {
+            existante.setDuree(dto.getDuree());
         }
 
-        existante.setDateActivite(activiteModifiee.getDateActivite());
-        existante.setDistance(activiteModifiee.getDistance());
-        existante.setLocalisation(activiteModifiee.getLocalisation());
-        existante.setEvaluation(activiteModifiee.getEvaluation());
-        existante.setMeteo(activiteModifiee.getMeteo()); 
+        existante.setDateActivite(dto.getDateActivite());
+        existante.setDistance(dto.getDistance());
+        existante.setLocalisation(dto.getLocalisation());
+        existante.setEvaluation(dto.getEvaluation());
         
         // La sauvegarde déclenchera le recalcul automatique des calories brûlées
         activiteService.sauvegarderActivite(existante, utilisateur.getPoids());
