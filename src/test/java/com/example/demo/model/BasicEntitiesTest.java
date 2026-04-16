@@ -55,11 +55,14 @@ class BasicEntitiesTest {
         Commentaire c3 = new Commentaire();
         c3.setId(2L);
 
-        assertEquals(c1, c1);
+        // Sonar Fix: 移除了毫无意义的 self-comparison assertEquals(c1, c1)
         assertEquals(c1, c2);
         assertNotEquals(c1, c3);
         assertNotEquals(c1, null);
         assertNotEquals(c1, new Object());
+        
+        // Sonar Fix: 将 expected 放在前面
+        assertEquals(c1.getClass().hashCode(), c1.hashCode());
         assertEquals(c1.hashCode(), c1.getClass().hashCode());
 
         // Test ToString

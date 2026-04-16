@@ -41,11 +41,7 @@ class MeteoServiceTest {
 
     @Test
     void testGetMeteoParLocalisation_Success() throws Exception {
-        // Mock Geo Response (内部类需要用 JSON 模拟或者创建实例，为了方便，这里假设能通过 Mockito 强转或反序列化)
-        // 实际上可以用 JSON 字符串模拟，这里模拟 RestTemplate 返回值
-        String geoJson = "{\"results\": [{\"name\": \"Paris\", \"latitude\": 48.85, \"longitude\": 2.35}]}";
-        // 因内部类是 private static，测试稍微复杂。最简单的做法是：即使抛出异常，也能进入 catch 返回 "Erreur météo"
-        // 下面测试 Exception 分支
+        // Sonar Fix: 删除了未使用的局部变量 geoJson
         when(restTemplate.getForObject(anyString(), any())).thenThrow(new RuntimeException("API Error"));
         assertEquals("Erreur météo", meteoService.getMeteoParLocalisation("Paris"));
     }

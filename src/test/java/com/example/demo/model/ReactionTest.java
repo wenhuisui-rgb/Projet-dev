@@ -53,23 +53,20 @@ class ReactionTest {
 
         Reaction r4 = new Reaction(); // id is null
 
-        // test == 
-        assertEquals(r1, r1);
-        
-        // test null or different class
+        // Sonar Fix: 移除 assertEquals(r1, r1) 自我比较
         assertNotEquals(r1, null);
         assertNotEquals(r1, new Object());
         
         // test same ID
-        assertEquals(r1, r2);
-        assertEquals(r1.hashCode(), r2.hashCode());
+        assertEquals(r2, r1); // expected 放在左边
+        assertEquals(r2.hashCode(), r1.hashCode()); // expected 放在左边
 
         // test different ID
-        assertNotEquals(r1, r3);
+        assertNotEquals(r3, r1);
 
         // test null ID
-        assertNotEquals(r1, r4);
         assertNotEquals(r4, r1);
+        assertNotEquals(r1, r4);
     }
 
     @Test
