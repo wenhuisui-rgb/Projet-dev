@@ -3,95 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${objectif.id == null ? 'Nouvel objectif' : 'Modifier l''objectif'}">Objectif</title>
+    <title th:text="${objectif.id == null ? 'Nouvel objectif' : 'Modifier objectif'}">Objectif</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="navbar-left">
-            <div class="logo">SportifApp</div>
-            <div class="nav-links">
-                <a th:href="@{/dashboard}">Mon Profil</a>
-                <a href="/profil#objectifs" class="active">Objectifs</a>
-                <a href="/profil#activites">Activités</a>
-            </div>
-        </div>
-        <div class="navbar-right">
-            <a th:href="@{/deconnexion}" class="logout" title="Se déconnecter">
-                <i class="fa-solid fa-arrow-right-from-bracket icon-lg"></i>
-            </a>
-        </div>
-    </nav>
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <a th:href="@{/profil}">
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
+        </a>
+    </div>
+</header>
 
-    <main class="main-container">
+<main style="max-width: 500px; margin: 40px auto; padding: 20px;">
+    
+    <form th:action="@{${objectif.id == null ? '/objectifs/sauvegarder' : '/objectifs/modifier/' + objectif.id}}" 
+          th:object="${objectif}" 
+          method="post">
+          
+        <h1 style="margin-bottom: 20px;" th:text="${objectif.id == null ? 'Nouvel Objectif' : 'Modifier Objectif'}"></h1>
+
+        <input type="hidden" th:field="*{id}" />
         
-        <form th:action="@{${objectif.id == null ? '/objectifs/sauvegarder' : '/objectifs/modifier/' + objectif.id}}" 
-              th:object="${objectif}" 
-              method="post">
-              
-            <h1 class="form-heading" th:text="${objectif.id == null ? 'Définir un nouvel objectif' : 'Modifier votre objectif'}">
-            </h1>
+        <div style="margin-bottom: 15px;">
+            <label>Description *</label>
+            <input type="text" th:field="*{description}" placeholder="Ex: Courir 50 km" required style="width: 100%; padding: 8px;">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Type de sport</label>
+            <select th:field="*{typeSport}" style="width: 100%; padding: 8px;">
+                <option value="">Tous les sports</option>
+                <option th:each="sport : ${typesSport}" th:value="${sport}" th:text="${sport}"></option>
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Objectif cible *</label>
+            <input type="number" th:field="*{cible}" step="0.1" required style="width: 100%; padding: 8px;">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Unité *</label>
+            <select th:field="*{unite}" required style="width: 100%; padding: 8px;">
+                <option value="">Selectionnez une unité</option>
+                <option value="KM">Kilometres</option>
+                <option value="MINUTES">Minutes</option>
+                <option value="KCAL">Calories - kcal</option>
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Période *</label>
+            <select th:field="*{periode}" required style="width: 100%; padding: 8px;">
+                <option value="">Selectionnez une période</option>
+                <option th:each="p : ${periodes}" th:value="${p.name()}" th:text="${p.libelle}"></option>
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Date de début</label>
+            <input type="date" th:field="*{dateDebut}" style="width: 100%; padding: 8px;">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Date de fin</label>
+            <input type="date" th:field="*{dateFin}" style="width: 100%; padding: 8px;">
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-primary" th:onclick="|window.location.href='@{/profil}'|">Annuler</button>
+        </div>
+    </form>
 
-            <input type="hidden" th:field="*{id}" />
-            
-            <div>
-                <label>Description *</label>
-                <input type="text" th:field="*{description}" placeholder="Ex: Courir 50 km" required>
-            </div>
-            
-            <div>
-                <label>Type de sport</label>
-                <select th:field="*{typeSport}">
-                    <option value="">Tous les sports (Objectif général)</option>
-                    <option th:each="sport : ${typesSport}" th:value="${sport}" th:text="${sport}"></option>
-                </select>
-            </div>
-            
-            <div>
-                <label>Objectif cible *</label>
-                <input type="number" th:field="*{cible}" step="0.1" placeholder="Valeur numérique" required>
-            </div>
-            
-            <div>
-                <label>Unité *</label>
-                <select th:field="*{unite}" required>
-                    <option value="">Sélectionnez une unité</option>
-                    <option value="KM">Kilomètres</option>
-                    <option value="MINUTES">Minutes</option>
-                    <option value="KCAL">Calories - kcal</option>
-                </select>
-            </div>
-            
-            <div>
-                <label>Période *</label>
-                <select th:field="*{periode}" required>
-                    <option value="">Sélectionnez une période</option>
-                    <option th:each="p : ${periodes}" th:value="${p.name()}" th:text="${p.libelle}"></option>
-                </select>
-            </div>
-            
-            <div>
-                <label>Date de début <span class="type font-normal">(Laissez vide pour aujourd'hui)</span></label>
-                <input type="date" th:field="*{dateDebut}">
-            </div>
-            
-            <div>
-                <label>Date de fin <span class="type font-normal">(Laissez vide pour calculer auto.)</span></label>
-                <input type="date" th:field="*{dateFin}">
-            </div>
-            
-            <div class="submit-group">
-                <button type="submit" th:text="${objectif.id == null ? 'Créer l''objectif' : 'Mettre à jour'}">
-                    Créer l'objectif
-                </button>
-                <a th:href="@{/profil}" class="cancel-link">
-                    Annuler et retourner
-                </a>
-            </div>
-        </form>
+</main>
 
-    </main>
 </body>
 </html>

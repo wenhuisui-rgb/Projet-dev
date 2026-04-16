@@ -9,25 +9,28 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="navbar-left">
-            <div class="logo">SportifApp</div>
-            <div class="nav-links">
-                <a th:href="@{/dashboard}" class="active">Mon Profil</a>
-                <a th:href="@{#objectifs}">Objectifs</a>
-                <a th:href="@{#activites}">Activités</a>
-                <a th:href="@{/badges}">Badges</a>
-            </div>
-        </div>
-        <div class="navbar-right">
-            <a th:href="@{/deconnexion}" class="logout" title="Se déconnecter">
-                <i class="fa-solid fa-arrow-right-from-bracket icon-lg"></i>
-            </a>
-            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${utilisateur.pseudo} + '&background=random&size=128'}" alt="Profile" class="profile-pic">
-        </div>
-    </nav>
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <img th:src="@{'https://ui-avatars.com/api/?name=' + ${utilisateur.pseudo} + '&background=random&size=128'}" alt="Profile" class="profile-pic">
+    </div>
+</header>
 
-    <main class="main-container">
+<main class="main-container">
 
         <div class="profile-grid">
             
@@ -36,7 +39,7 @@
                 <h2 class="profile-name" th:text="${utilisateur.pseudo}">Mon Profil</h2>
                 <div class="profile-links-container">
                     <a th:href="@{/mesAmis}" class="profile-link"><i class="fa-solid fa-user-group"></i> Mes Amis</a>
-                    <a th:href="@{/mesChallenges}" class="profile-link"><i class="fa-solid fa-trophy"></i> Mes Challenges</a>
+                    <a th:href="@{/challenge}" class="profile-link"><i class="fa-solid fa-trophy"></i> Mes Challenges</a>
                     
                     <a th:href="@{/badges}" class="profile-link">
                         <i class="fa-solid fa-medal"></i> Mes Badges 
@@ -59,15 +62,15 @@
                     
                     <li class="list-item-divider" th:if="${utilisateur.taille != null and utilisateur.poids != null}">
                         <span class="label">IMC:</span> 
-                        <span th:with="imc=${utilisateur.calculerIMC()}"
-                              class="badge"
-                              th:classappend="${imc < 18.5 ? 'badge-warning' : (imc <= 25.0 ? 'badge-success' : 'badge-danger')}"
-                              th:text="${imc}">
-                        </span>
+                        <span th:with="imc=${utilisateur.calculerIMC()}" class="badge" th:classappend="${imc < 18.5 ? 'badge-warning' : (imc <= 25.0 ? 'badge-success' : 'badge-danger')}" th:text="${#numbers.formatDecimal(imc, 1, 1)}"> </span>
                     </li>
                     <li class="list-item-divider" th:unless="${utilisateur.taille != null and utilisateur.poids != null}">
                         <span class="label">IMC:</span> 
                         <span class="type">Données incomplètes</span>
+                    </li>
+                    <li>
+                        <span class="label">Niveau:</span> 
+                        <span class="val" th:text="${utilisateur.niveauPratique != null ? utilisateur.niveauPratique : '-'}"></span>
                     </li>
                 </ul>
             </div>
@@ -78,7 +81,7 @@
                 </div>
                 <ul class="custom-list" th:if="${utilisateur.preferencesSports != null and !utilisateur.preferencesSports.isEmpty()}">
                     <li th:each="sport : ${utilisateur.preferencesSports}" class="sport-tag">
-                        🏃 <span th:text="${sport}"></span>
+                        🖤 <span th:text="${sport}"></span>
                     </li>
                 </ul>
                 <p class="type" th:unless="${utilisateur.preferencesSports != null and !utilisateur.preferencesSports.isEmpty()}">Aucun sport favori ajouté.</p>
@@ -100,7 +103,7 @@
                                 <span class="type" th:text="${obj.periode != null ? '(' + obj.periode.libelle + ')' : ''}">(MOIS)</span>
                             </h4>
                             <p class="date date-mt-0" th:if="${obj.dateDebut != null and obj.dateFin != null}">
-                                Du <span class="text-blue-semibold" th:text="${#temporals.format(obj.dateDebut, 'dd/MM/yyyy')}"></span>
+                                Du <span class="text-dark-semibold" th:text="${#temporals.format(obj.dateDebut, 'dd/MM/yyyy')}"></span>
                                 au <span class="text-dark-semibold" th:text="${#temporals.format(obj.dateFin, 'dd/MM/yyyy')}"></span>
                             </p>
                             <p class="type" th:text="${obj.description}"></p>
@@ -114,7 +117,7 @@
                     
                     <div th:with="progression=${objectifProgressions[obj.id] != null ? objectifProgressions[obj.id] : 0}">
                         <div class="progress-labels">
-                            <span th:text="'Avancement (' + ${progression} + '%)'"></span>
+                            <span th:text="'Avancement (' + ${#numbers.formatDecimal(progression, 1, 0)} + '%)'"></span>
                         </div>
                         <div class="progress-bg">
                             <div class="progress-bar" 
@@ -139,7 +142,8 @@
                         <th>Sport</th>
                         <th>Date & Heure</th>
                         <th>Durée</th>
-                        <th>Distance / Calories</th>
+                        <th>Distance</th>
+                        <th>Calories</th>
                         <th>Localisation</th>
                         <th>Évaluation</th>
                         <th class="text-right">Actions</th>
@@ -152,12 +156,10 @@
                         <td class="font-semibold" th:text="${act.typeSport}"></td>
                         <td class="type" th:text="${#temporals.format(act.dateActivite, 'dd MMM yyyy, HH:mm')}"></td>
                         <td th:text="${act.duree != null ? act.duree + ' min' : '-'}"></td>
-                        <td>
-                            <div class="col-stack">
-                                <span class="text-dark-medium" th:text="${act.distance != null ? act.distance + ' km' : '-'}"></span>
-                                <span class="type type-sm" th:text="${act.calories != null ? act.calories + ' kcal' : ''}"></span>
-                            </div>
-                        </td>
+                        <td class="text-dark-medium" th:text="${act.distance != null ? act.distance + ' km' : '-'}"></td>
+                        <td class="type type-sm" th:text="${act.calories != null ? act.calories + ' kcal' : ''}"></td>
+
+                        
                         <td>
                             <div class="col-stack">
                                 <span th:text="${act.localisation != null ? act.localisation : '-'}"></span>

@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.Challenge;
 import com.example.demo.model.ParticipationChallenge;
 import com.example.demo.model.TypeSport;
+import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.service.ChallengeService;
 import com.example.demo.service.ParticipationChallengeService;
@@ -54,6 +55,7 @@ public class ChallengeController {
 
         model.addAttribute("challenge", new Challenge());
         model.addAttribute("types", TypeSport.values());
+        model.addAttribute("unites", Unite.values());
         model.addAttribute("utilisateur", utilisateur);
 
         return "createChallenge";
@@ -79,55 +81,17 @@ public class ChallengeController {
                 challenge.getTypeSport(),
                 challenge.getDateDebut(),
                 challenge.getDateFin(),
-                utilisateur
+                utilisateur,
+                challenge.getUnite(),
+                challenge.getCible()
         );
 
         redirectAttributes.addFlashAttribute("success", "Challenge créé avec succès !");
         return "redirect:/challenges";
     }
 
-    @PostMapping("/challenges/{id}/rejoindre")
-    public String rejoindreChallenge(@PathVariable Long id,
-                                     HttpSession session,
-                                     RedirectAttributes redirectAttributes) {
-
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) return "redirect:/connexion";
-
-        Challenge challenge = challengeService.getChallengeById(id);
-        if (challenge == null) {
-            redirectAttributes.addFlashAttribute("error", "Challenge non trouvé.");
-            return "redirect:/challenges";
-        }
-
-        participationService.rejoindreChallenge(utilisateur, challenge);
-
-        redirectAttributes.addFlashAttribute("success", "Vous avez rejoint le challenge !");
-        return "redirect:/challenges";
-    }
-
-    @PostMapping("/challenges/{id}/quitter")
-    public String quitterChallenge(@PathVariable Long id,
-                                   HttpSession session,
-                                   RedirectAttributes redirectAttributes) {
-
-        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
-        if (utilisateur == null) return "redirect:/connexion";
-
-        Challenge challenge = challengeService.getChallengeById(id);
-        if (challenge == null) {
-            redirectAttributes.addFlashAttribute("error", "Challenge non trouvé.");
-            return "redirect:/challenges";
-        }
-
-        participationService.quitterChallenge(utilisateur, challenge);
-
-        redirectAttributes.addFlashAttribute("success", "Vous avez quitté le challenge !");
-        return "redirect:/challenges";
-    }
-
     @GetMapping("/challenge")
-public String myChallenges(@RequestParam(required = false) TypeSport typeSport,
+    public String myChallenges(@RequestParam(required = false) TypeSport typeSport,
                            HttpSession session, 
                            Model model) {
 

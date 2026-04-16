@@ -204,38 +204,38 @@ public class UtilisateurController {
     // =========================
     // 👥 MES AMIS (FINAL PROPRE)
     // =========================
-    @GetMapping("/mesAmis")
-    public String mesAmis(@RequestParam(required = false) String search,
-                          HttpSession session,
-                          Model model) {
+   @GetMapping("/mesAmis")
+public String mesAmis(@RequestParam(required = false) String search,
+                      HttpSession session,
+                      Model model) {
 
-        Utilisateur sessionUser =
-                (Utilisateur) session.getAttribute("utilisateur");
+    Utilisateur sessionUser =
+            (Utilisateur) session.getAttribute("utilisateur");
 
-        if (sessionUser == null) {
-            return "redirect:/connexion";
-        }
-
-        Utilisateur user =
-                utilisateurService.findById(sessionUser.getId());
-
-        // ❤️ amis
-        model.addAttribute("amis", user.getAmis());
-
-        // ⏳ demandes envoyées (bouton dynamique)
-        model.addAttribute("demandesEnvoyees",
-                amitieService.getDemandesEnvoyeesIds(user));
-
-        // 📩 demandes reçues
-        model.addAttribute("demandesRecues",
-                amitieService.getDemandesRecues(user));
-
-        // 🔍 recherche utilisateurs
-        if (search != null && !search.isEmpty()) {
-            model.addAttribute("resultats",
-                    utilisateurService.rechercherParPseudo(search, user.getId()));
-        }
-
-        return "mesAmis";
+    if (sessionUser == null) {
+        return "redirect:/connexion";
     }
+
+    Utilisateur user =
+            utilisateurService.findById(sessionUser.getId());
+
+    // ❤️ amis (ACCEPTÉS)
+    model.addAttribute("amis", amitieService.getAmis(user));
+
+    // ⏳ demandes envoyées (pour bouton dynamique)
+    model.addAttribute("demandesEnvoyees",
+            amitieService.getDemandesEnvoyeesIds(user));
+
+    // 📩 demandes reçues
+    model.addAttribute("demandesRecues",
+            amitieService.getDemandesRecues(user));
+
+    // 🔍 recherche utilisateurs
+    if (search != null && !search.isEmpty()) {
+        model.addAttribute("resultats",
+                utilisateurService.rechercherParPseudo(search, user.getId()));
+    }
+
+    return "mesAmis";
+}
 }

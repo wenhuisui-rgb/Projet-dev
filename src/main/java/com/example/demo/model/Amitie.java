@@ -10,15 +10,14 @@ public class Amitie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long amitieID;
 
-    // celui qui envoie la demande
-    @ManyToOne
+    // 🔥 FIX IMPORTANT (évite LazyInitializationException)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "demandeur_id")
-    private Utilisateur utilisateurDemandeur; 
+    private Utilisateur utilisateurDemandeur;
 
-    // celui qui reçoit la demande
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "receveur_id")
-    private Utilisateur utilisateurReceveur;  
+    private Utilisateur utilisateurReceveur;
 
     @Enumerated(EnumType.STRING)
     private StatutAmitie statut;
@@ -37,7 +36,6 @@ public class Amitie {
         this.dateDemande = LocalDate.now();
     }
 
-    // Getters / Setters
     public Long getAmitieID() {
         return amitieID;
     }

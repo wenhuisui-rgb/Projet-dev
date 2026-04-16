@@ -33,7 +33,9 @@
         <line x1="22" y1="12" x2="10" y2="12"/>
       </svg>
     </a>
-    <img src="/images/profile.jpg" class="profile-pic" alt="profile">
+      <a th:href="@{/profil}">
+        <img th:src="@{https://ui-avatars.com/api/(name=${session.utilisateur.pseudo},background='random',size=128)}" class="profile-pic" alt="profile">
+      </a>
   </div>
 </header>
 
