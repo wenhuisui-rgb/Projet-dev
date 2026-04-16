@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed - FitTrack</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        <div class="logo">FitTrack</div>
+        <nav class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/feed">Feed</a>
+            <a href="/challenges">Challenges</a>
+        </nav>
+    </div>
+    <div class="navbar-right">
+        <a href="/deconnexion" class="logout" title="Deconnexion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
+                <polyline points="17 16 22 12 17 8"/>
+                <line x1="22" y1="12" x2="10" y2="12"/>
+            </svg>
+        </a>
+        <a th:href="@{/profil}">
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
+        </a>
+    </div>
+</header>
+
+<div style="max-width: 700px; margin: 40px auto; padding: 20px;">
+
+    <h1>Fil d'actualite</h1>
+    <p style="color: #6b7280; margin-bottom: 30px;">Activites de vos amis et les votres</p>
+    
+    <div th:if="${activites != null and !activites.isEmpty()}">
+    <div th:each="act : ${activites}"
+         style="background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
+         th:onclick="'location.href=\'/activites/' + ${act.id} + '\''"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
+
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${act.utilisateur.pseudo} + '&background=random&size=64'}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+            <div>
+                <div style="font-weight: bold; font-size: 16px;" th:text="${act.utilisateur.pseudo}"></div>
+                <div style="font-size: 12px; color: #6b7280;" th:text="${#temporals.format(act.dateActivite, 'dd MMM yyyy, HH:mm')}"></div>
+            </div>
+        </div>
+
+        <div style="background: #f9fafb; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                <div>
+                    <span th:switch="${act.typeSport.name()}">
+                        <span th:case="'COURSE'">🏃‍♂️</span>
+                        <span th:case="'NATATION'">🏊‍♂️</span>
+                        <span th:case="'VELO'">🚴‍♂️</span>
+                        <span th:case="'MUSCULATION'">🏋️‍♂️</span>
+                        <span th:case="'YOGA'">🧘‍♀️</span>
+                        <span th:case="'RANDONNEE'">🥾</span>
+                        <span th:case="*">🏅</span>
+                    </span>
+                    <strong th:text="${act.typeSport}" style="margin-left: 5px;"></strong>
+                </div>
+                <div th:text="${act.duree} + ' min'"></div>
+                <div th:if="${act.distance != null}" th:text="${act.distance} + ' km'"></div>
+                <div th:if="${act.calories != null}" th:text="${act.calories} + ' kcal'"></div>
+            </div>
+            <div th:if="${act.localisation != null}" style="margin-top: 10px; font-size: 13px; color: #6b7280;">
+                📍 <span th:text="${act.localisation}"></span>
+                <span th:if="${act.meteo}" th:text="' - ' + ${act.meteo}"></span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0;" onclick="event.stopPropagation()">
+
+            <button class="reaction-btn-feed"
+                    th:data-id="${act.id}"
+                    data-type="KUDOS"
+                    style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px 10px; border-radius: 20px; transition: background 0.2s;"
+                    onmouseover="this.style.backgroundColor='#f3f4f6'"
+                    onmouseout="this.style.backgroundColor='transparent'">
+                👍 <span th:id="'feed-count-KUDOS-' + ${act.id}">0</span>
+            </button>
+
+            <button class="reaction-btn-feed"
+                    th:data-id="${act.id}"
+                    data-type="BRAVO"
+                    style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px 10px; border-radius: 20px; transition: background 0.2s;"
+                    onmouseover="this.style.backgroundColor='#f3f4f6'"
+                    onmouseout="this.style.backgroundColor='transparent'">
+                👏 <span th:id="'feed-count-BRAVO-' + ${act.id}">0</span>
+            </button>
+
+            <button class="reaction-btn-feed"
+                    th:data-id="${act.id}"
+                    data-type="SOUTIEN"
+                    style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px 10px; border-radius: 20px; transition: background 0.2s;"
+                    onmouseover="this.style.backgroundColor='#f3f4f6'"
+                    onmouseout="this.style.backgroundColor='transparent'">
+                💪 <span th:id="'feed-count-SOUTIEN-' + ${act.id}">0</span>
+            </button>
+
+            <button class="toggle-comments-btn"
+                    th:data-id="${act.id}"
+                    style="background: none; border: none; cursor: pointer; font-size: 14px; color: #3b82f6; padding: 5px 10px; border-radius: 20px; transition: background 0.2s;"
+                    onmouseover="this.style.backgroundColor='#eff6ff'"
+                    onmouseout="this.style.backgroundColor='transparent'">
+                💬 (<span th:id="'comment-count-' + ${act.id}">0</span>)
+            </button>
+        </div>
+
+        <div th:id="'comments-' + ${act.id}" style="display: none; margin-top: 15px;" onclick="event.stopPropagation()">
+
+            <div th:each="c : ${act.commentaires}" style="background: #f9fafb; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong th:text="${c.auteur.pseudo}"></strong>
+                <span style="font-size: 12px; color: #6b7280; margin-left: 10px;" th:text="${#temporals.format(c.dateCommentaire, 'dd/MM/yyyy HH:mm')}"></span>
+                <p th:text="${c.contenu}" style="margin-top: 5px; margin-bottom: 0;"></p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text"
+                       class="comment-input"
+                       th:data-id="${act.id}"
+                       placeholder="Ajouter un commentaire..."
+                       style="flex: 1; padding: 8px 15px; border-radius: 20px; border: 1px solid #e5e7eb; outline: none; transition: border 0.2s;"
+                       onfocus="this.style.borderColor='#3b82f6'"
+                       onblur="this.style.borderColor='#e5e7eb'">
+
+                <button class="comment-submit"
+                        th:data-id="${act.id}"
+                        style="padding: 8px 20px; background: #111827; color: white; border: none; border-radius: 20px; cursor: pointer; transition: opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.85'"
+                        onmouseout="this.style.opacity='1'">
+                    Envoyer
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script th:inline="javascript">
+
+    // erreur de VS code, empeche pas le code de fonctionner
+    var activiteIds = [[${activites != null ? activites.![id] : {}}]];
+
+    function loadReactionCounts(id) {
+        fetch('/api/reactions/count?activiteId=' + id)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('feed-count-KUDOS-' + id).innerText = data.KUDOS || 0;
+                document.getElementById('feed-count-BRAVO-' + id).innerText = data.BRAVO || 0;
+                document.getElementById('feed-count-SOUTIEN-' + id).innerText = data.SOUTIEN || 0;
+            });
+    }
+
+    function loadCommentCount(id) {
+        fetch('/api/commentaires/count?activiteId=' + id)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('comment-count-' + id).innerText = data.count || 0;
+            });
+    }
+
+    function refreshAll() {
+        activiteIds.forEach(id => {
+            loadReactionCounts(id);
+            loadCommentCount(id);
+        });
+    }
+
+    document.querySelectorAll('.reaction-btn-feed').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            var id = this.dataset.id;
+            var type = this.dataset.type;
+
+            fetch('/api/reactions/toggle', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({activiteId: id, type: type})
+            }).then(() => refreshAll());
+        });
+    });
+
+    document.querySelectorAll('.toggle-comments-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var id = this.dataset.id;
+            var div = document.getElementById('comments-' + id);
+            div.style.display = div.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    document.querySelectorAll('.comment-submit').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            var id = this.dataset.id;
+            var input = document.querySelector('.comment-input[data-id="' + id + '"]');
+            var text = input.value;
+
+            if (!text.trim()) return;
+
+            fetch('/api/commentaires/ajouter', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({activiteId: id, contenu: text})
+            }).then(() => {
+                input.value = '';
+                refreshAll();
+            });
+        });
+    });
+
+    refreshAll();
+
+    setInterval(refreshAll, 10000);
+
+</script>
+
+</body>
+</html>

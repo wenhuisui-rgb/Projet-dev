@@ -5,6 +5,9 @@ import com.example.demo.model.Activite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.service.CommentaireService;
 import com.example.demo.service.ActiviteService;
+import java.util.Map;
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -60,5 +63,30 @@ public class CommentaireController {
         }
 
         return "redirect:/activites/" + activiteId;
+    }
+
+    @GetMapping("/api/commentaires/count")
+    @ResponseBody
+    public Map<String, Long> getCommentCount(@RequestParam Long activiteId) {
+        Map<String, Long> result = new HashMap<>();
+        result.put("count", commentaireService.getNombreCommentairesParActivite(activiteId));
+        return result;
+    }
+
+    @PostMapping("/api/commentaires/ajouter")
+    @ResponseBody
+    public Map<String, Object> ajouterCommentaire(@RequestBody Map<String, Object> payload, HttpSession session) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        Long activiteId = Long.valueOf(payload.get("activiteId").toString());
+        String contenu = payload.get("contenu").toString();
+        Activite activite = activiteService.getActiviteParId(activiteId);
+        Commentaire commentaire = commentaireService.ajouterCommentaire(contenu, activite, utilisateur);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", commentaire.getId());
+        result.put("contenu", commentaire.getContenu());
+        result.put("auteurPseudo", commentaire.getAuteur().getPseudo());
+        result.put("date", commentaire.getDateCommentaire().toString());
+        return result;
     }
 }

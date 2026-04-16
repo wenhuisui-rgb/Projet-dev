@@ -2,20 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Challenges</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Tous les Challenges - FitTrack</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .card {
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
+        /* 针对卡片悬浮的轻微交互优化 */
+        .card { cursor: pointer; position: relative; }
+        /* 绝对定位的角标 */
+        .status-badge-absolute { position: absolute; top: 12px; right: 12px; z-index: 10; }
     </style>
 </head>
-
 <body>
 
 <header class="navbar">
@@ -24,73 +19,82 @@
         <nav class="nav-links">
             <a href="/dashboard">Dashboard</a>
             <a href="/feed">Feed</a>
-            <a href="/challenges">Challenges</a>
+            <a href="/challenges" class="active">Challenges</a>
         </nav>
     </div>
     <div class="navbar-right">
         <a href="/deconnexion" class="logout" title="Déconnexion">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="22" height="22"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2"
-                 stroke-linecap="round"
-                 stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/>
                 <polyline points="17 16 22 12 17 8"/>
                 <line x1="22" y1="12" x2="10" y2="12"/>
             </svg>
         </a>
         <a th:href="@{/profil}">
-            <img th:src="@{https://ui-avatars.com/api/(name=${session.utilisateur.pseudo},background='random',size=128)}" class="profile-pic" alt="profile">
+            <img th:if="${session.utilisateur != null}" th:src="@{'https://ui-avatars.com/api/?name=' + ${session.utilisateur.pseudo} + '&background=random&size=128'}" class="profile-pic" alt="profile">
         </a>
     </div>
 </header>
 
-<header class="top-bar">
-    <h1>Challenges</h1>
-    <a class="create-btn" href="/challenges/create">Créer un challenge</a>
-</header>
+<main class="main-container">
+    <div class="top-bar section-top-bar">
+        <h2 class="section-heading">Découvrir les Challenges</h2>
+        <a class="create-btn" href="/challenges/create"><i class="fa-solid fa-plus"></i> Créer un challenge</a>
+        <a class="create-btn" href="/challenge" style="margin-left: 10px;"><i class="fa-solid fa-list"></i> Mes Challenges</a>
+    </div>
 
-<!-- FILTER -->
-<section class="filter-bar">
-    <form method="get" action="/challenges">
-        <select name="typeSport">
-            <option value="">Tous les sports</option>
-            <option th:each="t : ${types}"
-                    th:value="${t}"
-                    th:text="${t}"
-                    th:selected="${t == selectedType}">
-            </option>
-        </select>
-        <button type="submit">Filtrer</button>
-    </form>
-</section>
+    <section class="filter-bar sport-filter-section" style="margin-bottom: 30px;">
+        <form method="get" action="/challenges" style="margin:0; padding:0; box-shadow:none; border:none; display:flex; align-items:center; max-width:100%;">
+            <span class="filter-label"><i class="fa-solid fa-filter"></i> Filtrer par sport :</span>
+            <select name="typeSport" style="width: auto; margin-right: 15px;">
+                <option value="">Tous les sports</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t == selectedType}"></option>
+            </select>
+            <button type="submit" class="create-btn" style="width: auto; margin:0;">Appliquer</button>
+        </form>
+    </section>
 
-<!-- CARDS -->
-<section class="grid">
-    <div class="card" th:each="c : ${challenges}"
-         th:onclick="'location.href=\'/challenges/detail/' + ${c.id} + '\''">
-        <div class="card-image"></div>
-        <div class="card-body">
-            <h3 th:text="${c.titre}"></h3>
-            <p class="type" th:text="${c.typeSport}"></p>
-            <p class="date">
-                Du <span th:text="${c.dateDebut}"></span>
-                au <span th:text="${c.dateFin}"></span>
-            </p>
-            <div class="actions">
-                <a th:href="@{/participation/classement/{id}(id=${c.id})}"
-                   onclick="event.stopPropagation()">Classement</a>
-                <form th:action="@{/participation/rejoindre/{id}(id=${c.id})}"
-                      method="post" onclick="event.stopPropagation()">
-                    <button type="submit">Rejoindre</button>
-                </form>
+    <section class="grid">
+        <div class="card" th:each="c : ${challenges}" th:onclick="'location.href=\'/challenges/detail/' + ${c.id} + '\''">
+            
+            <div class="status-badge-absolute">
+                <span th:if="${joinedChallengeIds != null and joinedChallengeIds.contains(c.id)}" class="badge badge-success"><i class="fa-solid fa-check"></i> Inscrit</span>
+                <span th:if="${c.createur.id == session.utilisateur.id}" class="badge badge-warning" style="margin-left: 5px;">Admin</span>
+                <span th:if="${c.dateFin < T(java.time.LocalDate).now()}" class="badge badge-secondary" style="margin-left: 5px;">Terminé</span>
+            </div>
+
+            <div class="card-image" style="display: flex; align-items: center; justify-content: center; font-size: 40px;">
+                <span th:text="${c.typeSport != null and c.typeSport.name() == 'COURSE' ? '🏃' : '🚴'}"></span>
+            </div>
+
+            <div class="card-body">
+                <h3 th:text="${c.titre}" style="margin-top:0;"></h3>
+                
+                <p class="type" style="margin-bottom: 5px;">
+                    <span class="badge" style="background:#f3f4f6; color:#374151;" th:text="${c.typeSport}"></span>
+                    <span class="badge" style="background:#e0e7ff; color:#4338ca;" th:text="${c.unite != null ? c.unite.code : 'pts'}"></span>
+                </p>
+                
+                <p class="date type-sm">
+                    Du <strong class="text-dark-semibold" th:text="${#temporals.format(c.dateDebut, 'dd/MM/yyyy')}"></strong> 
+                    au <strong class="text-dark-semibold" th:text="${#temporals.format(c.dateFin, 'dd/MM/yyyy')}"></strong>
+                </p>
+
+                <div class="actions" style="border-top: 1px solid #eee; padding-top: 12px; align-items: center;" onclick="event.stopPropagation()">
+                    <a th:href="@{/participation/classement/{id}(id=${c.id})}" class="profile-link" style="padding: 6px 10px;">Classement</a>
+                    
+                    <form th:if="${joinedChallengeIds == null or !joinedChallengeIds.contains(c.id)}" th:action="@{/participation/rejoindre/{id}(id=${c.id})}" method="post" style="margin:0; padding:0; border:none; box-shadow:none;">
+                        <button type="submit" class="create-btn" style="margin:0; padding: 6px 12px;">Rejoindre</button>
+                    </form>
+                    
+                    <span th:if="${joinedChallengeIds != null and joinedChallengeIds.contains(c.id)}" class="text-blue-semibold type-sm">
+                        Déjà inscrit ✔️
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+</main>
 
 </body>
 </html>

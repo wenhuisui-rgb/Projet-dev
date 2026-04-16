@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.model.*;
 import com.example.demo.service.*;
+import java.util.List;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -20,7 +22,6 @@ public class AmitieController {
         this.utilisateurService = utilisateurService;
     }
 
-    // AJOUTER AMI
     @GetMapping("/ajouter/{id}")
     public String ajouter(@PathVariable Long id,
                           HttpSession session,
@@ -40,36 +41,36 @@ public class AmitieController {
         return "redirect:/mesAmis";
     }
 
-    // ACCEPTER
-    @PostMapping("/{id}/accepter")
-    public String accepter(@PathVariable Long id) {
-        Amitie amitie = amitieService.getById(id);
+    @GetMapping("/{amitieID}/accepter")
+    public String accepter(@PathVariable Long amitieID) {
+        Amitie amitie = amitieService.getById(amitieID);
         amitieService.accepterDemande(amitie);
         return "redirect:/mesAmis";
     }
 
-    // REFUSER
-    @PostMapping("/{id}/refuser")
-    public String refuser(@PathVariable Long id) {
-        Amitie amitie = amitieService.getById(id);
+    @GetMapping("/{amitieID}/refuser")
+    public String refuser(@PathVariable Long amitieID) {
+        Amitie amitie = amitieService.getById(amitieID);
         amitieService.refuserDemande(amitie);
         return "redirect:/mesAmis";
     }
 
-    // SUPPRIMER AMI (PROPRE VERSION UNIQUE)
-    @PostMapping("/supprimer/{userId}")
-    public String supprimer(@PathVariable Long userId,
-                            HttpSession session) {
-
-        Utilisateur sessionUser =
-                (Utilisateur) session.getAttribute("utilisateur");
-
-        if (sessionUser == null) return "redirect:/connexion";
-
-        Utilisateur ami = utilisateurService.findById(userId);
-
-        amitieService.supprimerAmi(sessionUser, ami);
-
-        return "redirect:/mesAmis";
+    @GetMapping("/mesAmis")
+    public String mesAmis(HttpSession session, Model model) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) {
+            return "redirect:/connexion";
+        }
+        
+        List<Utilisateur> amis = amitieService.getAmis(utilisateur);
+        model.addAttribute("amis", amis);
+        
+        List<Amitie> demandesRecues = amitieService.getDemandesRecues(utilisateur);
+        model.addAttribute("demandesRecues", demandesRecues);
+        
+        List<Long> demandesEnvoyeesIds = amitieService.getDemandesEnvoyeesIds(utilisateur);
+        model.addAttribute("demandesEnvoyees", demandesEnvoyeesIds);
+        
+        return "mesAmis";
     }
 }

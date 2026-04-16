@@ -15,7 +15,6 @@ public class AmitieService {
         this.amitieRepository = amitieRepository;
     }
 
-    // ENVOYER DEMANDE
     public String envoyerDemande(Utilisateur demandeur, Utilisateur receveur) {
 
         if (demandeur == null || receveur == null) return "ERROR";
@@ -52,32 +51,27 @@ public class AmitieService {
         return "SENT";
     }
 
-    // ACCEPTER
-    public void accepterDemande(Amitie amitie) {
+    public Amitie accepterDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.ACCEPTEE);
         amitieRepository.save(amitie);
     }
 
-    // REFUSER
-    public void refuserDemande(Amitie amitie) {
+    public Amitie refuserDemande(Amitie amitie) {
         amitie.setStatut(StatutAmitie.REFUSEE);
         amitieRepository.save(amitie);
     }
 
-    // GET BY ID
     public Amitie getById(Long id) {
         return amitieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Amitié introuvable"));
     }
 
-    // DEMANDES RECUES
     public List<Amitie> getDemandesRecues(Utilisateur user) {
         return Optional.ofNullable(
                 amitieRepository.findByUtilisateurReceveurAndStatut(user, StatutAmitie.EN_ATTENTE)
         ).orElse(new ArrayList<>());
     }
 
-    // DEMANDES ENVOYEES IDS
     public List<Long> getDemandesEnvoyeesIds(Utilisateur user) {
         return amitieRepository
                 .findByUtilisateurDemandeurAndStatut(user, StatutAmitie.EN_ATTENTE)
@@ -86,19 +80,19 @@ public class AmitieService {
                 .toList();
     }
 
-    // AMIS
-    public List<Utilisateur> getAmis(Utilisateur user) {
-        List<Amitie> relations = amitieRepository.findAmis(user.getId());
-
-        return relations.stream()
-                .map(a -> a.getUtilisateurDemandeur().getId().equals(user.getId())
-                        ? a.getUtilisateurReceveur()
-                        : a.getUtilisateurDemandeur())
-                .toList();
-    }
-
-    // SUPPRESSION AMI
-    public void supprimerAmi(Utilisateur u1, Utilisateur u2) {
-        amitieRepository.deleteRelation(u1, u2);
+    public List<Utilisateur> getAmis(Utilisateur utilisateur) {
+        List<Utilisateur> amis = new ArrayList<>();
+        
+        List<Amitie> asDemandeur = amitieRepository.findByUtilisateurDemandeurAndStatut(utilisateur, StatutAmitie.ACCEPTEE);
+        for (Amitie a : asDemandeur) {
+            amis.add(a.getUtilisateurReceveur());
+        }
+        
+        List<Amitie> asReceveur = amitieRepository.findByUtilisateurReceveurAndStatut(utilisateur, StatutAmitie.ACCEPTEE);
+        for (Amitie a : asReceveur) {
+            amis.add(a.getUtilisateurDemandeur());
+        }
+        
+        return amis;
     }
 }
