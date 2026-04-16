@@ -3,7 +3,6 @@ package com.example.demo.service;
 import com.example.demo.model.Activite;
 import com.example.demo.model.Challenge;
 import com.example.demo.model.ParticipationChallenge;
-import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ChallengeRepository;
 import com.example.demo.repository.ParticipationChallengeRepository;

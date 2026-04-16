@@ -54,7 +54,7 @@ class ReactionTest {
         Reaction r4 = new Reaction(); // id is null
 
         // Sonar Fix: 移除 assertEquals(r1, r1) 自我比较
-        assertNotEquals(r1, null);
+        assertNotEquals(null, r1);
         assertNotEquals(r1, new Object());
         
         // test same ID

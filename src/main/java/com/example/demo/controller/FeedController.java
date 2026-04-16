@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Activite;
-import com.example.demo.model.Commentaire;
-import com.example.demo.model.Reaction;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.service.ActiviteService;
 import com.example.demo.service.AmitieService;

@@ -174,7 +174,7 @@ class ObjectifServiceTest {
     @Test
     void testGetProgressionObjectif_UniteNull() {
         Objectif obj = new Objectif();
-        obj.setUnite(null); // 覆盖当所有 if (Unite...) 都不匹配时的终极兜底分支
+        obj.setUnite(null);
         obj.setDateDebut(LocalDate.now());
         obj.setDateFin(LocalDate.now());
         Utilisateur user = new Utilisateur();

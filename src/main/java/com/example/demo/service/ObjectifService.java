@@ -1,8 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Objectif;
-import com.example.demo.model.Periode;
-import com.example.demo.model.TypeSport;
 import com.example.demo.model.Unite;
 import com.example.demo.model.Utilisateur;
 import com.example.demo.repository.ActiviteRepository;
@@ -10,7 +8,6 @@ import com.example.demo.repository.ObjectifRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

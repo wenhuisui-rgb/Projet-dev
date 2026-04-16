@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * Entité représentant une réaction (interaction sociale type "Like") laissée par un utilisateur sur une activité.
